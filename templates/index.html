@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF Search App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2C2F33;
+            color: #FFFFFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #FFFFFF;
+        }
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        #search-input {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            background-color: #23272A;
+            color: #FFFFFF;
+            border-radius: 4px 0 0 4px;
+        }
+        #search-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #5E35B1;
+            color: #FFFFFF;
+            border: none;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+        }
+        #search-button:hover {
+            background-color: #4527A0;
+        }
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .gif {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GIF Buddy</h1>
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Enter search term...">
+            <button id="search-button">Search</button>
+        </div>
+        <div id="results"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const resultsDiv = document.getElementById('results');
+
+        async function searchGifs() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+
+            try {
+                const response = await axios.get('/search', {
+                    params: { q: searchTerm }
+                });
+
+                resultsDiv.innerHTML = '';
+                Object.entries(response.data).forEach(([gifAlt, gifUrl]) => {
+                    const img = document.createElement('img');
+                    img.src = gifUrl;
+                    img.alt = gifAlt;
+                    img.className = 'gif';
+                    resultsDiv.appendChild(img);
+                });
+
+                if (Object.keys(response.data).length === 0) {
+                    resultsDiv.innerHTML = 'No GIFs found for this search term.';
+                }
+            } catch (error) {
+                console.error('Error fetching GIFs:', error);
+                resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
+            }
+        }
+
+        searchButton.addEventListener('click', searchGifs);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchGifs();
+            }
+        });
+    </script>
+</body>
+</html>

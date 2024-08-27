@@ -1,0 +1,1 @@
+web: gunicorn -t 600 api:app
