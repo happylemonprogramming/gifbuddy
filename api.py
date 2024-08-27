@@ -15,8 +15,9 @@ def index():
 @app.route("/search", methods=['POST'])
 def search():
     # Capture user data
-    search = request.form.get('q') # TODO: How to pass video file?
-    output = fetch_gifs(search,limit=10)
+    search = request.args.get('q')
+    print('Search term:', search) # debugging
+    output = fetch_gifs(search,limit=30)
     gifs = {}
 
     for result in output['results']:

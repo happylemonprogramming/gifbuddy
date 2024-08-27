@@ -12,14 +12,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            overflow-y: auto;
         }
         .container {
             width: 100%;
             max-width: 600px;
+            margin: 0 auto;
         }
         h1 {
             text-align: center;
@@ -103,6 +105,14 @@
                 console.error('Error fetching GIFs:', error);
                 resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
             }
+        }
+
+        function copyToClipboard(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
         }
 
         searchButton.addEventListener('click', searchGifs);
