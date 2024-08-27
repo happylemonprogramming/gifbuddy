@@ -83,7 +83,7 @@
             if (!searchTerm) return;
 
             try {
-                const response = await axios.get('/search', {
+                const response = await axios.post('/search', {
                     params: { q: searchTerm }
                 });
 
