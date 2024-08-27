@@ -20,7 +20,7 @@ def search():
     gifs = {}
 
     for result in output['results']:
-        gifURL = result['media_formats']['gif']
+        gifURL = result['media_formats']['gif']['url']
         alt = os.path.basename(gifURL)[0:-4]
         gifs[alt] = gifURL
 
