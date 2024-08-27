@@ -86,7 +86,7 @@
 
             try {
                 const response = await axios.post('/search', {
-                    params: { q: searchTerm }
+                    q: searchTerm  // Send the search term in the request body
                 });
 
                 resultsDiv.innerHTML = '';
@@ -95,6 +95,7 @@
                     img.src = gifUrl;
                     img.alt = gifAlt;
                     img.className = 'gif';
+                    img.addEventListener('click', () => copyToClipboard(gifUrl)); // Add click event listener
                     resultsDiv.appendChild(img);
                 });
 

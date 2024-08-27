@@ -15,7 +15,8 @@ def index():
 @app.route("/search", methods=['POST'])
 def search():
     # Capture user data
-    search = request.args.get('q')
+    data = request.get_json()  # Get the JSON data from the request body
+    search = data.get('q')  # Extract the search term
     print('Search term:', search) # debugging
     output = fetch_gifs(search,limit=30)
     gifs = {}
