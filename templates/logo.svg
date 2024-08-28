@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect x="0" y="0" width="192" height="192" rx="38" ry="38" fill="#FFB300"/>
+  <circle cx="96" cy="86" r="74" fill="#FFCC4D"/>
+  <circle cx="72" cy="73" r="9" fill="#664500"/>
+  <circle cx="120" cy="73" r="9" fill="#664500"/>
+  <path d="M53 89 Q 96 126 139 89" stroke="#664500" stroke-width="5" fill="none"/>
+  <text x="96" y="182" font-family="Arial Black, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#664500">GIF</text>
+</svg>

@@ -28,6 +28,7 @@ def search():
 
     return jsonify(gifs)
 
+# NOTE: Reserved for future use
 @app.route("/privacypolicy")
 def policy():
     return render_template("privacypolicy.html")

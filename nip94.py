@@ -1,62 +1,55 @@
 from nostrpublish import nostrpost
 from gifsearch import fetch_gifs
 import os
-
-# NOTE: do I make this a service where users can upload their own gifs, tag them and submit a note
-# do I pay users to tag through donations to the app?
-# do I host the file on AWS for backup so it's not exclusively on Tenor servers
-# do I just write a script that uploads common gifs to the service
-# TODO: add blurhash https://github.com/woltapp/blurhash-python
-
 import blurhash
 import requests
 from PIL import Image
 from io import BytesIO
 import hashlib
 
+private_key = os.environ["nostrdvmprivatekey"]
+
 def compute_sha256(data):
     return hashlib.sha256(data.encode('utf-8')).hexdigest()
 
-userInput = 'hello'
+def gifmetadata(userInput): #TODO: when user selects gif, this tag data should already be known and passed from a previous function
+    output = fetch_gifs(userInput,1)
+    gif = output['results'][0]['media_formats']['gif']
+    gifURL = gif['url']
+    gifSize = gif['size']
+    gifDims = gif['dims']
+    thumb = output['results'][0]['media_formats']['nanogifpreview']['url']
+    preview = output['results'][0]['media_formats']['tinygifpreview']['url']
+    alt = os.path.basename(gifURL)[0:-4]
+    # print(gifURL, gifSize, gifDims, thumb, preview, alt)
 
-output = fetch_gifs(userInput,1)
-gif = output['results'][0]['media_formats']['gif']
-gifURL = gif['url']
-gifSize = gif['size']
-gifDims = gif['dims']
-thumb = output['results'][0]['media_formats']['nanogifpreview']['url']
-preview = output['results'][0]['media_formats']['tinygifpreview']['url']
-alt = os.path.basename(gifURL)[0:-4]
-# print(gifURL, gifSize, gifDims, thumb, preview, alt)
+    # Blurhash
+    response = requests.get(preview)
+    response.raise_for_status()
+    image = Image.open(BytesIO(response.content))
+    blur_hash = blurhash.encode(image, x_components=4, y_components=3)
+    # print(blur_hash)
 
-# Blurhash
-response = requests.get(preview)
-response.raise_for_status()
-image = Image.open(BytesIO(response.content))
-blur_hash = blurhash.encode(image, x_components=4, y_components=3)
-# print(blur_hash)
-
-# Post 1063 File Metadata Event
-private_key = os.environ["nostrdvmprivatekey"] 
-kind = 1063
-content = "liotta mock laugh"
-url = "https://media.tenor.com/6TcA9vRym4MAAAAC/laugh-mock.gif"
-hash = str(compute_sha256(url))
-if hash is not None:
-    tags = [["url", url],
-            ["m", "image/gif"],
-            ["x", hash],
-            ["ox", hash],
-            ["size", gifSize],
-            ["dim", gifDims],
-            ["blurhash", blur_hash],
-            ["thumb", thumb],
-            ["image", preview],
-            ["summary", userInput],
-            ["alt", alt]
-            ]
-    print(kind, content, tags)
-    # nostrpost(private_key,kind,content,tags)
+    # Post 1063 File Metadata Event
+    kind = 1063
+    content = "liotta mock laugh"
+    url = "https://media.tenor.com/6TcA9vRym4MAAAAC/laugh-mock.gif"
+    hash = str(compute_sha256(url))
+    if hash is not None:
+        tags = [["url", url],
+                ["m", "image/gif"],
+                ["x", hash],
+                ["ox", hash],
+                ["size", gifSize],
+                ["dim", gifDims],
+                ["blurhash", blur_hash],
+                ["thumb", thumb],
+                ["image", preview],
+                ["summary", userInput],
+                ["alt", alt]
+                ]
+        print(kind, content, tags)
+        nostrpost(private_key,kind,content,tags)
 
 # {
 #   "kind": 1063,
