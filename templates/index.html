@@ -108,13 +108,25 @@
             }
         }
 
+        // function copyToClipboard(url) {
+        //     navigator.clipboard.writeText(url).then(() => {
+        //         alert('Copied to clipboard!');
+        //     }).catch(err => {
+        //         console.error('Failed to copy:', err);
+        //     });
+        // }
+
         function copyToClipboard(url) {
-            navigator.clipboard.writeText(url).then(() => {
-                alert('Copied to clipboard!');
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-            });
+            const tempInput = document.createElement('input');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            
+            alert('Copied to clipboard!');
         }
+
 
         searchButton.addEventListener('click', searchGifs);
         searchInput.addEventListener('keypress', (e) => {
