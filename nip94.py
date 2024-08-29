@@ -1,5 +1,4 @@
 from nostrpublish import nostrpost
-from gifsearch import fetch_gifs
 import os
 import blurhash
 import requests
@@ -12,31 +11,19 @@ private_key = os.environ["nostrdvmprivatekey"]
 def compute_sha256(data):
     return hashlib.sha256(data.encode('utf-8')).hexdigest()
 
-def gifmetadata(userInput): #TODO: when user selects gif, this tag data should already be known and passed from a previous function
-    output = fetch_gifs(userInput,1)
-    gif = output['results'][0]['media_formats']['gif']
-    gifURL = gif['url']
-    gifSize = gif['size']
-    gifDims = gif['dims']
-    thumb = output['results'][0]['media_formats']['nanogifpreview']['url']
-    preview = output['results'][0]['media_formats']['tinygifpreview']['url']
-    alt = os.path.basename(gifURL)[0:-4]
-    # print(gifURL, gifSize, gifDims, thumb, preview, alt)
-
+def gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm):
     # Blurhash
     response = requests.get(preview)
     response.raise_for_status()
     image = Image.open(BytesIO(response.content))
     blur_hash = blurhash.encode(image, x_components=4, y_components=3)
-    # print(blur_hash)
 
     # Post 1063 File Metadata Event
     kind = 1063
-    content = "liotta mock laugh"
-    url = "https://media.tenor.com/6TcA9vRym4MAAAAC/laugh-mock.gif"
-    hash = str(compute_sha256(url))
+    content = searchTerm
+    hash = str(compute_sha256(gifUrl))
     if hash is not None:
-        tags = [["url", url],
+        tags = [["url", gifUrl],
                 ["m", "image/gif"],
                 ["x", hash],
                 ["ox", hash],
@@ -45,11 +32,13 @@ def gifmetadata(userInput): #TODO: when user selects gif, this tag data should a
                 ["blurhash", blur_hash],
                 ["thumb", thumb],
                 ["image", preview],
-                ["summary", userInput],
+                ["summary", searchTerm],
                 ["alt", alt]
                 ]
-        print(kind, content, tags)
-        nostrpost(private_key,kind,content,tags)
+        
+        event_id = nostrpost(private_key,kind,content,tags)
+
+    return event_id
 
 # {
 #   "kind": 1063,
