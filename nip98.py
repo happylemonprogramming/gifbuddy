@@ -6,6 +6,9 @@ import hashlib
 from nip96 import nostrbuildupload
 from getevent import getevent
 import requests
+from nip94 import compute_sha256
+
+# BUG: NOTES AREN'T POSTING!
 
 # Variables
 private_key = os.environ["nostrdvmprivatekey"]
@@ -32,7 +35,7 @@ def fallbackurlgenerator(file_url, caption, alt):
         body_content += chunk.decode('latin1')
 
     # Calculate the SHA-256 hash of the request body
-    body_hash = hashlib.sha256(body_content.encode('latin1')).hexdigest()
+    body_hash = compute_sha256(body_content)
 
     # Post nostr event and capture ID
     event_id = nostrpost(private_key=private_key,kind=27235,content="",tags=[["u", api_url], ["method", "POST"], ["payload", body_hash]])

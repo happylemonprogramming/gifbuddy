@@ -99,3 +99,9 @@ def nostrpost(private_key,kind,content,tags=[]):
         print(event_msg.event.to_dict())
   
     return event_id
+
+if __name__ == "__main__":
+    api_url = "https://nostr.build/api/v2/nip96/upload"
+    from nip94 import compute_sha256
+    body_hash = compute_sha256("https://media.tenor.com/tIPGwbBysUoAAAAC/ruh-roh.gif")
+    event_id = nostrpost(private_key=private_key,kind=27235,content="",tags=[["u", api_url], ["method", "POST"], ["payload", body_hash]])

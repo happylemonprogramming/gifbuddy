@@ -44,9 +44,9 @@ if __name__ == "__main__":
     pubkey = "npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p"
     pubhex = PublicKey.from_npub(pubkey).hex()
     print(pubhex)
-    eventlist = getevent(kinds=[1063], authors=[pubhex])
+    eventlist = getevent(kinds=[27235], authors=[pubhex])
     print(eventlist, len(eventlist))
 
-    hexid = '228f998da86261d21614893b14664dc53697236449d9fe6cfb51af10b6e9ca85'
-    eventlist = getevent(kinds=[hexid])
-    print(eventlist, len(eventlist))
+    # hexid = '228f998da86261d21614893b14664dc53697236449d9fe6cfb51af10b6e9ca85'
+    # eventlist = getevent(kinds=[hexid])
+    # print(eventlist, len(eventlist))

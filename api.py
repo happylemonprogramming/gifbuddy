@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, send_from_directory, jsonify
 import os
 from gifsearch import fetch_gifs
-from nip94 import gifmetadata, private_key
+from nip94 import gifmetadata
 from getevent import getevent
 from pynostr.key import PublicKey
 
