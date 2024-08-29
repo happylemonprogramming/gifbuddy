@@ -6,10 +6,23 @@ from PIL import Image
 from io import BytesIO
 import hashlib
 
-private_key = os.environ["nostrdvmprivatekey"]
-
-def compute_sha256(data):
-    return hashlib.sha256(data.encode('utf-8')).hexdigest()
+def compute_sha256(url):
+    # Send a GET request to the URL to fetch the content
+    response = requests.get(url)
+    
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Read the binary content from the response
+        content = response.content
+        
+        # Compute SHA-256 hash of the binary content
+        sha256_hash = hashlib.sha256(content).hexdigest()
+        
+        return sha256_hash
+    else:
+        # Handle errors if the request fails
+        print(f"Failed to fetch URL: {url}")
+        return None
 
 def gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm):
     # Blurhash
@@ -19,8 +32,9 @@ def gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm):
     blur_hash = blurhash.encode(image, x_components=4, y_components=3)
 
     # Post 1063 File Metadata Event
+    private_key = os.environ["nostrdvmprivatekey"] 
     kind = 1063
-    content = searchTerm
+
     hash = str(compute_sha256(gifUrl))
     if hash is not None:
         tags = [["url", gifUrl],
@@ -36,7 +50,8 @@ def gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm):
                 ["alt", alt]
                 ]
         
-        event_id = nostrpost(private_key,kind,content,tags)
+        event_id = nostrpost(private_key,kind,searchTerm,tags)
+        print(event_id)
 
     return event_id
 
@@ -49,41 +64,5 @@ if __name__ == "__main__":
     alt = "ruh-roh"
     searchTerm = "ruh roh"
 
-    gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
-# {
-#   "kind": 1063,
-#   "tags": [
-#     ["url","https://media.tenor.com/6TcA9vRym4MAAAAC/laugh-mock.gif"],
-#     ["m", "image/gif"],
-#     ["x",<Hash SHA-256>],
-#     ["ox",<Hash SHA-256>],
-#     ["size", 28257],
-#     ["dim", "203x200"],
-#     ["magnet",<magnet URI> ],
-#     ["i",<torrent infohash>],
-#     ["blurhash", <value>],
-#     ["thumb", "https://media.tenor.com/6TcA9vRym4MAAAAT/laugh-mock.png"],
-#     ["image", "https://media.tenor.com/6TcA9vRym4MAAAAe/laugh-mock.png"],
-#     ["summary", liotta mock laugh],
-#     ["alt", ["laugh", "mock", "lol", "hysterical", "rofl"]]
-#   ],
-#   "content": "liotta mock laugh",
-#   ...
-# }
-
-
-            # ['EVENT', 
-            #  {'id': 'd35bc3f318f1c0dc3884371ed7d928e401e003a3c7b110c66a4354de8b8e106d', 
-            #   'pubkey': '18059c49c526b873d59e0798b0c892d9171114927dfccdc9b4aa7d45e8c2c314', 
-            #   'created_at': 1720584193, 
-            #   'kind': 1063, 
-            #   'tags': [['url', 'https://image.nostr.build/a9b70576d8cc1e778e4d58b3b46942fff30fd611454ad57a1a08f044126da9b4.jpg'], 
-            #            ['m', 'image/jpeg'], 
-            #            ['alt', 'Verifiable file url'], 
-            #            ['x', 'b083689218db941e132c5094e23e45640e937b9122dced6c6860ceccd0785d59'], 
-            #            ['size', '53027'], 
-            #            ['dim', '828x746'], 
-            #            ['blurhash', ';tODd^~qIUae%MRjtRaeofx]D%t7xuWCRjt8f6WBtRaet7Rjf6ozRjayj[xuWBWVj[jZa}aekCae%MRjj[ofWBj[j]WBj[xuWBofWBazofWBaeofV@a}ofWBj[ofR*t6ayWBt7WBayayofWBs:WV'], 
-            #            ['ox', 'a9b70576d8cc1e778e4d58b3b46942fff30fd611454ad57a1a08f044126da9b4']], 
-            #            'content': '', 
-            #            'sig': '42c7c139429a829498f5c158972d0d39aa3a4bc32e351f5404a060b3990b24108f5fd2bb449abc9a623c7db165b52b88470feaef04cb176043a71f23c73cd1eb'}]
+    event_id = gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
+    print(event_id)
