@@ -56,13 +56,19 @@ def gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm):
     return event_id
 
 if __name__ == "__main__":
-    gifUrl = "https://media.tenor.com/tIPGwbBysUoAAAAC/ruh-roh.gif"
-    gifSize = "869458"
-    gifDims = "[498, 329]"
-    thumb = "https://media.tenor.com/tIPGwbBysUoAAAAT/ruh-roh.png"
-    preview = "https://media.tenor.com/tIPGwbBysUoAAAAN/ruh-roh.png"
-    alt = "ruh-roh"
-    searchTerm = "ruh roh"
-
+    from gifsearch import fetch_gifs
+    from getevent import getevent
+    searchTerm = 'wow'
+    output = fetch_gifs(searchTerm,1)
+    gif = output['results'][0]['media_formats']['gif']
+    gifUrl = gif['url']
+    gifSize = str(gif['size'])
+    gifDims = str(gif['dims'])
+    thumb = output['results'][0]['media_formats']['nanogifpreview']['url']
+    preview = output['results'][0]['media_formats']['tinygifpreview']['url']
+    alt = os.path.basename(gifUrl)[0:-4]
+    print(gifUrl, gifSize, gifDims, thumb, preview, alt)
+    # BUG: not posting whencopying gif :(
     event_id = gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
-    print(event_id)
+    eventlist = getevent(ids=[event_id])
+    print(eventlist, len(eventlist))

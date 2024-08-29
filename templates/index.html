@@ -89,31 +89,27 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .popup-content {
             color: white;
             text-align: center;
+            position: relative;
+            padding-top: 20px;
         }
 
         .popup-close {
             position: absolute;
             top: 10px;
             right: 10px;
-            font-size: 20px;
+            font-size: 24px;
             color: white;
             cursor: pointer;
-        }
-
-        .qr-code {
-            width: 200px;
-            height: 200px;
-            background-color: white;
-            margin: 20px auto;
-        }
-
-        .popup-text {
-            margin: 10px 0;
+            z-index: 1001;
         }
 
         .popup-text-copy {
@@ -124,10 +120,13 @@
             padding: 5px 10px;
             border-radius: 5px;
             margin: 5px 0;
+            word-break: break-all;
         }
 
         .copy-icon {
             cursor: pointer;
+            flex-shrink: 0;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -276,7 +275,7 @@
                 searchGifs();
             }
         });
-
+        
         const zapButton = document.getElementById('zapButton');
         const popup = document.getElementById('popup');
         const popupClose = document.getElementById('popupClose');
@@ -285,22 +284,28 @@
             popup.style.display = 'block';
         });
 
-        popupClose.addEventListener('click', () => {
+        popupClose.addEventListener('click', (e) => {
+            e.stopPropagation();
             popup.style.display = 'none';
         });
 
         // Close popup when clicking outside
         window.addEventListener('click', (e) => {
-            if (e.target === popup) {
+            if (popup.style.display === 'block' && !popup.contains(e.target) && e.target !== zapButton) {
                 popup.style.display = 'none';
             }
+        });
+
+        // Prevent closing when clicking inside the popup
+        popup.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
 
         // Handle copying of text in the popup
         const copyIcons = document.querySelectorAll('.copy-icon');
         copyIcons.forEach(icon => {
             icon.addEventListener('click', () => {
-                const textElement = icon.previousElementSibling;  // Get the sibling element containing the text
+                const textElement = icon.previousElementSibling;
                 const textToCopy = textElement.textContent.trim();
                 copyToClipboard(textToCopy);
 

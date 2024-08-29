@@ -21,10 +21,10 @@ def fetch_gifs(search_term,limit=10):
 if __name__ == "__main__":
     output = fetch_gifs('excited',1)
     gif = output['results'][0]['media_formats']['gif']
-    gifURL = gif['url']
+    gifUrl = gif['url']
     gifSize = gif['size']
     gifDims = gif['dims']
     thumb = output['results'][0]['media_formats']['nanogifpreview']['url']
     preview = output['results'][0]['media_formats']['tinygifpreview']['url']
-    alt = os.path.basename(gifURL)[0:-4]
-    print(gifURL, gifSize, gifDims, thumb, preview, alt)
+    alt = os.path.basename(gifUrl)[0:-4]
+    print(gifUrl, gifSize, gifDims, thumb, preview, alt)
