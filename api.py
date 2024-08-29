@@ -74,7 +74,10 @@ def counter():
     pubkey = "npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p"
     pubhex = PublicKey.from_npub(pubkey).hex()
     eventlist = getevent(kinds=[1063], authors=[pubhex])
-    return str(len(eventlist))
+
+    counter = {"count": str(len(eventlist))}
+
+    return jsonify(counter)
 
 # NOTE: Reserved for future use
 @app.route("/privacypolicy")

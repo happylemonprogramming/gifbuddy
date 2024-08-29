@@ -27,8 +27,8 @@ def gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm):
                 ["m", "image/gif"],
                 ["x", hash],
                 ["ox", hash],
-                ["size", gifSize],
-                ["dim", gifDims],
+                ["size", str(gifSize)],
+                ["dim", str(gifDims)],
                 ["blurhash", blur_hash],
                 ["thumb", thumb],
                 ["image", preview],
@@ -40,6 +40,16 @@ def gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm):
 
     return event_id
 
+if __name__ == "__main__":
+    gifUrl = "https://media.tenor.com/tIPGwbBysUoAAAAC/ruh-roh.gif"
+    gifSize = "869458"
+    gifDims = "[498, 329]"
+    thumb = "https://media.tenor.com/tIPGwbBysUoAAAAT/ruh-roh.png"
+    preview = "https://media.tenor.com/tIPGwbBysUoAAAAN/ruh-roh.png"
+    alt = "ruh-roh"
+    searchTerm = "ruh roh"
+
+    gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
 # {
 #   "kind": 1063,
 #   "tags": [
