@@ -17,28 +17,28 @@ def nostrpost(private_key,kind,content,tags=[]):
     private_object = PrivateKey.from_nsec(private_key)
     private_hex = private_object.hex()
         
-    # Path for summoning program in terminal
-    if len(sys.argv) > 1:
-        # Extract terminal arguments passed to program
-        kind = int(sys.argv[1])
-        tags = sys.argv[2]
-        content = sys.argv[3]
+    # # Path for summoning program in terminal
+    # if len(sys.argv) > 1:
+    #     # Extract terminal arguments passed to program
+    #     kind = int(sys.argv[1])
+    #     tags = sys.argv[2]
+    #     content = sys.argv[3]
 
-        # Replace single quotes with double quotes to load JSON
-        tags = tags.replace("'", "\"")
+    #     # Replace single quotes with double quotes to load JSON
+    #     tags = tags.replace("'", "\"")
 
-        # Convert the string to a list using JSON
-        tags = json.loads(tags)
+    #     # Convert the string to a list using JSON
+    #     tags = json.loads(tags)
 
-        # Construct event
-        event = Event(
-                    kind = kind, 
-                    tags = tags,
-                    content = content
-                    )
+    #     # Construct event
+    #     event = Event(
+    #                 kind = kind, 
+    #                 tags = tags,
+    #                 content = content
+    #                 )
         
     # Path for custom tags (list type)
-    elif tags != [] and isinstance(tags, list):
+    if tags != [] and isinstance(tags, list):
         kind = int(kind)
         event = Event(
                     kind = kind, 

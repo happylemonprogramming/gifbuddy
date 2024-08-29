@@ -74,7 +74,7 @@ def counter():
     pubkey = "npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p"
     pubhex = PublicKey.from_npub(pubkey).hex()
     eventlist = getevent(kinds=[1063], authors=[pubhex])
-    return len(eventlist)
+    return str(len(eventlist))
 
 # NOTE: Reserved for future use
 @app.route("/privacypolicy")
