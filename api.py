@@ -76,7 +76,7 @@ def gif_metadata():
     return url
 
 @app.route("/counter", methods=['GET'])
-def counter():
+def get_count():
     # # DVM public key
     # pubkey = "npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p"
     # pubhex = PublicKey.from_npub(pubkey).hex()
@@ -84,9 +84,9 @@ def counter():
 
     # counter = {"count": str(len(eventlist))}
     global counter
-    counter = {"count": str(counter)}
+    response = {"count": str(counter)}
 
-    return jsonify(counter)
+    return jsonify(response)
 
 # NOTE: Reserved for future use
 @app.route("/privacypolicy")
