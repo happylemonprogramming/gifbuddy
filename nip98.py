@@ -3,7 +3,7 @@ import base64
 from nostrpublish import nostrpost
 import os
 import hashlib
-from nip96 import nostrbuildupload
+from nip96 import nostrbuildupload, testnostrbuildupload
 from getevent import getevent
 import requests
 
@@ -43,7 +43,7 @@ def fallbackurlgenerator(file_url, caption, alt):
     url = None
 
     # POST to Nostr.Build and pull new URL
-    response = nostrbuildupload(event_base64, file_url, caption, alt)
+    response = testnostrbuildupload(event_base64, file_url, caption, alt)
     tags = response['nip94_event']['tags']
     for tag in tags:
         if tag[0] == 'url':
@@ -57,9 +57,9 @@ def fallbackurlgenerator(file_url, caption, alt):
 
 if __name__ == "__main__":
     # User Input
-    file_url = "https://media.tenor.com/FbeCJI0NgeQAAAAC/fat-albert-is-it-working.gif"
-    caption = "does it work?"
-    alt = "fat-albert-is-it-working"
+    file_url = "https://media.tenor.com/whLi2M5tTq8AAAAC/stan-lee-did-it-work.gif"
+    caption = "did it work"
+    alt = "stan-lee-did-it-work"
 
     url = fallbackurlgenerator(file_url, caption, alt)
     print(url)
