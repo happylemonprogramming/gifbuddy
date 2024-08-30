@@ -1,6 +1,6 @@
 import requests
 
-def nostrbuildupload(event_base64, file_url, caption, alt):
+def filenostrbuildupload(event_base64, file_url, caption, alt):
     # The file is not downloaded, instead, the URL is sent directly to the server
     files = {
         "file": (file_url, requests.get(file_url, stream=True).raw, "image/gif"),
@@ -35,7 +35,7 @@ def nostrbuildupload(event_base64, file_url, caption, alt):
 
     return response
 
-def testnostrbuildupload(event_base64, file_url, caption, alt):
+def urlnostrbuildupload(event_base64, file_url, caption, alt):
     # Prepare headers with NIP-98 Authorization
     headers = {
         "Authorization": f"Nostr {event_base64}"

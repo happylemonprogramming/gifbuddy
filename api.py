@@ -66,7 +66,7 @@ def gif_metadata():
     # print('Search Term:', searchTerm)
 
     # event_id = gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
-    url = fallbackurlgenerator(gifUrl, searchTerm, alt)
+    url = fallbackurlgenerator(gifUrl, searchTerm, alt) #NOTE: should this be a subprocess?
 
     return url
 

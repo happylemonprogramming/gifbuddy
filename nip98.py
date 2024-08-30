@@ -3,20 +3,16 @@ import base64
 from nostrpublish import nostrpost
 import os
 import hashlib
-from nip96 import nostrbuildupload, testnostrbuildupload
+from nip96 import urlnostrbuildupload
 from getevent import getevent
-import requests
 
 def fallbackurlgenerator(file_url, caption, alt):
     # Variables
     private_key = os.environ["nostrdvmprivatekey"]
     api_url = "https://nostr.build/api/v2/nip96/upload"
 
-    # Prepare file data from URL
-    file_content = requests.get(file_url, stream=True).content
-
-    # NIP94 Data
     data = {
+        "url": file_url,
         "caption": caption,
         "expiration": "",  # "" for no expiration
         "alt": alt,
@@ -24,11 +20,8 @@ def fallbackurlgenerator(file_url, caption, alt):
         "no_transform": "false"
     }
 
-    # Combine data into one string, including the file content
-    combined_data = json.dumps(data).encode('utf-8') + file_content
-
     # Compute the SHA256 hash
-    sha256_hash = hashlib.sha256(combined_data).hexdigest()
+    sha256_hash = hashlib.sha256(json.dumps(data).encode('utf-8')).hexdigest()
 
     # Post nostr event and capture ID
     event_id = nostrpost(private_key=private_key,kind=27235,content="",tags=[["u", api_url], ["method", "POST"], ["payload", sha256_hash]])
@@ -43,7 +36,7 @@ def fallbackurlgenerator(file_url, caption, alt):
     url = None
 
     # POST to Nostr.Build and pull new URL
-    response = testnostrbuildupload(event_base64, file_url, caption, alt)
+    response = urlnostrbuildupload(event_base64, file_url, caption, alt)
     tags = response['nip94_event']['tags']
     for tag in tags:
         if tag[0] == 'url':
@@ -57,9 +50,9 @@ def fallbackurlgenerator(file_url, caption, alt):
 
 if __name__ == "__main__":
     # User Input
-    file_url = "https://media.tenor.com/whLi2M5tTq8AAAAC/stan-lee-did-it-work.gif"
-    caption = "did it work"
-    alt = "stan-lee-did-it-work"
+    file_url = "https://media.tenor.com/lDcJViIM2VIAAAAC/what-jurassic-park.gif"
+    caption = "raptor"
+    alt = "what-jurassic-park"
 
     url = fallbackurlgenerator(file_url, caption, alt)
     print(url)
