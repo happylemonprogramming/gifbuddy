@@ -26,8 +26,11 @@ def nostrbuildupload(event_base64, file_url, caption, alt):
     # Check the response
     if response.status_code == 200:
         print("File uploaded successfully.")
-        print("Response:", response.json())
+        response = response.json()
     else:
         print("Failed to upload file.")
         print("Status code:", response.status_code)
         print("Response:", response.text)
+        response = response.text
+        
+    return response

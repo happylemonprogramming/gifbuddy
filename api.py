@@ -4,11 +4,15 @@ from gifsearch import fetch_gifs
 from nip94 import gifmetadata
 from getevent import getevent
 from pynostr.key import PublicKey
+from nip98 import fallbackurlgenerator
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get('flasksecret')
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Variable initialization
+counter = 0
 
 # Serve the HTML homepage as the index path
 @app.route("/")
@@ -48,34 +52,37 @@ def gif_metadata():
     data = request.get_json()  # Get the JSON data from the request body
 
     gifUrl = data.get('gifUrl')
-    gifSize = data.get('gifSize')
-    gifDims = data.get('gifDims')
-    thumb = data.get('thumb')
-    preview = data.get('preview')
+    # gifSize = data.get('gifSize')
+    # gifDims = data.get('gifDims')
+    # thumb = data.get('thumb')
+    # preview = data.get('preview')
     alt = data.get('alt')
     searchTerm = data.get('searchTerm')
 
-    # Process the metadata as needed
-    print('GIF URL:', gifUrl)
-    print('GIF Size:', gifSize)
-    print('GIF Dimensions:', gifDims)
-    print('Thumbnail URL:', thumb)
-    print('Preview URL:', preview)
-    print('Alt Text:', alt)
-    print('Search Term:', searchTerm)
+    # # Process the metadata as needed
+    # print('GIF URL:', gifUrl)
+    # print('GIF Size:', gifSize)
+    # print('GIF Dimensions:', gifDims)
+    # print('Thumbnail URL:', thumb)
+    # print('Preview URL:', preview)
+    # print('Alt Text:', alt)
+    # print('Search Term:', searchTerm)
 
-    event_id = gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
+    # event_id = gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
+    url = fallbackurlgenerator(gifUrl, searchTerm, alt)
+    counter = counter + 1
 
-    return event_id
+    return url
 
 @app.route("/counter", methods=['GET'])
 def counter():
-    # DVM public key
-    pubkey = "npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p"
-    pubhex = PublicKey.from_npub(pubkey).hex()
-    eventlist = getevent(kinds=[1063], authors=[pubhex])
+    # # DVM public key
+    # pubkey = "npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p"
+    # pubhex = PublicKey.from_npub(pubkey).hex()
+    # eventlist = getevent(kinds=[1063], authors=[pubhex])
 
-    counter = {"count": str(len(eventlist))}
+    # counter = {"count": str(len(eventlist))}
+    counter = {"count": str(counter)}
 
     return jsonify(counter)
 
