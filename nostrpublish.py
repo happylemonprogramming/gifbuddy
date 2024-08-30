@@ -11,6 +11,7 @@ private_key = os.environ["nostrdvmprivatekey"]
 relay_manager = RelayManager(timeout=6)
 relay_manager.add_relay("wss://nostr-pub.wellorder.net")
 relay_manager.add_relay("wss://relay.damus.io")
+relay_manager.add_relay("wss://relay.primal.net")
 
 def nostrpost(private_key,kind,content,tags=[]):
     # Private key storage

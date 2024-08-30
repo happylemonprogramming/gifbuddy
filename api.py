@@ -11,9 +11,6 @@ app.config["SECRET_KEY"] = os.environ.get('flasksecret')
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Variable initialization
-counter = 0
-
 # Serve the HTML homepage as the index path
 @app.route("/")
 def index():
@@ -70,23 +67,22 @@ def gif_metadata():
 
     # event_id = gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
     url = fallbackurlgenerator(gifUrl, searchTerm, alt)
-    global counter
-    counter += 1
 
     return url
 
-@app.route("/counter", methods=['GET'])
-def get_count():
-    # # DVM public key
-    # pubkey = "npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p"
-    # pubhex = PublicKey.from_npub(pubkey).hex()
-    # eventlist = getevent(kinds=[1063], authors=[pubhex])
+# TODO: Figure out cool way to count Freedom Gifs
+# @app.route("/counter", methods=['GET'])
+# def get_count():
+#     # # DVM public key
+#     # pubkey = "npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p"
+#     # pubhex = PublicKey.from_npub(pubkey).hex()
+#     # eventlist = getevent(kinds=[1063], authors=[pubhex])
 
-    # counter = {"count": str(len(eventlist))}
-    global counter
-    response = {"count": str(counter)}
+#     # counter = {"count": str(len(eventlist))}
+#     global counter
+#     response = {"count": str(counter)}
 
-    return jsonify(response)
+#     return jsonify(response)
 
 # NOTE: Reserved for future use
 @app.route("/privacypolicy")
