@@ -70,7 +70,8 @@ def gif_metadata():
 
     # event_id = gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
     url = fallbackurlgenerator(gifUrl, searchTerm, alt)
-    counter = counter + 1
+    global counter
+    counter += 1
 
     return url
 
@@ -82,6 +83,7 @@ def counter():
     # eventlist = getevent(kinds=[1063], authors=[pubhex])
 
     # counter = {"count": str(len(eventlist))}
+    global counter
     counter = {"count": str(counter)}
 
     return jsonify(counter)
