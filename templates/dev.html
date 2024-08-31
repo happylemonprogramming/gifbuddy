@@ -181,6 +181,33 @@
             color: #878787;
             padding: 5px 10px;
         }
+
+        /* Spinner CSS */
+        #loadingIndicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            border-top: 4px solid #fff;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -216,6 +243,11 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div id="loadingIndicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>Uploading...</p>
     </div>
 
     <div class="popup" id="uploadPopup">
@@ -368,6 +400,9 @@
         // Gif and MP4 Upload function
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Show loading indicator
+            document.getElementById('loadingIndicator').style.display = 'block';
             
             const caption = document.getElementById('caption').value;
             const alt = document.getElementById('alt').value;
@@ -375,6 +410,7 @@
 
             if (!file) {
                 alert('Please select a file to upload.');
+                document.getElementById('loadingIndicator').style.display = 'none';
                 return;
             }
 
@@ -396,6 +432,9 @@
             } catch (error) {
                 console.error('Error uploading file:', error);
                 alert('An error occurred while uploading the file.');
+            } finally {
+                // Hide loading indicator
+                document.getElementById('loadingIndicator').style.display = 'none';
             }
         });
 
