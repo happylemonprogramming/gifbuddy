@@ -78,6 +78,23 @@
             cursor: pointer;
         }
 
+        .upload-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #5E35B1;
+            color: #FFFFFF;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .upload-button:hover {
+            background-color: #4527A0;
+        }
+
         .popup {
             display: none;
             position: fixed;
@@ -128,24 +145,52 @@
             flex-shrink: 0;
             margin-left: 10px;
         }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .upload-form input[type="text"],
+        .upload-form input[type="file"] {
+            padding: 10px;
+            border-radius: 4px;
+            border: none;
+            background-color: #23272A;
+            color: #FFFFFF;
+        }
+
+        .upload-form button {
+            padding: 10px;
+            border-radius: 4px;
+            border: none;
+            background-color: #5E35B1;
+            color: white;
+            cursor: pointer;
+        }
+
+        .upload-form button:hover {
+            background-color: #4527A0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>GIF Buddy</h1>
-        <!-- <div id="counter">Freedom Gifs Counter: <span id="counter-value">Loading...</span></div> -->
+        <h1>GIF Buddy🫂</h1>
         <div class="search-box">
-            <input type="text" id="search-input" placeholder="Enter search term...">
-            <button id="search-button">Search</button>
+            <input type="text" id="search-input" placeholder="Gif your heart out">
+            <button id="search-button">Search🔎</button>
         </div>
         <div id="results"></div>
     </div>
 
+    <button class="upload-button" id="uploadButton">Upload☁️</button>
     <button class="zap-button" id="zapButton">⚡</button>
 
-    <div class="popup" id="popup">
-        <div class="popup-close" id="popupClose">×</div>
+    <div class="popup" id="zapPopup">
         <div class="popup-content">
+            <span class="popup-close">&times;</span>
             <h2>Developed by Lemon🍋</h2>
             <div class="popup-text">
                 <div>Public key:</div>
@@ -164,142 +209,67 @@
         </div>
     </div>
 
+    <div class="popup" id="uploadPopup">
+        <div class="popup-content">
+            <span class="popup-close">&times;</span>
+            <h2>Upload GIF or MP4</h2>
+            <form class="upload-form" id="uploadForm">
+                <input type="text" id="caption" placeholder="Gif caption" required>
+                <input type="text" id="alt" placeholder="Alt text for accessibility (optional)">
+                <input type="file" id="fileUpload" accept=".gif,.mp4" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
     <script>
         const searchInput = document.getElementById('search-input');
         const searchButton = document.getElementById('search-button');
         const resultsDiv = document.getElementById('results');
-        const counterValue = document.getElementById('counter-value');
-
-        async function fetchCounter() {
-            try {
-                const response = await axios.get('/counter');
-                counterValue.textContent = response.data.count;
-            } catch (error) {
-                console.error('Error fetching counter:', error);
-                counterValue.textContent = 'Error';
-            }
-        }
-
-        // async function searchGifs() {
-        //     const searchTerm = searchInput.value.trim();
-        //     if (!searchTerm) return;
-
-        //     try {
-        //         const response = await axios.post('/search', {
-        //             q: searchTerm
-        //         });
-
-        //         resultsDiv.innerHTML = '';
-        //         Object.entries(response.data).forEach(([gifAlt, gifUrl]) => {
-        //             const img = document.createElement('img');
-        //             img.src = gifUrl;
-        //             img.alt = gifAlt;
-        //             img.className = 'gif';
-        //             img.addEventListener('click', () => copyToClipboard(gifUrl));
-        //             resultsDiv.appendChild(img);
-        //         });
-
-        //         if (Object.keys(response.data).length === 0) {
-        //             resultsDiv.innerHTML = 'No GIFs found for this search term.';
-        //         }
-
-        //         // Fetch the updated counter after each search
-        //         fetchCounter();
-        //     } catch (error) {
-        //         console.error('Error fetching GIFs:', error);
-        //         resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
-        //     }
-        // }
-
-        async function searchGifs() {
-            const searchTerm = searchInput.value.trim();
-            if (!searchTerm) return;
-
-            try {
-                const response = await axios.post('/search', {
-                    q: searchTerm
-                });
-
-                resultsDiv.innerHTML = '';
-                Object.entries(response.data).forEach(([alt, gifData]) => {
-                    const { gifUrl, gifSize, gifDims, thumb, preview } = gifData;
-
-                    const img = document.createElement('img');
-                    img.src = gifUrl;
-                    img.alt = alt;
-                    img.className = 'gif';
-                    img.addEventListener('click', () => {
-                        copyToClipboard(gifUrl);
-                        sendGifMetadata({
-                            gifUrl,
-                            gifSize,
-                            gifDims,
-                            thumb,
-                            preview,
-                            alt,
-                            searchTerm
-                        });
-                    });
-                    resultsDiv.appendChild(img);
-                });
-            } catch (error) {
-                console.error('Error fetching GIFs:', error);
-                resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
-            }
-        }
-
-    async function sendGifMetadata(gifData) {
-        try {
-            await axios.post('/gifmetadata', gifData);
-            console.log('GIF metadata sent successfully.');
-        } catch (error) {
-            console.error('Error sending GIF metadata:', error);
-        }
-    }
-
-        function copyToClipboard(text) {
-            const tempInput = document.createElement('input');
-            tempInput.value = text;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            alert('Copied to clipboard!');
-        }
-
-        searchButton.addEventListener('click', searchGifs);
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchGifs();
-            }
-        });
 
         const zapButton = document.getElementById('zapButton');
-        const popup = document.getElementById('popup');
-        const popupClose = document.getElementById('popupClose');
+        const zapPopup = document.getElementById('zapPopup');
+        const uploadButton = document.getElementById('uploadButton');
+        const uploadPopup = document.getElementById('uploadPopup');
+        const uploadForm = document.getElementById('uploadForm');
 
-        zapButton.addEventListener('click', () => {
+        function openPopup(popup) {
             popup.style.display = 'block';
-        });
+        }
 
-        popupClose.addEventListener('click', (e) => {
-            e.stopPropagation();
+        function closePopup(popup) {
             popup.style.display = 'none';
+        }
+
+        zapButton.addEventListener('click', () => openPopup(zapPopup));
+        uploadButton.addEventListener('click', () => openPopup(uploadPopup));
+
+        document.querySelectorAll('.popup-close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', () => {
+                closePopup(closeBtn.closest('.popup'));
+            });
         });
 
-        // Close popup when clicking outside
         window.addEventListener('click', (e) => {
-            if (popup.style.display === 'block' && !popup.contains(e.target) && e.target !== zapButton) {
-                popup.style.display = 'none';
+            if (e.target.classList.contains('popup')) {
+                closePopup(e.target);
             }
         });
 
-        // Prevent closing when clicking inside the popup
-        popup.addEventListener('click', (e) => {
-            e.stopPropagation();
+        // Close popups when clicking outside
+        window.addEventListener('click', (e) => {
+            if (zapPopup.style.display === 'block' && !zapPopup.contains(e.target) && e.target !== zapButton) {
+                closePopup(zapPopup);
+            }
+            if (uploadPopup.style.display === 'block' && !uploadPopup.contains(e.target) && e.target !== uploadButton) {
+                closePopup(uploadPopup);
+            }
         });
+
+        // Prevent closing when clicking inside the popups
+        zapPopup.addEventListener('click', (e) => e.stopPropagation());
+        uploadPopup.addEventListener('click', (e) => e.stopPropagation());
 
         // Handle copying of text in the popup
         const copyIcons = document.querySelectorAll('.copy-icon');
@@ -316,6 +286,52 @@
                 }, 2000);
             });
         });
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const caption = document.getElementById('caption').value;
+            const alt = document.getElementById('alt').value;
+            const file = document.getElementById('fileUpload').files[0];
+
+            if (!file) {
+                alert('Please select a file to upload.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('caption', caption);
+            formData.append('alt', alt);
+            formData.append('file', file);
+
+            try {
+                const response = await axios.post('/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                console.log('File uploaded successfully:', response.data);
+                alert('File uploaded successfully!');
+                closePopup(uploadPopup);
+                uploadForm.reset();
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                alert('An error occurred while uploading the file.');
+            }
+        });
+
+
+        // const counterValue = document.getElementById('counter-value');
+
+        // async function fetchCounter() {
+        //     try {
+        //         const response = await axios.get('/counter');
+        //         counterValue.textContent = response.data.count;
+        //     } catch (error) {
+        //         console.error('Error fetching counter:', error);
+        //         counterValue.textContent = 'Error';
+        //     }
+        // }
 
         // Fetch the initial counter value when the page loads
         // fetchCounter();

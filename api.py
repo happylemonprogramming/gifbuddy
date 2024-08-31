@@ -16,6 +16,10 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 def index():
     return render_template("index.html")
 
+@app.route("/dev")
+def dev():
+    return render_template("dev.html")
+
 @app.route("/search", methods=['POST'])
 def search():
     # Capture user data
