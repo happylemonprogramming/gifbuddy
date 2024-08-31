@@ -12,21 +12,23 @@ app.config["SECRET_KEY"] = os.environ.get('flasksecret')
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Serve the HTML homepage as the index path
+# Homepage
 @app.route("/")
 def index():
     return render_template("index.html")
 
+# Development environment
 @app.route("/dev")
 def dev():
     return render_template("dev.html")
 
+# Search API endpoint
 @app.route("/search", methods=['POST'])
 def search():
     # Capture user data
     data = request.get_json()  # Get the JSON data from the request body
     search = data.get('q')  # Extract the search term
-    print('Search term:', search) # debugging
+    print('Search term:', search) # Debugging
     output = fetch_gifs(search,limit=30)
     gifs = {}
 
@@ -49,33 +51,18 @@ def search():
 
     return jsonify(gifs)
 
+# Nostr.Build Upload, NIP94 endpoint
 @app.route("/gifmetadata", methods=['POST'])
 def gif_metadata():
-    data = request.get_json()  # Get the JSON data from the request body
-
+    # Get the JSON data from the request body
+    data = request.get_json()
     gifUrl = data.get('gifUrl')
-    # gifSize = data.get('gifSize')
-    # gifDims = data.get('gifDims')
-    # thumb = data.get('thumb')
-    # preview = data.get('preview')
     alt = data.get('alt')
     searchTerm = data.get('searchTerm')
 
-    # # Process the metadata as needed
-    # print('GIF URL:', gifUrl)
-    # print('GIF Size:', gifSize)
-    # print('GIF Dimensions:', gifDims)
-    # print('Thumbnail URL:', thumb)
-    # print('Preview URL:', preview)
-    # print('Alt Text:', alt)
-    # print('Search Term:', searchTerm)
-
-    # event_id = gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
     # Start the task in a separate process
     with concurrent.futures.ProcessPoolExecutor() as executor:
         executor.submit(fallbackurlgenerator, gifUrl, searchTerm, alt)
-
-    # url = fallbackurlgenerator(gifUrl, searchTerm, alt) #NOTE: should this be a subprocess?
 
     # Return a response indicating that the request was accepted
     return jsonify({"message": "Task is being processed."}), 202

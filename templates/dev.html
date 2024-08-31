@@ -224,33 +224,98 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
     <script>
+        // Element ID initialization
         const searchInput = document.getElementById('search-input');
         const searchButton = document.getElementById('search-button');
         const resultsDiv = document.getElementById('results');
-
         const zapButton = document.getElementById('zapButton');
         const zapPopup = document.getElementById('zapPopup');
         const uploadButton = document.getElementById('uploadButton');
         const uploadPopup = document.getElementById('uploadPopup');
         const uploadForm = document.getElementById('uploadForm');
 
+        // Nostr.Build and NIP94 API POST request
+        async function sendGifMetadata(gifData) {
+            try {
+                await axios.post('/gifmetadata', gifData);
+                console.log('GIF metadata sent successfully.');
+            } catch (error) {
+                console.error('Error sending GIF metadata:', error);
+            }
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            alert('Copied to clipboard!');
+        }
+
+        // Primary gif search function
+        async function searchGifs() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+
+            try {
+                const response = await axios.post('/search', {
+                    q: searchTerm
+                });
+
+                resultsDiv.innerHTML = '';
+                Object.entries(response.data).forEach(([alt, gifData]) => {
+                    const { gifUrl, gifSize, gifDims, thumb, preview } = gifData;
+
+                    const img = document.createElement('img');
+                    img.src = gifUrl;
+                    img.alt = alt;
+                    img.className = 'gif';
+                    img.addEventListener('click', () => {
+                        copyToClipboard(gifUrl);
+                        sendGifMetadata({
+                            gifUrl,
+                            gifSize,
+                            gifDims,
+                            thumb,
+                            preview,
+                            alt,
+                            searchTerm
+                        });
+                    });
+                    resultsDiv.appendChild(img);
+                });
+            } catch (error) {
+                console.error('Error fetching GIFs:', error);
+                resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
+            }
+        }
+
+        // Allows user to initiate search by click or enter
+        searchButton.addEventListener('click', searchGifs);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchGifs();
+            }
+        });
+
+        // Define popup open and close functionality
         function openPopup(popup) {
             popup.style.display = 'block';
         }
-
         function closePopup(popup) {
             popup.style.display = 'none';
         }
-
         zapButton.addEventListener('click', () => openPopup(zapPopup));
         uploadButton.addEventListener('click', () => openPopup(uploadPopup));
-
         document.querySelectorAll('.popup-close').forEach(closeBtn => {
             closeBtn.addEventListener('click', () => {
                 closePopup(closeBtn.closest('.popup'));
             });
         });
-
         window.addEventListener('click', (e) => {
             if (e.target.classList.contains('popup')) {
                 closePopup(e.target);
@@ -287,6 +352,7 @@
             });
         });
 
+        // Gif and MP4 Upload function
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -319,7 +385,6 @@
                 alert('An error occurred while uploading the file.');
             }
         });
-
 
         // const counterValue = document.getElementById('counter-value');
 
