@@ -4,13 +4,18 @@ from gifsearch import fetch_gifs
 from nip94 import gifmetadata
 from getevent import getevent
 from pynostr.key import PublicKey
-from nip98 import fallbackurlgenerator
+from nip98 import fallbackurlgenerator, urlgenerator
 import concurrent.futures
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get('flasksecret')
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Set up a folder for storing uploaded files
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Homepage
 @app.route("/")
@@ -66,6 +71,33 @@ def gif_metadata():
 
     # Return a response indicating that the request was accepted
     return jsonify({"message": "Task is being processed."}), 202
+
+# Nostr.Build Upload, NIP94 endpoint
+@app.route("/upload", methods=['POST'])
+def upload():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    if file:
+        # Save the file
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filepath)
+
+        # Get additional fields
+        caption = request.form.get('caption', '')
+        alt = request.form.get('alt', '')
+
+        # Process the file and additional fields as needed
+        urlgenerator(filepath, caption, alt)
+
+        return jsonify({'message': 'File uploaded successfully!', 'filename': file.filename, 'caption': caption, 'alt': alt}), 200
+
+    return jsonify({'error': 'Failed to upload file'}), 500
 
 # TODO: Figure out cool way to count Freedom Gifs
 # @app.route("/counter", methods=['GET'])

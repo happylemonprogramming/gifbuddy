@@ -1,10 +1,11 @@
 import requests
 
-def filenostrbuildupload(event_base64, file_url, caption, alt):
-    # The file is not downloaded, instead, the URL is sent directly to the server
-    files = {
-        "file": (file_url, requests.get(file_url, stream=True).raw, "image/gif"),
-    }
+def filenostrbuildupload(event_base64, filepath, caption, alt):
+    # Open the file in binary mode
+    with open(filepath, 'rb') as file:
+        files = {
+            "file": (filepath, file, "image/gif"),
+        }
 
     # Prepare headers with NIP-98 Authorization
     headers = {
