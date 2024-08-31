@@ -5,6 +5,7 @@ from nip94 import gifmetadata
 from getevent import getevent
 from pynostr.key import PublicKey
 from nip98 import fallbackurlgenerator
+import concurrent.futures
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get('flasksecret')
@@ -70,9 +71,14 @@ def gif_metadata():
     # print('Search Term:', searchTerm)
 
     # event_id = gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm)
-    url = fallbackurlgenerator(gifUrl, searchTerm, alt) #NOTE: should this be a subprocess?
+    # Start the task in a separate process
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        executor.submit(fallbackurlgenerator, gifUrl, searchTerm, alt)
 
-    return url
+    # url = fallbackurlgenerator(gifUrl, searchTerm, alt) #NOTE: should this be a subprocess?
+
+    # Return a response indicating that the request was accepted
+    return jsonify({"message": "Task is being processed."}), 202
 
 # TODO: Figure out cool way to count Freedom Gifs
 # @app.route("/counter", methods=['GET'])
