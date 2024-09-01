@@ -314,29 +314,15 @@
             }
         }
 
-        function copyToClipboard(text) {
-            const tempInput = document.createElement('textarea'); // Changed input to textarea
-            tempInput.value = text;
-            tempInput.style.position = 'fixed';  // Prevent scrolling to the bottom
-            tempInput.style.left = '-9999px'; // Move it off-screen
-            document.body.appendChild(tempInput);
-            tempInput.focus();  // Ensures that the text area is in focus
-            tempInput.select(); // Selects the text inside the textarea
-
+        async function copyToClipboard(text) {
             try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    alert('Copied to clipboard!');
-                } else {
-                    console.error('Copy command was unsuccessful');
-                }
+                await navigator.clipboard.writeText(text);
+                alert('Copied to clipboard!');
             } catch (err) {
-                console.error('Unable to copy to clipboard', err);
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy text to clipboard.');
             }
-
-            document.body.removeChild(tempInput);  // Remove the textarea after copying
         }
-
 
         // // Copy to clipboard function
         // function copyToClipboard(text) {
@@ -475,7 +461,7 @@
                 });
 
                 console.log('File uploaded successfully:', response.data.url);
-                copyToClipboard(response.data.url);
+                await copyToClipboard(response.data.url);  // Use the new clipboard API
 
                 uploadForm.reset();
             } catch (error) {
