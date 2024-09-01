@@ -236,6 +236,10 @@
             <button id="search-button">Search🔎</button>
         </div>
         <div id="results"></div>
+
+        <div class="powered-by">
+            Powered by Tenor
+        </div>
     </div>
 
     <button class="zap-button" id="zapButton">⚡</button>
@@ -278,10 +282,6 @@
                 <button type="submit">Submit</button>
             </form>
         </div>
-    </div>
-
-    <div class="powered-by">
-        Powered by Tenor
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
@@ -444,7 +444,7 @@
                 });
                 
                 // Extract the URL from the response data
-                const { url } = response.data;
+                const { url } = response.data.url;
 
                 // Log the response and copy the URL to clipboard
                 console.log('File uploaded successfully:', response.data);
