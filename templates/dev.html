@@ -90,7 +90,7 @@
         }
 
         .upload-button {
-            position: relative;
+            position: absolute;
             top: 20px; /* Distance from the top of the viewport */
             left: 20px; /* Distance from the left of the viewport */
             padding: 10px 20px;
@@ -227,6 +227,8 @@
     </style>
 </head>
 <body>
+    <button class="upload-button" id="uploadButton">Upload☁️</button>
+
     <div class="container">
         <h1>GIF Buddy🫂</h1>
         <div class="search-box">
@@ -236,7 +238,6 @@
         <div id="results"></div>
     </div>
 
-    <button class="upload-button" id="uploadButton">Upload☁️</button>
     <button class="zap-button" id="zapButton">⚡</button>
 
     <div class="popup" id="zapPopup">
