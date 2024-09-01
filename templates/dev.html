@@ -343,14 +343,6 @@
         //     }
         // }
 
-        if (url) {
-            const copyButton = document.createElement('button');
-            copyButton.textContent = 'Copy URL';
-            copyButton.onclick = () => copyToClipboard(url);
-            document.body.appendChild(copyButton);
-            alert('File uploaded successfully! Click the "Copy URL" button to copy the link.');
-        }
-
         async function copyToClipboard(text) {
             // The older method using a temporary input element
             const tempInput = document.createElement('input');
@@ -500,7 +492,7 @@
                     copyButton.onclick = () => copyToClipboard(url);
                     document.body.appendChild(copyButton);
                     alert('File uploaded successfully! Click the "Copy URL" button to copy the link.');
-        }
+                }
                 // await copyToClipboard(url);
 
                 uploadForm.reset();
