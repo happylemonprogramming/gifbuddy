@@ -314,13 +314,28 @@
             }
         }
 
-        // Copy to clipboard function
+        // // Copy to clipboard function
+        // async function copyToClipboard(text) {
+        //     try {
+        //         await navigator.clipboard.writeText(text);
+        //         alert('Copied to clipboard!');
+        //     } catch (err) {
+        //         console.error('Failed to copy: ', err);
+        //         alert('Failed to copy text to clipboard.');
+        //     }
+        // }
+
         async function copyToClipboard(text) {
             try {
-                await navigator.clipboard.writeText(text);
+                const tempInput = document.createElement('input');
+                tempInput.value = text;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
                 alert('Copied to clipboard!');
-            } catch (err) {
-                console.error('Failed to copy: ', err);
+            } catch (execErr) {
+                console.error('Fallback failed:', execErr);
                 alert('Failed to copy text to clipboard.');
             }
         }
@@ -447,20 +462,27 @@
                 const response = await axios.post('/upload', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
-                    }
+                    },
+                    timeout: 30000 // 30 seconds timeout
                 });
 
                 console.log('File uploaded successfully:', response.data.url);
-                await copyToClipboard(response.data.url);  // Use the new clipboard API
+                await copyToClipboard(response.data.url);
 
                 uploadForm.reset();
             } catch (error) {
-                console.error('Error uploading file:', error);
-                alert('An error occurred while uploading the file.');
+                if (error.code === 'ECONNABORTED') {
+                    console.error('Error: Request timed out after 30 seconds');
+                    alert('The upload request timed out. Please try again.');
+                } else {
+                    console.error('Error uploading file:', error);
+                    alert('An error occurred while uploading the file.');
+                }
             } finally {
                 // Hide loading indicator
                 document.getElementById('loadingIndicator').style.display = 'none';
             }
+
         });
 
         // const counterValue = document.getElementById('counter-value');
