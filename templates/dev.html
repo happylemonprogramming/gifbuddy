@@ -494,13 +494,33 @@
                     try {
                         // await copyToClipboard(url);
                         alert('File uploaded successfully!');
- 
+
                         // Fallback to manual copy button
+                        const popup = document.querySelector('.popup');
                         const copyButton = document.createElement('button');
                         copyButton.textContent = 'Copy URL';
                         copyButton.onclick = () => copyToClipboard(url);
-                        document.body.appendChild(copyButton);
-                        // alert('File uploaded successfully! Click the "Copy URL" button to copy the link.');
+
+                        // Style the copy button to match the submit button
+                        copyButton.style.padding = '10px';
+                        copyButton.style.borderRadius = '4px';
+                        copyButton.style.fontSize = '16px';
+                        copyButton.style.border = 'none';
+                        copyButton.style.backgroundColor = '#5E35B1'; // Match submit button color
+                        copyButton.style.color = '#FFFFFF'; // Match submit button text color
+                        copyButton.style.cursor = 'pointer';
+                        copyButton.style.marginTop = '10px'; // Add space above the button
+
+                        // Add hover effect
+                        copyButton.addEventListener('mouseover', () => {
+                            copyButton.style.backgroundColor = '#4527A0';
+                        });
+                        copyButton.addEventListener('mouseout', () => {
+                            copyButton.style.backgroundColor = '#5E35B1';
+                        });
+
+                        // Append the button to the popup
+                        popup.appendChild(copyButton);
                     } catch (copyError) {
                         console.error('Copy failed:', copyError);
                     }
