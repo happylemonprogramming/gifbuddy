@@ -311,7 +311,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
     <script>
-        // Element ID initialization
+        // Variable & Element ID initialization
+        let pos = null
         const searchInput = document.getElementById('search-input');
         const searchButton = document.getElementById('search-button');
         const resultsDiv = document.getElementById('results');
@@ -379,7 +380,7 @@
         }
 
         // Primary gif search function
-        async function searchGifs(pos = null) {
+        async function searchGifs(pos) {
             const searchTerm = searchInput.value.trim();
             if (!searchTerm) {
                 console.log('No search term, returning');
@@ -431,21 +432,24 @@
                 document.getElementById('load-more-button').style.display = pos ? 'block' : 'none';
                 console.log('Load More button display:', loadMore.style.display);
 
+                return pos; // Return the updated pos
+
             } catch (error) {
                 console.error('Error fetching GIFs:', error);
                 resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
+                return null; // Return null in case of error
             }
         }
 
         // Allows user to initiate search by click or enter
         searchButton.addEventListener('click', () => {
             pos = null;  // Reset pos for a new search
-            searchGifs(pos);  // Initial search
+            pos = searchGifs(pos);  // Initial search
         });
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 pos = null;  // Reset pos for a new search
-                searchGifs(pos);  // Initial search
+                pos = searchGifs(pos);  // Initial search
             }
         });
 
@@ -453,7 +457,7 @@
         loadMore.addEventListener('click', () => {
             console.log('Load More button clicked');
             console.log('Current pos value:', pos);
-            searchGifs(pos);
+            pos = searchGifs(pos);
         });
 
         // Define popup open and close functionality
