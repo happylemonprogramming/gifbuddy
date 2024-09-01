@@ -94,7 +94,7 @@ def upload():
 
         # Process the file and additional fields as needed
         url = urlgenerator(filepath, caption, alt)
-
+        print("Nostr.Build Upload URL:", url)
         return jsonify({'message': 'File uploaded successfully!', 'url': url,'filename': file.filename, 'caption': caption, 'alt': alt}), 200
 
     return jsonify({'error': 'Failed to upload file'}), 500
