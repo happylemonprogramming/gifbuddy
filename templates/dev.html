@@ -314,16 +314,40 @@
             }
         }
 
-        // Copy to clipboard function
         function copyToClipboard(text) {
-            const tempInput = document.createElement('input');
+            const tempInput = document.createElement('textarea'); // Changed input to textarea
             tempInput.value = text;
+            tempInput.style.position = 'fixed';  // Prevent scrolling to the bottom
+            tempInput.style.left = '-9999px'; // Move it off-screen
             document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-            alert('Copied to clipboard: ' + text);
+            tempInput.focus();  // Ensures that the text area is in focus
+            tempInput.select(); // Selects the text inside the textarea
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('Copied to clipboard!');
+                } else {
+                    console.error('Copy command was unsuccessful');
+                }
+            } catch (err) {
+                console.error('Unable to copy to clipboard', err);
+            }
+
+            document.body.removeChild(tempInput);  // Remove the textarea after copying
         }
+
+
+        // // Copy to clipboard function
+        // function copyToClipboard(text) {
+        //     const tempInput = document.createElement('input');
+        //     tempInput.value = text;
+        //     document.body.appendChild(tempInput);
+        //     tempInput.select();
+        //     document.execCommand('copy');
+        //     document.body.removeChild(tempInput);
+        //     alert('Copied to clipboard: ' + text);
+        // }
 
         // Primary gif search function
         async function searchGifs() {
@@ -449,22 +473,10 @@
                         'Content-Type': 'multipart/form-data'
                     }
                 });
-                
-                // Extract the URL from the response data
-                const url = response.data.url;
 
-                // Log the response and copy the URL to clipboard
-                console.log('File uploaded successfully:', url);
-                
-                if (url) {
-                    copyToClipboard(url);
-                    alert('File uploaded successfully! URL copied to clipboard.');
-                } else {
-                    console.error('URL not found in response:', response.data);
-                    alert('File uploaded, but URL not received. Please check the console for details.');
-                }
+                console.log('File uploaded successfully:', response.data.url);
+                copyToClipboard(response.data.url);
 
-                // closePopup(uploadPopup);
                 uploadForm.reset();
             } catch (error) {
                 console.error('Error uploading file:', error);
@@ -474,6 +486,61 @@
                 document.getElementById('loadingIndicator').style.display = 'none';
             }
         });
+
+
+        // // Gif and MP4 Upload function
+        // uploadForm.addEventListener('submit', async (e) => {
+        //     e.preventDefault();
+
+        //     // Show loading indicator
+        //     document.getElementById('loadingIndicator').style.display = 'block';
+            
+        //     const caption = document.getElementById('caption').value;
+        //     const alt = document.getElementById('alt').value;
+        //     const file = document.getElementById('fileUpload').files[0];
+
+        //     if (!file) {
+        //         alert('Please select a file to upload.');
+        //         document.getElementById('loadingIndicator').style.display = 'none';
+        //         return;
+        //     }
+
+        //     const formData = new FormData();
+        //     formData.append('caption', caption);
+        //     formData.append('alt', alt);
+        //     formData.append('file', file);
+
+        //     try {
+        //         const response = await axios.post('/upload', formData, {
+        //             headers: {
+        //                 'Content-Type': 'multipart/form-data'
+        //             }
+        //         });
+                
+        //         // Extract the URL from the response data
+        //         const url = response.data.url;
+
+        //         // Log the response and copy the URL to clipboard
+        //         console.log('File uploaded successfully:', url);
+                
+        //         if (url) {
+        //             copyToClipboard(url);
+        //             alert('File uploaded successfully! URL copied to clipboard.');
+        //         } else {
+        //             console.error('URL not found in response:', response.data);
+        //             alert('File uploaded, but URL not received. Please check the console for details.');
+        //         }
+
+        //         // closePopup(uploadPopup);
+        //         uploadForm.reset();
+        //     } catch (error) {
+        //         console.error('Error uploading file:', error);
+        //         alert('An error occurred while uploading the file.');
+        //     } finally {
+        //         // Hide loading indicator
+        //         document.getElementById('loadingIndicator').style.display = 'none';
+        //     }
+        // });
 
         // const counterValue = document.getElementById('counter-value');
 
