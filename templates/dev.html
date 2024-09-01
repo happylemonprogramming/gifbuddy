@@ -463,11 +463,11 @@
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     },
-                    timeout: 30000 // 30 seconds timeout
+                    timeout: 45000 // 30 seconds timeout
                 });
 
                 console.log('File uploaded successfully:', response.data.url);
-                await copyToClipboard(response.data.url);
+                copyToClipboard(response.data.url);
 
                 uploadForm.reset();
             } catch (error) {
