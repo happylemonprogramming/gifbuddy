@@ -322,8 +322,7 @@
             tempInput.select();
             document.execCommand('copy');
             document.body.removeChild(tempInput);
-
-            alert('Copied to clipboard!');
+            alert('Copied to clipboard: ' + text);
         }
 
         // Primary gif search function
@@ -451,14 +450,20 @@
                     }
                 });
                 
-                // // Extract the URL from the response data
-                // const { url } = response.data.url;
+                // Extract the URL from the response data
+                const url = response.data.url;
 
                 // Log the response and copy the URL to clipboard
-                console.log('File uploaded successfully:', response.data.url);
-                copyToClipboard(response.data.url);
+                console.log('File uploaded successfully:', url);
+                
+                if (url) {
+                    copyToClipboard(url);
+                    alert('File uploaded successfully! URL copied to clipboard.');
+                } else {
+                    console.error('URL not found in response:', response.data);
+                    alert('File uploaded, but URL not received. Please check the console for details.');
+                }
 
-                // alert('File uploaded successfully! URL copied to clipboard.');
                 // closePopup(uploadPopup);
                 uploadForm.reset();
             } catch (error) {
