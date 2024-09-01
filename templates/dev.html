@@ -510,6 +510,74 @@
             });
         });
 
+        // // Gif and MP4 Upload function
+        // uploadForm.addEventListener('submit', async (e) => {
+        //     e.preventDefault();
+
+        //     // Show loading indicator
+        //     document.getElementById('loadingIndicator').style.display = 'block';
+            
+        //     const caption = document.getElementById('caption').value;
+        //     const file = document.getElementById('fileUpload').files[0];
+
+        //     if (!file) {
+        //         alert('Please select a file to upload.');
+        //         document.getElementById('loadingIndicator').style.display = 'none';
+        //         return;
+        //     }
+
+        //     const formData = new FormData();
+        //     formData.append('caption', caption);
+        //     formData.append('file', file);
+
+        //     try {
+        //         const response = await axios.post('/upload', formData, {
+        //             headers: {
+        //                 'Content-Type': 'multipart/form-data'
+        //             },
+        //             timeout: 60000 // 60 seconds timeout
+        //         });
+
+        //         console.log('File uploaded successfully:', response.data.url);
+
+        //         const url = String(response.data.url)
+        //         if (url) {
+        //             // Attempt automatic copy first
+        //             try {
+        //                 // await copyToClipboard(url);
+        //                 alert('File uploaded successfully!');
+ 
+        //                 // Fallback to manual copy button
+        //                 const copyButton = document.createElement('button');
+        //                 copyButton.textContent = 'Copy URL';
+        //                 copyButton.onclick = () => copyToClipboard(url);
+        //                 document.body.appendChild(copyButton);
+        //                 // alert('File uploaded successfully! Click the "Copy URL" button to copy the link.');
+        //             } catch (copyError) {
+        //                 console.error('Copy failed:', copyError);
+        //             }
+        //         } else {
+        //             console.error('URL not found in response:', response.data);
+        //             alert('File uploaded, but URL not received. Please check the console for details.');
+        //         }
+        //         // await copyToClipboard(url);
+
+        //         uploadForm.reset();
+        //     } catch (error) {
+        //         if (error.code === 'ECONNABORTED') {
+        //             console.error('Error: Request timed out after 30 seconds');
+        //             alert('The upload request timed out. Please try again.');
+        //         } else {
+        //             console.error('Error uploading file:', error);
+        //             alert('An error occurred while uploading the file.');
+        //         }
+        //     } finally {
+        //         // Hide loading indicator
+        //         document.getElementById('loadingIndicator').style.display = 'none';
+        //     }
+
+        // });
+
         // Gif and MP4 Upload function
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -540,32 +608,47 @@
 
                 console.log('File uploaded successfully:', response.data.url);
 
-                const url = String(response.data.url)
+                const url = String(response.data.url);
                 if (url) {
-                    // Attempt automatic copy first
-                    try {
-                        // await copyToClipboard(url);
-                        alert('File uploaded successfully!');
- 
-                        // Fallback to manual copy button
-                        const copyButton = document.createElement('button');
-                        copyButton.textContent = 'Copy URL';
-                        copyButton.onclick = () => copyToClipboard(url);
-                        document.body.appendChild(copyButton);
-                        // alert('File uploaded successfully! Click the "Copy URL" button to copy the link.');
-                    } catch (copyError) {
-                        console.error('Copy failed:', copyError);
-                    }
+                    // Create and show the image preview popup
+                    const popup = document.createElement('div');
+                    popup.style.position = 'fixed';
+                    popup.style.top = '50%';
+                    popup.style.left = '50%';
+                    popup.style.transform = 'translate(-50%, -50%)';
+                    popup.style.backgroundColor = 'white';
+                    popup.style.padding = '20px';
+                    popup.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+                    popup.style.zIndex = '1000';
+
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '80vh';
+                    popup.appendChild(img);
+
+                    const closeButton = document.createElement('button');
+                    closeButton.textContent = 'Close';
+                    closeButton.onclick = () => document.body.removeChild(popup);
+                    popup.appendChild(closeButton);
+
+                    const copyButton = document.createElement('button');
+                    copyButton.textContent = 'Copy URL';
+                    copyButton.onclick = () => copyToClipboard(url);
+                    popup.appendChild(copyButton);
+
+                    document.body.appendChild(popup);
+
+                    alert('File uploaded successfully!');
                 } else {
                     console.error('URL not found in response:', response.data);
                     alert('File uploaded, but URL not received. Please check the console for details.');
                 }
-                // await copyToClipboard(url);
 
                 uploadForm.reset();
             } catch (error) {
                 if (error.code === 'ECONNABORTED') {
-                    console.error('Error: Request timed out after 30 seconds');
+                    console.error('Error: Request timed out after 60 seconds');
                     alert('The upload request timed out. Please try again.');
                 } else {
                     console.error('Error uploading file:', error);
@@ -575,7 +658,6 @@
                 // Hide loading indicator
                 document.getElementById('loadingIndicator').style.display = 'none';
             }
-
         });
 
         // const counterValue = document.getElementById('counter-value');
