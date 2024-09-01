@@ -16,17 +16,20 @@
             align-items: center; /* Centers the container horizontally */
             min-height: 100vh;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
         .container {
             width: 100%;
             max-width: 600px;
+            /* min-height: 100vh;
+            max-height: 100vh; */
             margin: 0 auto;
             display: flex;
             flex-direction: column;
             justify-content: center; /* Centers content vertically within the container */
             align-items: center; /* Centers content horizontally within the container */
-            flex-grow: 1;
+            /* flex-grow: 1; */
             padding: 20px;
             box-sizing: border-box;
         }
@@ -73,6 +76,10 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 10px;
             margin-bottom: 20px; /* Adds spacing before the footer */
+            flex-grow: 1;
+            width: 100%;
+            overflow-y: auto; /* Only scroll when there's overflow */
+            
         }
 
         #results:empty {
