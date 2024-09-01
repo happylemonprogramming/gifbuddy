@@ -379,8 +379,7 @@
         }
 
         // Primary gif search function
-        let pos = null;
-        async function searchGifs(pos) {
+        async function searchGifs(pos = null) {
             const searchTerm = searchInput.value.trim();
             if (!searchTerm) {
                 console.log('No search term, returning');
@@ -396,7 +395,7 @@
                 console.log('Search response received:', response.data);
 
                 // If it's the initial search, clear the results. If it's a "Load More," append new results.
-                if (!pos) {
+                if (pos == null) {
                     resultsDiv.innerHTML = '';  // Clear results only for the initial search
                 }
 
@@ -532,7 +531,7 @@
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     },
-                    timeout: 45000 // 30 seconds timeout
+                    timeout: 60000 // 60 seconds timeout
                 });
 
                 console.log('File uploaded successfully:', response.data.url);
