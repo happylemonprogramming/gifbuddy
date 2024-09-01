@@ -44,7 +44,7 @@ def search():
         gifSize = gif['size']
         gifDims = gif['dims']
         thumb = result['media_formats']['nanogifpreview']['url']
-        preview = result['media_formats']['tinygifpreview']['url']
+        preview = result['media_formats']['tinygif']['url']
         alt = os.path.basename(gifURL)[0:-4]
 
         gifs[alt] = {

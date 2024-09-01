@@ -321,6 +321,7 @@
         const uploadPopup = document.getElementById('uploadPopup');
         const uploadForm = document.getElementById('uploadForm');
         const loadMore = document.getElementById('load-more-button');
+        console.log('Load More button found:', loadMore);
 
         // Nostr.Build and NIP94 API POST request
         async function sendGifMetadata(gifData) {
@@ -381,13 +382,18 @@
         let pos = null;
         async function searchGifs(pos) {
             const searchTerm = searchInput.value.trim();
-            if (!searchTerm) return;
+            if (!searchTerm) {
+                console.log('No search term, returning');
+                return;
+            }
 
             try {
                 const response = await axios.post('/search', {
                     q: searchTerm,
                     pos: pos
                 });
+
+                console.log('Search response received:', response.data);
 
                 // If it's the initial search, clear the results. If it's a "Load More," append new results.
                 if (!pos) {
@@ -420,9 +426,11 @@
 
                 // Update pos with the new position for the next load more action
                 pos = response.data.next;
+                console.log('Updated pos:', pos);
 
                 // Show or hide the "Load More" button based on the presence of a next position
                 document.getElementById('load-more-button').style.display = pos ? 'block' : 'none';
+                console.log('Load More button display:', loadMore.style.display);
 
             } catch (error) {
                 console.error('Error fetching GIFs:', error);
@@ -443,7 +451,11 @@
         });
 
         // Allows user to initiate search by click or enter
-        loadMore.addEventListener('click', () => searchGifs(pos));
+        loadMore.addEventListener('click', () => {
+            console.log('Load More button clicked');
+            console.log('Current pos value:', pos);
+            searchGifs(pos);
+        });
 
         // Define popup open and close functionality
         function openPopup(popup) {
