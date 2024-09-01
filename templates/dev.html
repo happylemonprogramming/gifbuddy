@@ -34,7 +34,7 @@
         h1 {
             text-align: center;
             color: #FFFFFF;
-            padding: 20px 0 0 0;
+            padding: 50px 0 0 0;
         }
 
         .search-box {
@@ -326,24 +326,32 @@
         //     }
         // }
 
-        async function copyToClipboard(text) {
-            if (navigator.clipboard) {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    alert('Copied to clipboard!');
-                } catch (err) {
-                    console.error('Failed to copy: ', err);
-                    alert('Failed to copy text to clipboard.');
-                }
-            } else {
-                // Fallback for browsers that do not support the Clipboard API
-                console.warn('Clipboard API not supported. Using fallback method.');
-                // You can use the temporary input method here if needed
-                fallbackCopyToClipboard(text);
-            }
+        // async function copyToClipboard(text) {
+        //     if (navigator.clipboard) {
+        //         try {
+        //             await navigator.clipboard.writeText(text);
+        //             alert('Copied to clipboard!');
+        //         } catch (err) {
+        //             console.error('Failed to copy: ', err);
+        //             alert('Failed to copy text to clipboard.');
+        //         }
+        //     } else {
+        //         // Fallback for browsers that do not support the Clipboard API
+        //         console.warn('Clipboard API not supported. Using fallback method.');
+        //         // You can use the temporary input method here if needed
+        //         fallbackCopyToClipboard(text);
+        //     }
+        // }
+
+        if (url) {
+            const copyButton = document.createElement('button');
+            copyButton.textContent = 'Copy URL';
+            copyButton.onclick = () => copyToClipboard(url);
+            document.body.appendChild(copyButton);
+            alert('File uploaded successfully! Click the "Copy URL" button to copy the link.');
         }
 
-        function fallbackCopyToClipboard(text) {
+        async function copyToClipboard(text) {
             // The older method using a temporary input element
             const tempInput = document.createElement('input');
             tempInput.value = text;
@@ -484,7 +492,16 @@
                 });
 
                 console.log('File uploaded successfully:', response.data.url);
-                await copyToClipboard(String(response.data.url));
+
+                const url = String(response.data.url)
+                if (url) {
+                    const copyButton = document.createElement('button');
+                    copyButton.textContent = 'Copy URL';
+                    copyButton.onclick = () => copyToClipboard(url);
+                    document.body.appendChild(copyButton);
+                    alert('File uploaded successfully! Click the "Copy URL" button to copy the link.');
+        }
+                // await copyToClipboard(url);
 
                 uploadForm.reset();
             } catch (error) {
