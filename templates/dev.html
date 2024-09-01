@@ -3,26 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GIF Search App</title>
+    <title>GIF Buddy🫂</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #2C2F33;
             color: #FFFFFF;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            display: flex;
+            justify-content: center; /* Centers the container vertically when possible */
+            align-items: center; /* Centers the container horizontally */
+            min-height: 100vh;
             box-sizing: border-box;
-            overflow-y: auto;
         }
 
         .container {
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centers content vertically within the container */
+            align-items: center; /* Centers content horizontally within the container */
+            flex-grow: 1;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         h1 {
@@ -32,6 +38,8 @@
 
         .search-box {
             display: flex;
+            width: 100%; /* Ensure the search box takes full width within the container */
+            max-width: 100%; /* Prevents overflow */
             margin-bottom: 20px;
         }
 
@@ -63,12 +71,21 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 10px;
+            margin-bottom: 20px; /* Adds spacing before the footer */
         }
 
         .gif {
             width: 100%;
             height: auto;
             border-radius: 4px;
+        }
+
+        .powered-by {
+            font-size: 14px;
+            color: #878787;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: auto; /* Pushes the footer to the bottom if the content above is short */
         }
 
         #counter {
@@ -185,15 +202,6 @@
 
         .upload-form button:hover {
             background-color: #4527A0;
-        }
-
-        .powered-by {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            font-size: 14px;
-            color: #878787;
-            padding: 5px 10px;
         }
 
         /* Spinner CSS */
