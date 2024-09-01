@@ -451,15 +451,15 @@
                     }
                 });
                 
-                // Extract the URL from the response data
-                const { url } = response.data.url;
+                // // Extract the URL from the response data
+                // const { url } = response.data.url;
 
                 // Log the response and copy the URL to clipboard
-                console.log('File uploaded successfully:', response.data);
-                copyToClipboard(url);
+                console.log('File uploaded successfully:', response.data.url);
+                copyToClipboard(response.data.url);
 
                 // alert('File uploaded successfully! URL copied to clipboard.');
-                closePopup(uploadPopup);
+                // closePopup(uploadPopup);
                 uploadForm.reset();
             } catch (error) {
                 console.error('Error uploading file:', error);
