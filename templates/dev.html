@@ -231,6 +231,23 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        #load-more-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #5E35B1;  /* Same as search button */
+            color: #FFFFFF;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;  /* Rounded corners like the search button */
+            display: block;  /* Makes the button a block-level element */
+            margin: 20px auto;  /* Centers the button horizontally and adds space above */
+            text-align: center;  /* Centers text within the button */
+        }
+
+        #load-more-button:hover {
+            background-color: #4527A0;  /* Same hover effect as the search button */
+        }
     </style>
 </head>
 <body>
@@ -426,7 +443,7 @@
         });
 
         // Allows user to initiate search by click or enter
-        loadMore.addEventListener('click', searchGifs(pos));
+        loadMore.addEventListener('click', () => searchGifs(pos));
 
         // Define popup open and close functionality
         function openPopup(popup) {
