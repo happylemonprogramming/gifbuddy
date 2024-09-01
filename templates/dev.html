@@ -442,22 +442,22 @@
         }
 
         // Allows user to initiate search by click or enter
-        searchButton.addEventListener('click', () => {
+        searchButton.addEventListener('click', async () => {
             pos = null;  // Reset pos for a new search
-            pos = searchGifs(pos);  // Initial search
+            pos = await searchGifs(pos);  // Initial search
         });
-        searchInput.addEventListener('keypress', (e) => {
+        searchInput.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter') {
                 pos = null;  // Reset pos for a new search
-                pos = searchGifs(pos);  // Initial search
+                pos = await searchGifs(pos);  // Initial search
             }
         });
 
         // Allows user to initiate search by click or enter
-        loadMore.addEventListener('click', () => {
+        loadMore.addEventListener('click', async () => {
             console.log('Load More button clicked');
             console.log('Current pos value:', pos);
-            pos = searchGifs(pos);
+            pos = await searchGifs(pos);
         });
 
         // Define popup open and close functionality
