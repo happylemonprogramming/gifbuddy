@@ -93,9 +93,9 @@ def upload():
         alt = request.form.get('alt', '')
 
         # Process the file and additional fields as needed
-        urlgenerator(filepath, caption, alt)
+        url = urlgenerator(filepath, caption, alt)
 
-        return jsonify({'message': 'File uploaded successfully!', 'filename': file.filename, 'caption': caption, 'alt': alt}), 200
+        return jsonify({'message': 'File uploaded successfully!', 'url': url,'filename': file.filename, 'caption': caption, 'alt': alt}), 200
 
     return jsonify({'error': 'Failed to upload file'}), 500
 

@@ -18,19 +18,23 @@
             box-sizing: border-box;
             overflow-y: auto;
         }
+
         .container {
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
         }
+
         h1 {
             text-align: center;
             color: #FFFFFF;
         }
+
         .search-box {
             display: flex;
             margin-bottom: 20px;
         }
+
         #search-input {
             flex-grow: 1;
             padding: 10px;
@@ -40,6 +44,7 @@
             color: #FFFFFF;
             border-radius: 4px 0 0 4px;
         }
+
         #search-button {
             padding: 10px 20px;
             font-size: 16px;
@@ -49,25 +54,30 @@
             cursor: pointer;
             border-radius: 0 4px 4px 0;
         }
+
         #search-button:hover {
             background-color: #4527A0;
         }
+
         #results {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 10px;
         }
+
         .gif {
             width: 100%;
             height: auto;
             border-radius: 4px;
         }
+
         #counter {
             text-align: center;
             font-size: 18px;
             margin-bottom: 20px;
             color: #FFFFFF;
         }
+
         .zap-button {
             position: fixed;
             top: 20px;
@@ -79,9 +89,9 @@
         }
 
         .upload-button {
-            position: fixed;
-            top: 20px;
-            left: 20px;
+            position: fixed; /* Ensures the button stays in a fixed position */
+            top: 20px; /* Distance from the top of the viewport */
+            left: 20px; /* Distance from the left of the viewport */
             padding: 10px 20px;
             font-size: 16px;
             background-color: #5E35B1;
@@ -89,6 +99,7 @@
             border: none;
             cursor: pointer;
             border-radius: 4px;
+            z-index: 1000; /* Ensure it stays above other content */
         }
 
         .upload-button:hover {
@@ -173,6 +184,7 @@
         .upload-form button:hover {
             background-color: #4527A0;
         }
+
         .powered-by {
             position: absolute;
             bottom: 20px;
@@ -193,6 +205,7 @@
             padding: 20px;
             border-radius: 10px;
             text-align: center;
+            z-index: 1000; /* High value to ensure it is on top */
         }
 
         .spinner {
@@ -425,8 +438,15 @@
                         'Content-Type': 'multipart/form-data'
                     }
                 });
+                
+                // Extract the URL from the response data
+                const { url } = response.data;
+
+                // Log the response and copy the URL to clipboard
                 console.log('File uploaded successfully:', response.data);
-                alert('File uploaded successfully!');
+                copyToClipboard(url);
+
+                alert('File uploaded successfully! URL copied to clipboard.');
                 closePopup(uploadPopup);
                 uploadForm.reset();
             } catch (error) {
