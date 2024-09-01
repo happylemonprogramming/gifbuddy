@@ -429,7 +429,7 @@
             document.getElementById('loadingIndicator').style.display = 'block';
             
             const caption = document.getElementById('caption').value;
-            const alt = document.getElementById('alt').value;
+            // const alt = document.getElementById('alt').value;
             const file = document.getElementById('fileUpload').files[0];
 
             if (!file) {
@@ -440,7 +440,7 @@
 
             const formData = new FormData();
             formData.append('caption', caption);
-            formData.append('alt', alt);
+            // formData.append('alt', alt);
             formData.append('file', file);
 
             try {
