@@ -19,7 +19,7 @@
             align-items: center;
             min-height: calc(100vh - 80px);
             margin: 0;
-            padding: 0;
+            padding: 20px;
             box-sizing: border-box;
             overflow-y: auto;
         }
@@ -243,6 +243,7 @@
             <button id="search-button">Search</button>
         </div>
         <div id="results"></div>
+        <button id="load-more-button" style="display: none;">Load More</button>
 
         <div class="powered-by">
             Powered by Tenor
@@ -302,6 +303,7 @@
         const uploadButton = document.getElementById('uploadButton');
         const uploadPopup = document.getElementById('uploadPopup');
         const uploadForm = document.getElementById('uploadForm');
+        const loadMore = document.getElementById('load-more-button');
 
         // Nostr.Build and NIP94 API POST request
         async function sendGifMetadata(gifData) {
@@ -359,37 +361,52 @@
         }
 
         // Primary gif search function
-        async function searchGifs() {
+        let pos = null;
+        async function searchGifs(pos) {
             const searchTerm = searchInput.value.trim();
             if (!searchTerm) return;
 
             try {
                 const response = await axios.post('/search', {
-                    q: searchTerm
+                    q: searchTerm,
+                    pos: pos
                 });
 
-                resultsDiv.innerHTML = '';
+                // If it's the initial search, clear the results. If it's a "Load More," append new results.
+                if (!pos) {
+                    resultsDiv.innerHTML = '';  // Clear results only for the initial search
+                }
+
                 Object.entries(response.data).forEach(([alt, gifData]) => {
-                    const { gifUrl, gifSize, gifDims, thumb, preview } = gifData;
+                    if (alt !== 'next') {  // Skip the 'next' key in the results
+                        const { gifUrl, gifSize, gifDims, thumb, preview } = gifData;
 
-                    const img = document.createElement('img');
-                    img.src = gifUrl;
-                    img.alt = alt;
-                    img.className = 'gif';
-                    img.addEventListener('click', () => {
-                        copyToClipboard(gifUrl);
-                        sendGifMetadata({
-                            gifUrl,
-                            gifSize,
-                            gifDims,
-                            thumb,
-                            preview,
-                            alt,
-                            searchTerm
+                        const img = document.createElement('img');
+                        img.src = preview;
+                        img.alt = alt;
+                        img.className = 'gif';
+                        img.addEventListener('click', () => {
+                            copyToClipboard(gifUrl);
+                            sendGifMetadata({
+                                gifUrl,
+                                gifSize,
+                                gifDims,
+                                thumb,
+                                preview,
+                                alt,
+                                searchTerm
+                            });
                         });
-                    });
-                    resultsDiv.appendChild(img);
+                        resultsDiv.appendChild(img);
+                    }
                 });
+
+                // Update pos with the new position for the next load more action
+                pos = response.data.next;
+
+                // Show or hide the "Load More" button based on the presence of a next position
+                document.getElementById('load-more-button').style.display = pos ? 'block' : 'none';
+
             } catch (error) {
                 console.error('Error fetching GIFs:', error);
                 resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
@@ -397,12 +414,19 @@
         }
 
         // Allows user to initiate search by click or enter
-        searchButton.addEventListener('click', searchGifs);
+        searchButton.addEventListener('click', () => {
+            pos = null;  // Reset pos for a new search
+            searchGifs(pos);  // Initial search
+        });
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                searchGifs();
+                pos = null;  // Reset pos for a new search
+                searchGifs(pos);  // Initial search
             }
         });
+
+        // Allows user to initiate search by click or enter
+        loadMore.addEventListener('click', searchGifs(pos));
 
         // Define popup open and close functionality
         function openPopup(popup) {
@@ -490,33 +514,13 @@
                     try {
                         // await copyToClipboard(url);
                         alert('File uploaded successfully!');
-
+ 
                         // Fallback to manual copy button
-                        const popup = document.querySelector('.popup');
                         const copyButton = document.createElement('button');
                         copyButton.textContent = 'Copy URL';
                         copyButton.onclick = () => copyToClipboard(url);
-
-                        // Style the copy button to match the submit button
-                        copyButton.style.padding = '10px';
-                        copyButton.style.borderRadius = '4px';
-                        copyButton.style.fontSize = '16px';
-                        copyButton.style.border = 'none';
-                        copyButton.style.backgroundColor = '#5E35B1'; // Match submit button color
-                        copyButton.style.color = '#FFFFFF'; // Match submit button text color
-                        copyButton.style.cursor = 'pointer';
-                        copyButton.style.marginTop = '10px'; // Add space above the button
-
-                        // Add hover effect
-                        copyButton.addEventListener('mouseover', () => {
-                            copyButton.style.backgroundColor = '#4527A0';
-                        });
-                        copyButton.addEventListener('mouseout', () => {
-                            copyButton.style.backgroundColor = '#5E35B1';
-                        });
-
-                        // Append the button to the popup
-                        popup.appendChild(copyButton);
+                        document.body.appendChild(copyButton);
+                        // alert('File uploaded successfully! Click the "Copy URL" button to copy the link.');
                     } catch (copyError) {
                         console.error('Copy failed:', copyError);
                     }

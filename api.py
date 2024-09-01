@@ -33,8 +33,9 @@ def search():
     # Capture user data
     data = request.get_json()  # Get the JSON data from the request body
     search = data.get('q')  # Extract the search term
-    print('Search term:', search) # Debugging
-    output = fetch_gifs(search,limit=30)
+    pos = data.get('pos')
+    print(f'Search term: {search}, Position: {pos}')  # Debugging
+    output = fetch_gifs(search,limit=30,pos=pos)
     gifs = {}
 
     for result in output['results']:
@@ -53,6 +54,9 @@ def search():
             'thumb': thumb,
             'preview': preview
         }
+
+        # Include the next position token in the response
+        gifs['next'] = output.get('next', None)
 
     return jsonify(gifs)
 
