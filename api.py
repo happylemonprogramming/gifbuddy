@@ -90,7 +90,7 @@ def upload():
 
         # Get additional fields
         caption = request.form.get('caption', '')
-        alt = os.path.basename(file.filename)[0:-4]
+        alt = file.filename[0:-4]
         print("Alt:", file.filename)
 
         # Process the file and additional fields as needed

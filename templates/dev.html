@@ -34,6 +34,7 @@
         h1 {
             text-align: center;
             color: #FFFFFF;
+            padding: 20px 0 0 0;
         }
 
         .search-box {
@@ -235,13 +236,13 @@
     </style>
 </head>
 <body>
-    <button class="upload-button" id="uploadButton">Upload☁️</button>
+    <button class="upload-button" id="uploadButton">Upload</button>
 
     <div class="container">
         <h1>GIF Buddy🫂</h1>
         <div class="search-box">
             <input type="text" id="search-input" placeholder="Gif your heart out">
-            <button id="search-button">Search🔎</button>
+            <button id="search-button">Search</button>
         </div>
         <div id="results"></div>
 
@@ -325,22 +326,6 @@
         //     }
         // }
 
-        function fallbackCopyToClipboard(text) {
-            // The older method using a temporary input element
-            const tempInput = document.createElement('input');
-            tempInput.value = text;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            try {
-                document.execCommand('copy');
-                alert('Copied to clipboard!');
-            } catch (err) {
-                console.error('Fallback failed:', err);
-                alert('Failed to copy text to clipboard.');
-            }
-            document.body.removeChild(tempInput);
-        }
-
         async function copyToClipboard(text) {
             if (navigator.clipboard) {
                 try {
@@ -356,6 +341,22 @@
                 // You can use the temporary input method here if needed
                 fallbackCopyToClipboard(text);
             }
+        }
+
+        function fallbackCopyToClipboard(text) {
+            // The older method using a temporary input element
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            try {
+                document.execCommand('copy');
+                alert('Copied to clipboard!');
+            } catch (err) {
+                console.error('Fallback failed:', err);
+                alert('Failed to copy text to clipboard.');
+            }
+            document.body.removeChild(tempInput);
         }
 
         // Primary gif search function
@@ -462,7 +463,6 @@
             document.getElementById('loadingIndicator').style.display = 'block';
             
             const caption = document.getElementById('caption').value;
-            // const alt = document.getElementById('alt').value;
             const file = document.getElementById('fileUpload').files[0];
 
             if (!file) {
@@ -473,7 +473,6 @@
 
             const formData = new FormData();
             formData.append('caption', caption);
-            // formData.append('alt', alt);
             formData.append('file', file);
 
             try {
@@ -485,9 +484,9 @@
                 });
 
                 console.log('File uploaded successfully:', response.data.url);
-                copyToClipboard(String(response.data.url));
+                await copyToClipboard(String(response.data.url));
 
-                // uploadForm.reset();
+                uploadForm.reset();
             } catch (error) {
                 if (error.code === 'ECONNABORTED') {
                     console.error('Error: Request timed out after 30 seconds');
