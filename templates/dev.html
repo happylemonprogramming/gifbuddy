@@ -469,7 +469,7 @@
                 console.log('File uploaded successfully:', response.data.url);
                 copyToClipboard(response.data.url);
 
-                uploadForm.reset();
+                // uploadForm.reset();
             } catch (error) {
                 if (error.code === 'ECONNABORTED') {
                     console.error('Error: Request timed out after 30 seconds');
