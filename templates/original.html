@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF Search App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2C2F33;
+            color: #FFFFFF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #FFFFFF;
+        }
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        #search-input {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            background-color: #23272A;
+            color: #FFFFFF;
+            border-radius: 4px 0 0 4px;
+        }
+        #search-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #5E35B1;
+            color: #FFFFFF;
+            border: none;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+        }
+        #search-button:hover {
+            background-color: #4527A0;
+        }
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .gif {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        #counter {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #FFFFFF;
+        }
+        .zap-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #2C2F33;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .popup-content {
+            color: white;
+            text-align: center;
+            position: relative;
+            padding-top: 20px;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: white;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .popup-text-copy {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #23272A;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            word-break: break-all;
+        }
+
+        .copy-icon {
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GIF Buddy</h1>
+        <!-- <div id="counter">Freedom Gifs Counter: <span id="counter-value">Loading...</span></div> -->
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Enter search term...">
+            <button id="search-button">Search</button>
+        </div>
+        <div id="results"></div>
+    </div>
+
+    <button class="zap-button" id="zapButton">⚡</button>
+
+    <div class="popup" id="popup">
+        <div class="popup-close" id="popupClose">×</div>
+        <div class="popup-content">
+            <h2>Developed by Lemon🍋</h2>
+            <div class="popup-text">
+                <div>Public key:</div>
+                <div class="popup-text-copy">
+                    <span>npub1hee433872q2gen90cqh2ypwcq9z7y5ugn23etrd2l2rrwpruss8qwmrsv6</span>
+                    <span class="copy-icon">📋</span>
+                </div>
+            </div>
+            <div class="popup-text">
+                <div>Lightning address:</div>
+                <div class="popup-text-copy">
+                    <span>palekangaroo1@primal.net</span>
+                    <span class="copy-icon">📋</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const resultsDiv = document.getElementById('results');
+        const counterValue = document.getElementById('counter-value');
+
+        async function fetchCounter() {
+            try {
+                const response = await axios.get('/counter');
+                counterValue.textContent = response.data.count;
+            } catch (error) {
+                console.error('Error fetching counter:', error);
+                counterValue.textContent = 'Error';
+            }
+        }
+
+        // async function searchGifs() {
+        //     const searchTerm = searchInput.value.trim();
+        //     if (!searchTerm) return;
+
+        //     try {
+        //         const response = await axios.post('/search', {
+        //             q: searchTerm
+        //         });
+
+        //         resultsDiv.innerHTML = '';
+        //         Object.entries(response.data).forEach(([gifAlt, gifUrl]) => {
+        //             const img = document.createElement('img');
+        //             img.src = gifUrl;
+        //             img.alt = gifAlt;
+        //             img.className = 'gif';
+        //             img.addEventListener('click', () => copyToClipboard(gifUrl));
+        //             resultsDiv.appendChild(img);
+        //         });
+
+        //         if (Object.keys(response.data).length === 0) {
+        //             resultsDiv.innerHTML = 'No GIFs found for this search term.';
+        //         }
+
+        //         // Fetch the updated counter after each search
+        //         fetchCounter();
+        //     } catch (error) {
+        //         console.error('Error fetching GIFs:', error);
+        //         resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
+        //     }
+        // }
+
+        async function searchGifs() {
+            const searchTerm = searchInput.value.trim();
+            if (!searchTerm) return;
+
+            try {
+                const response = await axios.post('/search', {
+                    q: searchTerm
+                });
+
+                resultsDiv.innerHTML = '';
+                Object.entries(response.data).forEach(([alt, gifData]) => {
+                    const { gifUrl, gifSize, gifDims, thumb, preview } = gifData;
+
+                    const img = document.createElement('img');
+                    img.src = gifUrl;
+                    img.alt = alt;
+                    img.className = 'gif';
+                    img.addEventListener('click', () => {
+                        copyToClipboard(gifUrl);
+                        sendGifMetadata({
+                            gifUrl,
+                            gifSize,
+                            gifDims,
+                            thumb,
+                            preview,
+                            alt,
+                            searchTerm
+                        });
+                    });
+                    resultsDiv.appendChild(img);
+                });
+            } catch (error) {
+                console.error('Error fetching GIFs:', error);
+                resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
+            }
+        }
+
+    async function sendGifMetadata(gifData) {
+        try {
+            await axios.post('/gifmetadata', gifData);
+            console.log('GIF metadata sent successfully.');
+        } catch (error) {
+            console.error('Error sending GIF metadata:', error);
+        }
+    }
+
+        function copyToClipboard(text) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            alert('Copied to clipboard!');
+        }
+
+        searchButton.addEventListener('click', searchGifs);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchGifs();
+            }
+        });
+
+        const zapButton = document.getElementById('zapButton');
+        const popup = document.getElementById('popup');
+        const popupClose = document.getElementById('popupClose');
+
+        zapButton.addEventListener('click', () => {
+            popup.style.display = 'block';
+        });
+
+        popupClose.addEventListener('click', (e) => {
+            e.stopPropagation();
+            popup.style.display = 'none';
+        });
+
+        // Close popup when clicking outside
+        window.addEventListener('click', (e) => {
+            if (popup.style.display === 'block' && !popup.contains(e.target) && e.target !== zapButton) {
+                popup.style.display = 'none';
+            }
+        });
+
+        // Prevent closing when clicking inside the popup
+        popup.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Handle copying of text in the popup
+        const copyIcons = document.querySelectorAll('.copy-icon');
+        copyIcons.forEach(icon => {
+            icon.addEventListener('click', () => {
+                const textElement = icon.previousElementSibling;
+                const textToCopy = textElement.textContent.trim();
+                copyToClipboard(textToCopy);
+
+                // Optional: Provide visual feedback
+                icon.textContent = '✅';
+                setTimeout(() => {
+                    icon.textContent = '📋';
+                }, 2000);
+            });
+        });
+
+        // Fetch the initial counter value when the page loads
+        // fetchCounter();
+    </script>
+
+</body>
+</html>
