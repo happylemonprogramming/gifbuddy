@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, send_from_directory, jsonify
+from flask import Flask, request, render_template, send_from_directory, jsonify, send_file
 import os
 from gifsearch import fetch_gifs
 from nip94 import gifmetadata
@@ -118,6 +118,14 @@ def upload():
 
 #     return jsonify(response)
 
+@app.route('/manifest.json')
+def serve_manifest():
+    return send_file('manifest.json', mimetype='application/manifest+json')
+
+@app.route('/sw.js')
+def serve_sw():
+    return send_file('sw.js', mimetype='application/javascript')
+
 # NOTE: Reserved for future use
 @app.route("/privacypolicy")
 def policy():
@@ -126,10 +134,6 @@ def policy():
 @app.route("/termsofservice")
 def terms():
     return render_template("termsofservice.html")
-
-@app.route('/.well-known/apple-developer-merchantid-domain-association')
-def serve_apple_pay_file():
-    return send_from_directory(current_dir, 'apple-developer-merchantid-domain-association')
 
 if __name__ == "__main__":
     app.run(debug=True)
