@@ -122,6 +122,27 @@
             z-index: 1000; /* Ensure it stays above other content */
         }
 
+        .github-button {
+            position: absolute;
+            top: 23px;
+            right: 50px;
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .github-logo {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
         .upload-button {
             position: absolute;
             top: 20px; /* Distance from the top of the viewport */
@@ -301,6 +322,10 @@
             Powered by Tenor
         </div>
     </div>
+
+    <a href="https://github.com/happylemonprogramming/gifbuddy" target="_blank" class="github-button" id="githubButton">
+        <img src="/static/githublogo.png" alt="GitHub logo" class="github-logo">
+    </a>
 
     <button class="zap-button" id="zapButton">⚡</button>
 
