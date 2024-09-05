@@ -87,7 +87,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 10px;
-            margin-bottom: 10px; /* Adds spacing before the footer */
+            margin-bottom: 10px;
         }
 
         .gif {
@@ -159,8 +159,8 @@
 
         .upload-button {
             position: absolute;
-            top: 20px; /* Distance from the top of the viewport */
-            left: 20px; /* Distance from the left of the viewport */
+            top: 20px;
+            left: 20px;
             padding: 10px 20px;
             font-size: 16px;
             background-color: #5E35B1;
@@ -168,7 +168,7 @@
             border: none;
             cursor: pointer;
             border-radius: 4px;
-            z-index: 1000; /* Ensure it stays above other content */
+            z-index: 1000;
         }
 
         .upload-button:hover {
@@ -199,7 +199,6 @@
             padding-top: 20px;
         }
 
-        /* Specific content style for uploadContent */
         .popup-gif {
             color: white;
             text-align: center;
@@ -211,7 +210,6 @@
             z-index: 2001;
         }
 
-        /* Add specific styles for the upload results div */
         #uploadResults {
             margin-top: 10px;
         }
@@ -284,7 +282,7 @@
             padding: 20px;
             border-radius: 10px;
             text-align: center;
-            z-index: 2000; /* Ensure it is on top of other elements */
+            z-index: 2000;
         }
 
         .spinner {
@@ -294,7 +292,7 @@
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto; /* Center the spinner within the loadingIndicator */
+            margin: 0 auto;
         }
 
         @keyframes spin {
@@ -309,10 +307,10 @@
             color: #FFFFFF;
             border: none;
             cursor: pointer;
-            border-radius: 4px;  /* Rounded corners like the search button */
-            display: block;  /* Makes the button a block-level element */
-            margin: 20px auto;  /* Centers the button horizontally and adds space above */
-            text-align: center;  /* Centers text within the button */
+            border-radius: 4px;
+            display: block;
+            margin: 20px auto;
+            text-align: center;
         }
 
         #load-more-button:hover {
@@ -385,7 +383,6 @@
             <h2>Upload GIF or MP4</h2>
             <form class="upload-form" id="uploadForm">
                 <input type="text" id="caption" placeholder="Gif caption" required>
-                <!-- <input type="text" id="alt" placeholder="Alt text for accessibility (optional)"> -->
                 <input type="file" id="fileUpload" accept=".gif,.mp4" required>
                 <button type="submit">Submit</button>
             </form>
@@ -418,37 +415,8 @@
             }
         }
 
-        // // Copy to clipboard function
-        // async function copyToClipboard(text) {
-        //     try {
-        //         await navigator.clipboard.writeText(text);
-        //         alert('Copied to clipboard!');
-        //     } catch (err) {
-        //         console.error('Failed to copy: ', err);
-        //         alert('Failed to copy text to clipboard.');
-        //     }
-        // }
-
-        // async function copyToClipboard(text) {
-        //     if (navigator.clipboard) {
-        //         try {
-        //             await navigator.clipboard.writeText(text);
-        //             alert('Copied to clipboard!');
-        //         } catch (err) {
-        //             console.error('Failed to copy: ', err);
-        //             alert('Failed to copy text to clipboard.');
-        //         }
-        //     } else {
-        //         // Fallback for browsers that do not support the Clipboard API
-        //         console.warn('Clipboard API not supported. Using fallback method.');
-        //         // You can use the temporary input method here if needed
-        //         fallbackCopyToClipboard(text);
-        //     }
-        // }
-
         // Copy to clipboard function
         async function copyToClipboard(text) {
-            // The older method using a temporary input element
             const tempInput = document.createElement('input');
             tempInput.value = text;
             document.body.appendChild(tempInput);
@@ -593,156 +561,6 @@
                 }, 2000);
             });
         });
-
-        // // Gif and MP4 Upload function
-        // uploadForm.addEventListener('submit', async (e) => {
-        //     e.preventDefault();
-
-        //     // Show loading indicator
-        //     document.getElementById('loadingIndicator').style.display = 'block';
-            
-        //     const caption = document.getElementById('caption').value;
-        //     const file = document.getElementById('fileUpload').files[0];
-
-        //     if (!file) {
-        //         alert('Please select a file to upload.');
-        //         document.getElementById('loadingIndicator').style.display = 'none';
-        //         return;
-        //     }
-
-        //     const formData = new FormData();
-        //     formData.append('caption', caption);
-        //     formData.append('file', file);
-
-        //     try {
-        //         const response = await axios.post('/upload', formData, {
-        //             headers: {
-        //                 'Content-Type': 'multipart/form-data'
-        //             },
-        //             timeout: 60000 // 60 seconds timeout
-        //         });
-
-        //         console.log('File uploaded successfully:', response.data.url);
-
-        //         const url = String(response.data.url)
-        //         if (url) {
-        //             // Attempt automatic copy first
-        //             try {
-        //                 // await copyToClipboard(url);
-        //                 alert('File uploaded successfully!');
- 
-        //                 // Fallback to manual copy button
-        //                 const copyButton = document.createElement('button');
-        //                 copyButton.textContent = 'Copy URL';
-        //                 copyButton.onclick = () => copyToClipboard(url);
-        //                 document.body.appendChild(copyButton);
-        //                 // alert('File uploaded successfully! Click the "Copy URL" button to copy the link.');
-        //             } catch (copyError) {
-        //                 console.error('Copy failed:', copyError);
-        //             }
-        //         } else {
-        //             console.error('URL not found in response:', response.data);
-        //             alert('File uploaded, but URL not received. Please check the console for details.');
-        //         }
-        //         // await copyToClipboard(url);
-
-        //         uploadForm.reset();
-        //     } catch (error) {
-        //         if (error.code === 'ECONNABORTED') {
-        //             console.error('Error: Request timed out after 30 seconds');
-        //             alert('The upload request timed out. Please try again.');
-        //         } else {
-        //             console.error('Error uploading file:', error);
-        //             alert('An error occurred while uploading the file.');
-        //         }
-        //     } finally {
-        //         // Hide loading indicator
-        //         document.getElementById('loadingIndicator').style.display = 'none';
-        //     }
-
-        // });
-
-        // // Gif and MP4 Upload function
-        // uploadForm.addEventListener('submit', async (e) => {
-        //     e.preventDefault();
-
-        //     // Show loading indicator
-        //     document.getElementById('loadingIndicator').style.display = 'block';
-            
-        //     const caption = document.getElementById('caption').value;
-        //     const file = document.getElementById('fileUpload').files[0];
-
-        //     if (!file) {
-        //         alert('Please select a file to upload.');
-        //         document.getElementById('loadingIndicator').style.display = 'none';
-        //         return;
-        //     }
-
-        //     const formData = new FormData();
-        //     formData.append('caption', caption);
-        //     formData.append('file', file);
-
-        //     try {
-        //         const response = await axios.post('/upload', formData, {
-        //             headers: {
-        //                 'Content-Type': 'multipart/form-data'
-        //             },
-        //             timeout: 60000 // 60 seconds timeout
-        //         });
-
-        //         console.log('File uploaded successfully:', response.data.url);
-
-        //         const url = String(response.data.url);
-        //         if (url) {
-        //             // Create and show the image preview popup
-        //             const popup = document.createElement('div');
-        //             popup.style.position = 'fixed';
-        //             popup.style.top = '50%';
-        //             popup.style.left = '50%';
-        //             popup.style.transform = 'translate(-50%, -50%)';
-        //             popup.style.backgroundColor = 'white';
-        //             popup.style.padding = '20px';
-        //             popup.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-        //             popup.style.zIndex = '1000';
-
-        //             const img = document.createElement('img');
-        //             img.src = url;
-        //             img.style.maxWidth = '100%';
-        //             img.style.maxHeight = '80vh';
-        //             popup.appendChild(img);
-
-        //             const closeButton = document.createElement('button');
-        //             closeButton.textContent = 'Close';
-        //             closeButton.onclick = () => document.body.removeChild(popup);
-        //             popup.appendChild(closeButton);
-
-        //             const copyButton = document.createElement('button');
-        //             copyButton.textContent = 'Copy URL';
-        //             copyButton.onclick = () => copyToClipboard(url);
-        //             popup.appendChild(copyButton);
-
-        //             document.body.appendChild(popup);
-
-        //             alert('File uploaded successfully!');
-        //         } else {
-        //             console.error('URL not found in response:', response.data);
-        //             alert('File uploaded, but URL not received. Please check the console for details.');
-        //         }
-
-        //         uploadForm.reset();
-        //     } catch (error) {
-        //         if (error.code === 'ECONNABORTED') {
-        //             console.error('Error: Request timed out after 60 seconds');
-        //             alert('The upload request timed out. Please try again.');
-        //         } else {
-        //             console.error('Error uploading file:', error);
-        //             alert('An error occurred while uploading the file.');
-        //         }
-        //     } finally {
-        //         // Hide loading indicator
-        //         document.getElementById('loadingIndicator').style.display = 'none';
-        //     }
-        // });
 
         // Gif and MP4 Upload function
         uploadForm.addEventListener('submit', async (e) => {
