@@ -111,37 +111,50 @@
             color: #FFFFFF;
         }
 
-        .zap-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            font-size: 24px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            z-index: 1000; /* Ensure it stays above other content */
-        }
-
-        .github-button {
+        .button-container {
             position: absolute;
             top: 10px;
-            right: 40px;
-            padding: 10px;
-            font-size: 24px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .zap-button,
+        .github-button {
             background: none;
             border: none;
             cursor: pointer;
-            z-index: 1000;
+            padding: 5px;
             display: flex;
             align-items: center;
             text-decoration: none;
             color: inherit;
         }
 
+        .zap-button {
+            font-size: 24px;
+        }
+
         .github-logo {
-            width: 30px;
-            height: 30px;
-            margin-right: 10px;
+            width: 24px;
+            height: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .button-container {
+                top: 5px;
+                right: 5px;
+            }
+
+            .zap-button {
+                font-size: 20px;
+            }
+
+            .github-logo {
+                width: 20px;
+                height: 20px;
+            }
         }
 
         .upload-button {
@@ -324,11 +337,12 @@
         </div>
     </div>
 
+    <div class="button-container">
     <a href="https://github.com/happylemonprogramming/gifbuddy" target="_blank" class="github-button" id="githubButton">
         <img src="/static/githublogo.png" alt="GitHub logo" class="github-logo">
     </a>
-
     <button class="zap-button" id="zapButton">⚡</button>
+    </div>
 
     <div class="popup" id="zapPopup">
         <div class="popup-content">
