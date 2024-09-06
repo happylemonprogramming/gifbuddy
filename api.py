@@ -124,7 +124,7 @@ def serve_manifest():
 
 @app.route('/sw.js')
 def serve_sw():
-    return send_file('sw.js', mimetype='application/javascript')
+    return send_file('templates/sw.js', mimetype='application/javascript')
 
 # NOTE: Reserved for future use
 @app.route("/privacypolicy")
