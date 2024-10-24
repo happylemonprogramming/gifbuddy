@@ -1,7 +1,7 @@
 import json
 from datetime import timedelta
-from nostr_sdk import Client, Kind, Alphabet, SingleLetterTag, Filter, EventSource, init_logger, LogLevel, PublicKey, \
-    Options, NostrDatabase, ClientBuilder, NegentropyOptions, NegentropyDirection
+from nostr_sdk import Client, Kind, Alphabet, SingleLetterTag, Filter, EventSource, init_logger, LogLevel, \
+   NostrDatabase, ClientBuilder, NegentropyOptions, NegentropyDirection
 
 init_logger(LogLevel.ERROR)
 
