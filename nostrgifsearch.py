@@ -66,13 +66,13 @@ async def getgifs(search_term):
 if __name__ == "__main__":
     import asyncio
 
+    search_term = "liotta"
+
     # Variant with local database
     asyncio.run(update_database("gifs"))
-    search_term = "liotta"
     output = asyncio.run(get_gifs_from_database("gifs", search_term))
     print("DB: " + str(len(output)), output)
 
     # Variant with in memory
     output = asyncio.run(getgifs(search_term))
-
     print("Memory: " + str(len(output)), output)
