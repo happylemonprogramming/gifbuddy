@@ -30,8 +30,8 @@ def filenostrbuildupload(event_base64, filepath, caption, alt):
             response = response.json()
         else:
             logging.info("Failed to upload file.")
-            logging.info("Status code:", response.status_code)
-            logging.info("Response:", response.text)
+            logging.info(f"Status code: {response.status_code}")
+            logging.info(f"Response: {response.text}")
             response = response.text
 
         return response
@@ -61,8 +61,8 @@ def urlnostrbuildupload(event_base64, file_url, caption, alt):
         response = response.json()
     else:
         logging.info("Failed to upload file.")
-        logging.info("Status code:", response.status_code)
-        logging.info("Response:", response.text)
+        logging.info(f"Status code: {response.status_code}")
+        logging.info(f"Response: {response.text}")
         response = response.text
         
     return response

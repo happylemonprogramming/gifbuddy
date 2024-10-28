@@ -36,9 +36,9 @@ def update_counter():
         try:
             eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
             cached_counter["count"] = str(len(eventlist))
-            logging.info("Counter updated:", cached_counter["count"])
+            logging.info(f"Counter updated: {cached_counter["count"]}")
         except Exception as e:
-            logging.info("Error updating counter:", e)
+            logging.info(f"Error updating counter: {e}")
         
         time.sleep(300)  # Wait for 5 minutes before updating again
 
@@ -123,11 +123,11 @@ def gif_metadata():
         # Define and start the process
         process = Process(target=decentralizeGifUrl, args=(gifUrl, summary, alt, image, preview))
         process.start()
-        logging.info('API Process Time:', round(time.time()-start, 0))
+        logging.info(f'API Process Time: {round(time.time()-start, 0)}')
         # Return a response indicating that the request was accepted
         return jsonify({"message": "Task is being processed."}), 202
     except Exception as e:
-        logging.info('API Process Time:', round(time.time()-start, 0))
+        logging.info(f'API Process Time: {round(time.time()-start, 0)}')
         # Return an error if process fails to start
         return jsonify({"error": str(e)}), 500
 
@@ -150,7 +150,7 @@ def upload():
         # Get additional fields
         caption = request.form.get('caption', '')
         alt = file.filename[0:-4]
-        logging.info("Alt:", alt)
+        logging.info(f"Alt: {alt}")
 
         mime_type, _ = mimetypes.guess_type(filepath)
 
