@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, jsonify, send_file
-import os, time, asyncio, subprocess
+import os, time, asyncio, subprocess, threading
+from multiprocessing import Process
 from gifsearch import fetch_gifs
 from getevent import getevent
 from nip98 import decentralizeGifUpload, decentralizeGifUrl
@@ -16,7 +17,27 @@ UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-global counter
+# Cache to store the counter value
+cached_counter = {"count": "0"}
+
+# DVM public key
+pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
+
+def update_counter():
+    """Fetches the count periodically and updates the cache."""
+    global cached_counter
+    while True:
+        try:
+            eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
+            cached_counter["count"] = str(len(eventlist))
+            print("Counter updated:", cached_counter["count"])
+        except Exception as e:
+            print("Error updating counter:", e)
+        
+        time.sleep(300)  # Wait for 5 minutes before updating again
+
+# Start the background task when the app starts
+threading.Thread(target=update_counter, daemon=True).start()
 
 # Homepage
 @app.route("/")
@@ -89,14 +110,20 @@ def gif_metadata():
     image = data.get('image')
     summary = data.get('summary')
     
-    # Start the task in a separate process
-    # with concurrent.futures.ProcessPoolExecutor() as executor:
-    #     executor.submit(decentralizeGifUrl, gifUrl, summary, alt, image, preview)
-    subprocess.Popen(decentralizeGifUrl(gifUrl, summary, alt, image, preview))
-
-    print('API Process Time:', round(time.time()-start, 0))
-    # Return a response indicating that the request was accepted
-    return jsonify({"message": "Task is being processed."}), 202
+    try:
+        # Start the task in a separate process
+        # with concurrent.futures.ProcessPoolExecutor() as executor:
+        #     executor.submit(decentralizeGifUrl, gifUrl, summary, alt, image, preview)
+        # Define and start the process
+        process = Process(target=decentralizeGifUrl, args=(gifUrl, summary, alt, image, preview))
+        process.start()
+        print('API Process Time:', round(time.time()-start, 0))
+        # Return a response indicating that the request was accepted
+        return jsonify({"message": "Task is being processed."}), 202
+    except Exception as e:
+        print('API Process Time:', round(time.time()-start, 0))
+        # Return an error if process fails to start
+        return jsonify({"error": str(e)}), 500
 
 # Nostr.Build Upload, NIP94 endpoint
 @app.route("/upload", methods=['POST'])
@@ -121,21 +148,30 @@ def upload():
 
         mime_type, _ = mimetypes.guess_type(filepath)
 
-        # Process the file and additional fields as needed
-        url = decentralizeGifUpload(filepath, caption, alt, mime_type)
-        return jsonify({'message': 'File uploaded successfully!', 'url': url,'filename': file.filename, 'caption': caption, 'alt': alt}), 200
+        try:
+            # Process the file and additional fields as needed
+            url = decentralizeGifUpload(filepath, caption, alt, mime_type)
+            return jsonify({'message': 'File uploaded successfully!', 'url': url,'filename': file.filename, 'caption': caption, 'alt': alt}), 200
+        except Exception as e:
+            # Return an error if process fails to start
+            return jsonify({"error": str(e)}), 500
 
     return jsonify({'error': 'Failed to upload file'}), 500
 
+# @app.route("/counter", methods=['GET'])
+# def get_count():
+#     # # DVM public key
+#     pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
+#     eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
+
+#     counter = {"count": str(len(eventlist))}
+
+#     return jsonify(counter)
+
 @app.route("/counter", methods=['GET'])
 def get_count():
-    # # DVM public key
-    pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
-    eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
-
-    counter = {"count": str(len(eventlist))}
-
-    return jsonify(counter)
+    """Returns the cached counter value."""
+    return jsonify(cached_counter)
 
 @app.route('/manifest.json')
 def serve_manifest():

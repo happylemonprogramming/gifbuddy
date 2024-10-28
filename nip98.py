@@ -1,4 +1,5 @@
 import json, base64, os, hashlib, logging, asyncio, time, subprocess
+from multiprocessing import Process
 from publish import nostrpost
 from nip96 import urlnostrbuildupload, filenostrbuildupload
 from getevent import getevent
@@ -133,7 +134,9 @@ def decentralizeGifUpload(filepath, caption, alt, MIME):
         # image_path = capture_image(filepath)
         # image_url = urlgenerator(image_path, caption, alt, "image/png")
         # event94 = nip94(tags, alt, caption, image_url, preview)
-        subprocess.Popen(backgroundProcessing(filepath, tags, caption, alt, preview))
+        # Define and start the process
+        process = Process(target=backgroundProcessing, args=(filepath, tags, caption, alt, preview))
+        process.start()
     except:
         print('NIP94 Failed')
 
