@@ -12,9 +12,6 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-# Suppress Flask's access logs
-logging.getLogger('werkzeug').setLevel(logging.WARNING)
-
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get('flasksecret')
 
@@ -42,7 +39,7 @@ def update_counter():
         except Exception as e:
             logging.info(f"Error updating counter: {e}")
         
-        time.sleep(300)  # Wait for 5 minutes before updating again
+        time.sleep(180)  # Wait for 3 minutes before updating again
 
 # Start the background task when the app starts
 threading.Thread(target=update_counter, daemon=True).start()
