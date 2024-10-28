@@ -1,4 +1,4 @@
-import json, base64, os, hashlib, logging, asyncio, time
+import json, base64, os, hashlib, logging, asyncio, time, subprocess
 from publish import nostrpost
 from nip96 import urlnostrbuildupload, filenostrbuildupload
 from getevent import getevent
@@ -130,14 +130,21 @@ def decentralizeGifUpload(filepath, caption, alt, MIME):
         if tag[0] == 'thumb':
             preview = tag[1]
     try:
-        image_path = capture_image(filepath)
-        image_url = urlgenerator(image_path, caption, alt, "image/png")
-        event94 = nip94(tags, alt, caption, image_url, preview)
-        print('NIP94 Event Published:', event94)
+        # image_path = capture_image(filepath)
+        # image_url = urlgenerator(image_path, caption, alt, "image/png")
+        # event94 = nip94(tags, alt, caption, image_url, preview)
+        subprocess.Popen(backgroundProcessing(filepath, tags, caption, alt, preview))
     except:
         print('NIP94 Failed')
 
     return url
+
+def backgroundProcessing(filepath, tags, caption, alt, preview):
+    image_path = capture_image(filepath)
+    image_url = urlgenerator(image_path, caption, alt, "image/png")
+    event94 = nip94(tags, alt, caption, image_url, preview)
+    print('NIP94 Event Published:', event94)
+    return event94
 
 if __name__ == "__main__":
     # User Input

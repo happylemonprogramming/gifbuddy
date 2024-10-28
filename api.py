@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, jsonify, send_file
-import os, time, asyncio
+import os, time, asyncio, subprocess
 from gifsearch import fetch_gifs
 from getevent import getevent
 from nip98 import decentralizeGifUpload, decentralizeGifUrl
@@ -90,8 +90,10 @@ def gif_metadata():
     summary = data.get('summary')
     
     # Start the task in a separate process
-    with concurrent.futures.ProcessPoolExecutor() as executor:
-        executor.submit(decentralizeGifUrl, gifUrl, summary, alt, image, preview)
+    # with concurrent.futures.ProcessPoolExecutor() as executor:
+    #     executor.submit(decentralizeGifUrl, gifUrl, summary, alt, image, preview)
+    subprocess.Popen(decentralizeGifUrl(gifUrl, summary, alt, image, preview))
+
     print('API Process Time:', round(time.time()-start, 0))
     # Return a response indicating that the request was accepted
     return jsonify({"message": "Task is being processed."}), 202
