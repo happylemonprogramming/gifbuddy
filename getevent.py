@@ -3,12 +3,8 @@ from datetime import timedelta
 from nostr_sdk import Client, SingleLetterTag, Alphabet, EventId, PublicKey, Kind, Filter, EventSource, init_logger, LogLevel, Timestamp
 init_logger(LogLevel.WARN)
 
+# Initialize private key
 private_key = os.environ["nostrdvmprivatekey"]
-
-
-# Get relay list
-relay_str = os.environ["relaylist"]
-relaywss_list = ast.literal_eval(relay_str)
 
 # Get event list
 async def getevent(id=None, kind=1, pubkey=None, event=None, since=None, author=None):
