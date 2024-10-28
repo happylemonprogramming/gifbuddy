@@ -21,11 +21,17 @@ def fetch_gifs(search_term,limit, pos=None):
     return result
 
 if __name__ == "__main__":
-    output = fetch_gifs('excited',1,'CAEQ1ezgotOiiAMaHgoKAD-_wHv0zFJjcRIQMBvy4oDXvi_ZiMP0AAAAADAB')
-    print(output['next'])
+    output = fetch_gifs('uh oh',1)
+    print(output)
     # CAEQ1ezgotOiiAMaHgoKAD-_wHv0zFJjcRIQMBvy4oDXvi_ZiMP0AAAAADAB
     gif = output['results'][0]['media_formats']['gif']
+    description = output['results'][0]['content_description']
+    tags = output['results'][0]['tags']
+    thumb = output['results'][0]['media_formats']['tinygif']['url']
     print(gif)
+    print(description)
+    print(tags)
+    print(thumb)
     # gifUrl = gif['url']
     # gifSize = gif['size']
     # gifDims = gif['dims']

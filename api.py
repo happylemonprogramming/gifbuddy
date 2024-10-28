@@ -1,11 +1,10 @@
-from flask import Flask, request, render_template, send_from_directory, jsonify, send_file
-import os
+from flask import Flask, request, render_template, jsonify, send_file
+import os, time, asyncio
 from gifsearch import fetch_gifs
-from nip94 import gifmetadata
 from getevent import getevent
-from pynostr.key import PublicKey
-from nip98 import fallbackurlgenerator, urlgenerator
+from nip98 import decentralizeGifUpload, decentralizeGifUrl
 import concurrent.futures
+import mimetypes
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get('flasksecret')
@@ -16,6 +15,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+global counter
 
 # Homepage
 @app.route("/")
@@ -43,16 +44,29 @@ def search():
         gifURL = gif['url']
         gifSize = gif['size']
         gifDims = gif['dims']
-        thumb = result['media_formats']['nanogifpreview']['url']
+        thumb = result['media_formats']['nanogifpreview']['url'] # not always gif format
         preview = result['media_formats']['tinygif']['url']
-        alt = os.path.basename(gifURL)[0:-4]
+        image = result['media_formats']['gifpreview']['url']
+        basename = os.path.basename(gifURL)[0:-4]
+        try:
+            alt = result['content_description']
+            tags = result['tags']
+            summary = search
+            for tag in tags:
+                summary = f"{summary} {tag}"
+        except:
+            alt = basename
+            summary = search
 
-        gifs[alt] = {
+        gifs[basename] = {
             'gifUrl': gifURL,
             'gifSize': gifSize,
             'gifDims': gifDims,
             'thumb': thumb,
-            'preview': preview
+            'preview': preview,
+            'alt': alt,
+            'image': image,
+            'summary': summary
         }
 
         # Include the next position token in the response
@@ -63,16 +77,22 @@ def search():
 # Nostr.Build Upload, NIP94 endpoint
 @app.route("/gifmetadata", methods=['POST'])
 def gif_metadata():
+    start = time.time()
     # Get the JSON data from the request body
     data = request.get_json()
     gifUrl = data.get('gifUrl')
+    gifSize = data.get('gifSize')
+    gifDims = data.get('gifDims')
+    thumb = data.get('thumb')
+    preview = data.get('preview')
     alt = data.get('alt')
-    searchTerm = data.get('searchTerm')
-
+    image = data.get('image')
+    summary = data.get('summary')
+    
     # Start the task in a separate process
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        executor.submit(fallbackurlgenerator, gifUrl, searchTerm, alt)
-
+        executor.submit(decentralizeGifUrl, gifUrl, summary, alt, image, preview)
+    print('API Process Time:', round(time.time()-start, 0))
     # Return a response indicating that the request was accepted
     return jsonify({"message": "Task is being processed."}), 202
 
@@ -95,28 +115,25 @@ def upload():
         # Get additional fields
         caption = request.form.get('caption', '')
         alt = file.filename[0:-4]
-        print("Alt:", file.filename)
+        print("Alt:", alt)
+
+        mime_type, _ = mimetypes.guess_type(filepath)
 
         # Process the file and additional fields as needed
-        url = urlgenerator(filepath, caption, alt)
-        print("Nostr.Build Upload URL:", url)
+        url = decentralizeGifUpload(filepath, caption, alt, mime_type)
         return jsonify({'message': 'File uploaded successfully!', 'url': url,'filename': file.filename, 'caption': caption, 'alt': alt}), 200
 
     return jsonify({'error': 'Failed to upload file'}), 500
 
-# TODO: Figure out cool way to count Freedom Gifs
-# @app.route("/counter", methods=['GET'])
-# def get_count():
-#     # # DVM public key
-#     # pubkey = "npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p"
-#     # pubhex = PublicKey.from_npub(pubkey).hex()
-#     # eventlist = getevent(kinds=[1063], authors=[pubhex])
+@app.route("/counter", methods=['GET'])
+def get_count():
+    # # DVM public key
+    pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
+    eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
 
-#     # counter = {"count": str(len(eventlist))}
-#     global counter
-#     response = {"count": str(counter)}
+    counter = {"count": str(len(eventlist))}
 
-#     return jsonify(response)
+    return jsonify(counter)
 
 @app.route('/manifest.json')
 def serve_manifest():
