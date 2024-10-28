@@ -12,6 +12,9 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+# Suppress Flask's access logs
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get('flasksecret')
 

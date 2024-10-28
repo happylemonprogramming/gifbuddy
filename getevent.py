@@ -53,11 +53,11 @@ if __name__ == "__main__":
     # print(event_list)
 
     # pubhex = 'c63c5b4e21b9b1ec6b73ad0449a6a8589f6bd8542cabd9e5de6ae474b28fe806'
-    # pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
-    # eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
-    eventlist = asyncio.run(getevent(id='b91163b2131fa2f2fa9606ee385592b6213c71396b0585fd74866b058565dac4'))
+    pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
+    eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
+    # eventlist = asyncio.run(getevent(id='b91163b2131fa2f2fa9606ee385592b6213c71396b0585fd74866b058565dac4'))
 
     # metadata = asyncio.run(getevent(i))
     # name = json.loads(metadata[0]['content'])['name']
-    print((eventlist))
+    print(len(eventlist))
     # print(PublicKey.from_hex(pubhex).to_bech32())
