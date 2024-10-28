@@ -1,9 +1,8 @@
-import json, base64, os, hashlib, asyncio, time, logging
-from multiprocessing import Process
+import json, base64, os, hashlib, asyncio, time, logging, subprocess
 from publish import nostrpost
 from nip96 import urlnostrbuildupload, filenostrbuildupload
 from getevent import getevent
-from nip94 import nip94, capture_image
+from nip94 import nip94
 
 def fallbackurlgenerator(file_url, caption, alt):
     # Variables
@@ -135,19 +134,12 @@ def decentralizeGifUpload(filepath, caption, alt, MIME):
         # image_url = urlgenerator(image_path, caption, alt, "image/png")
         # event94 = nip94(tags, alt, caption, image_url, preview)
         # Define and start the process
-        process = Process(target=backgroundProcessing, args=(filepath, tags, caption, alt, preview))
-        process.start()
+        subprocess.Popen(["python", "decentralizeGifUpload.py", filepath, tags, caption, alt, preview])
+
     except:
         logging.info('NIP94 Failed')
 
     return url
-
-def backgroundProcessing(filepath, tags, caption, alt, preview):
-    image_path = capture_image(filepath)
-    image_url = urlgenerator(image_path, caption, alt, "image/png")
-    event94 = nip94(tags, alt, caption, image_url, preview)
-    logging.info(f'NIP94 Event Published: {event94}')
-    return event94
 
 if __name__ == "__main__":
     # User Input
