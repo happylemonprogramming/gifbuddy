@@ -1,11 +1,8 @@
 from publish import nostrpost
-import os
+import os, requests, hashlib, asyncio, logging
 import blurhash
-import requests
 from PIL import Image
 from io import BytesIO
-import hashlib
-import asyncio
 
 def capture_image(gif_path):
     # Load the GIF
@@ -20,7 +17,7 @@ def capture_image(gif_path):
     frame_path = f"uploads/{basename}.png"
     gif.save(frame_path, "PNG")
 
-    print(f"Frame saved as {frame_path}")
+    logging.info(f"Frame saved as {frame_path}")
 
     return frame_path
 
@@ -39,7 +36,7 @@ def compute_sha256(url):
         return sha256_hash
     else:
         # Handle errors if the request fails
-        print(f"Failed to fetch URL: {url}")
+        logging.info(f"Failed to fetch URL: {url}")
         return None
 
 def gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm):
@@ -69,7 +66,7 @@ def gifmetadata(gifUrl, gifSize, gifDims, thumb, preview, alt, searchTerm):
                 ]
         
         event_id = asyncio.run(nostrpost(private_key=private_key,content=searchTerm, kind=kind, tags=tags))
-        print(event_id)
+        logging.info(event_id)
 
     return event_id
 
@@ -87,7 +84,7 @@ def nip94(tags, alt, summary, image, thumb):
     except:
         pass
         
-    print('Attempting to Post NIP94 Event')
+    logging.info('Attempting to Post NIP94 Event')
     event_id = asyncio.run(nostrpost(private_key=private_key,content=f"{summary} {alt}", kind=kind, tags=tags))
 
     return event_id

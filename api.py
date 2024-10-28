@@ -1,11 +1,17 @@
 from flask import Flask, request, render_template, jsonify, send_file
-import os, time, asyncio, subprocess, threading
+import os, time, asyncio, threading, sys, logging
 from multiprocessing import Process
 from gifsearch import fetch_gifs
 from getevent import getevent
 from nip98 import decentralizeGifUpload, decentralizeGifUrl
-import concurrent.futures
 import mimetypes
+
+# Configure logging to stdout so Heroku can capture it
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get('flasksecret')
@@ -30,9 +36,9 @@ def update_counter():
         try:
             eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
             cached_counter["count"] = str(len(eventlist))
-            print("Counter updated:", cached_counter["count"])
+            logging.info("Counter updated:", cached_counter["count"])
         except Exception as e:
-            print("Error updating counter:", e)
+            logging.info("Error updating counter:", e)
         
         time.sleep(300)  # Wait for 5 minutes before updating again
 
@@ -56,7 +62,7 @@ def search():
     data = request.get_json()  # Get the JSON data from the request body
     search = data.get('q')  # Extract the search term
     pos = data.get('pos')
-    print(f'Search term: {search}, Position: {pos}')  # Debugging
+    logging.info(f'Search term: {search}, Position: {pos}')  # Debugging
     output = fetch_gifs(search,limit=30,pos=pos)
     gifs = {}
 
@@ -117,11 +123,11 @@ def gif_metadata():
         # Define and start the process
         process = Process(target=decentralizeGifUrl, args=(gifUrl, summary, alt, image, preview))
         process.start()
-        print('API Process Time:', round(time.time()-start, 0))
+        logging.info('API Process Time:', round(time.time()-start, 0))
         # Return a response indicating that the request was accepted
         return jsonify({"message": "Task is being processed."}), 202
     except Exception as e:
-        print('API Process Time:', round(time.time()-start, 0))
+        logging.info('API Process Time:', round(time.time()-start, 0))
         # Return an error if process fails to start
         return jsonify({"error": str(e)}), 500
 
@@ -144,7 +150,7 @@ def upload():
         # Get additional fields
         caption = request.form.get('caption', '')
         alt = file.filename[0:-4]
-        print("Alt:", alt)
+        logging.info("Alt:", alt)
 
         mime_type, _ = mimetypes.guess_type(filepath)
 

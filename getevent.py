@@ -1,4 +1,4 @@
-import os, json, re, ast
+import os, json
 from datetime import timedelta
 from nostr_sdk import Client, SingleLetterTag, Alphabet, EventId, PublicKey, Kind, Filter, EventSource, init_logger, LogLevel, Timestamp
 init_logger(LogLevel.WARN)

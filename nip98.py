@@ -1,4 +1,4 @@
-import json, base64, os, hashlib, logging, asyncio, time, subprocess
+import json, base64, os, hashlib, logging, asyncio, time, logging
 from multiprocessing import Process
 from publish import nostrpost
 from nip96 import urlnostrbuildupload, filenostrbuildupload
@@ -46,7 +46,7 @@ def fallbackurlgenerator(file_url, caption, alt):
     if url is None:
         raise ValueError("URL not found in the response")
 
-    print("Nostr Build URL:", url)
+    logging.info("Nostr Build URL:", url)
     return url, tags
 
 def urlgenerator(filepath, caption, alt, MIME):
@@ -110,7 +110,7 @@ def urlgenerator(filepath, caption, alt, MIME):
     if url is None:
         raise ValueError("URL not found in the response")
 
-    print("Nostr Build URL:", url)
+    logging.info("Nostr Build URL:", url)
     return url, tags
 
 def decentralizeGifUrl(file_url, summary, alt, image, preview):
@@ -119,9 +119,9 @@ def decentralizeGifUrl(file_url, summary, alt, image, preview):
 
     try:
         event94 = nip94(tags, alt, summary, image, preview)
-        print('NIP94 Event Published:', event94)
+        logging.info('NIP94 Event Published:', event94)
     except:
-        print('NIP94 Failed')
+        logging.info('NIP94 Failed')
 
     return url
 
@@ -138,7 +138,7 @@ def decentralizeGifUpload(filepath, caption, alt, MIME):
         process = Process(target=backgroundProcessing, args=(filepath, tags, caption, alt, preview))
         process.start()
     except:
-        print('NIP94 Failed')
+        logging.info('NIP94 Failed')
 
     return url
 
@@ -146,7 +146,7 @@ def backgroundProcessing(filepath, tags, caption, alt, preview):
     image_path = capture_image(filepath)
     image_url = urlgenerator(image_path, caption, alt, "image/png")
     event94 = nip94(tags, alt, caption, image_url, preview)
-    print('NIP94 Event Published:', event94)
+    logging.info('NIP94 Event Published:', event94)
     return event94
 
 if __name__ == "__main__":

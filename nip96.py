@@ -1,4 +1,4 @@
-import requests
+import requests, logging
 
 def filenostrbuildupload(event_base64, filepath, caption, alt):
     # Open the file in binary mode
@@ -26,12 +26,12 @@ def filenostrbuildupload(event_base64, filepath, caption, alt):
 
         # Check the response
         if response.status_code == 200:
-            print("File uploaded successfully.")
+            logging.info("File uploaded successfully.")
             response = response.json()
         else:
-            print("Failed to upload file.")
-            print("Status code:", response.status_code)
-            print("Response:", response.text)
+            logging.info("Failed to upload file.")
+            logging.info("Status code:", response.status_code)
+            logging.info("Response:", response.text)
             response = response.text
 
         return response
@@ -57,12 +57,12 @@ def urlnostrbuildupload(event_base64, file_url, caption, alt):
 
     # Check the response
     if response.status_code == 200:
-        print("File uploaded successfully.")
+        logging.info("File uploaded successfully.")
         response = response.json()
     else:
-        print("Failed to upload file.")
-        print("Status code:", response.status_code)
-        print("Response:", response.text)
+        logging.info("Failed to upload file.")
+        logging.info("Status code:", response.status_code)
+        logging.info("Response:", response.text)
         response = response.text
         
     return response
