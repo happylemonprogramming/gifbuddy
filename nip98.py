@@ -45,7 +45,7 @@ def fallbackurlgenerator(file_url, caption, alt):
     if url is None:
         raise ValueError("URL not found in the response")
 
-    logging.info("Nostr Build URL:", url)
+    logging.info(f"Nostr Build URL: {url}")
     return url, tags
 
 def urlgenerator(filepath, caption, alt, MIME):

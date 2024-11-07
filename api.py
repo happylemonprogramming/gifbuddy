@@ -1,15 +1,14 @@
 from flask import Flask, request, render_template, jsonify, send_file
-import os, time, asyncio, threading, sys, logging, subprocess
+import os, time, threading, sys, logging, subprocess
 from gifsearch import fetch_gifs
-from getevent import getevent
-from nip98 import decentralizeGifUpload, decentralizeGifUrl
+from getevent import gifcounter
+from nip98 import decentralizeGifUpload
 import mimetypes
 
 # Configure logging to stdout so Heroku can capture it
 logging.basicConfig(
     stream=sys.stdout,
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO
 )
 
 app = Flask(__name__)
@@ -33,13 +32,13 @@ def update_counter():
     global cached_counter
     while True:
         try:
-            eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
-            cached_counter["count"] = str(len(eventlist))
+            eventlist = gifcounter() # Passes count and list
+            cached_counter["count"] = str(eventlist[0])
             logging.info(f"Counter updated: {cached_counter["count"]}")
         except Exception as e:
             logging.info(f"Error updating counter: {e}")
         
-        time.sleep(180)  # Wait for 3 minutes before updating again
+        time.sleep(120)  # Wait for 2 minutes before updating again
 
 # Start the background task when the app starts
 threading.Thread(target=update_counter, daemon=True).start()
@@ -116,9 +115,6 @@ def gif_metadata():
     summary = data.get('summary')
     
     try:
-        # Start the task in a separate process
-        # with concurrent.futures.ProcessPoolExecutor() as executor:
-        #     executor.submit(decentralizeGifUrl, gifUrl, summary, alt, image, preview)
         # Define and start the process
         subprocess.Popen(["python", "decentralizeGifUrl.py", gifUrl, summary, alt, image, preview])
         logging.info(f'API Process Time: {round(time.time()-start, 0)}')
@@ -161,16 +157,6 @@ def upload():
             return jsonify({"error": str(e)}), 500
 
     return jsonify({'error': 'Failed to upload file'}), 500
-
-# @app.route("/counter", methods=['GET'])
-# def get_count():
-#     # # DVM public key
-#     pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
-#     eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
-
-#     counter = {"count": str(len(eventlist))}
-
-#     return jsonify(counter)
 
 @app.route("/counter", methods=['GET'])
 def get_count():

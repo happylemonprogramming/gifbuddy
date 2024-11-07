@@ -1,4 +1,4 @@
-import os, json
+import os, json, time, asyncio, logging
 from datetime import timedelta
 from nostr_sdk import Client, SingleLetterTag, Alphabet, EventId, PublicKey, Kind, Filter, EventSource, init_logger, LogLevel, Timestamp
 init_logger(LogLevel.WARN)
@@ -7,7 +7,7 @@ init_logger(LogLevel.WARN)
 private_key = os.environ["nostrdvmprivatekey"]
 
 # Get event list
-async def getevent(id=None, kind=1, pubkey=None, event=None, since=None, author=None):
+async def getevent(id=None, kind=1, pubkey=None, event=None, since=None, author=None, start=1724961480, end=int(time.time())):
     # Initialize client without signer
     client = Client()
 
@@ -15,7 +15,7 @@ async def getevent(id=None, kind=1, pubkey=None, event=None, since=None, author=
     await client.add_relay("wss://relay.damus.io")
     await client.add_relay("wss://relay.primal.net")
     # await client.add_relay("wss://relay.nostr.band")
-    await client.add_relay("wss://nostr.fmt.wiz.biz")
+    # await client.add_relay("wss://nostr.fmt.wiz.biz")
     await client.connect()
 
     # Get events from relays
@@ -28,8 +28,7 @@ async def getevent(id=None, kind=1, pubkey=None, event=None, since=None, author=
     elif kind==0 and author: # Metadata
         f = Filter().kind(Kind(kind)).author(PublicKey.from_hex(author))
     elif kind == 1063: # Gif search
-        f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"]).author(PublicKey.from_bech32(author))
-
+        f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"]).author(PublicKey.from_bech32(author)).since(Timestamp.from_secs(start)).until(Timestamp.from_secs(end))
 
     else:
         raise Exception("Unrecognized request for event retreival")
@@ -46,18 +45,52 @@ async def getevent(id=None, kind=1, pubkey=None, event=None, since=None, author=
 
     return event_list
 
+def gifcounter():
+    start_timestamp = 1724961480 # NOTE: UNIX timestamp for gifbuddy launch
+    interval = 2628288 # NOTE: one month interval
+    current_timestamp = int(time.time())
+    pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
+    super_list = []
+
+    # Helper function to fetch events
+    async def fetch_events(start, end):
+        return await getevent(kind=1063, author=pubkey, start=start, end=end)
+
+    # Calculate the number of full months
+    months_passed = (current_timestamp - start_timestamp) // interval
+
+    # Fetch events for each full month
+    for month in range(months_passed):
+        end_timestamp = start_timestamp + interval
+        logging.info(f"Fetching events from {start_timestamp} to {end_timestamp}")
+        
+        # Run the async fetch_events function and collect results
+        eventlist = asyncio.run(fetch_events(start_timestamp, end_timestamp))
+        super_list.extend(eventlist)
+        
+        # Update start timestamp for the next month
+        start_timestamp = end_timestamp
+
+    # Handle any remaining time up to the current timestamp
+    if start_timestamp < current_timestamp:
+        logging.info(f"Fetching events from {start_timestamp} to {current_timestamp}")
+        eventlist = asyncio.run(fetch_events(start_timestamp, current_timestamp))
+        super_list.extend(eventlist)
+
+    logging.info(f"Total events fetched: {len(super_list)}")
+    return len(super_list), super_list
+
 
 if __name__ == "__main__":
-    import asyncio
-    # event_list = asyncio.run(getevent(kind=5201))
-    # print(event_list)
+    # Review nip94 events
+    # pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
+    # eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
+    # print(len(eventlist))
 
-    # pubhex = 'c63c5b4e21b9b1ec6b73ad0449a6a8589f6bd8542cabd9e5de6ae474b28fe806'
-    pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
-    eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
-    # eventlist = asyncio.run(getevent(id='b91163b2131fa2f2fa9606ee385592b6213c71396b0585fd74866b058565dac4'))
+    # Get specific event
+    # event_id = '43fe4d4f7d6c6cd2a66151d6f5753a93f420e57a889e5ad94e7c5a2bee282704'
+    # eventlist = asyncio.run(getevent(id=event_id))
+    # print(eventlist)
 
-    # metadata = asyncio.run(getevent(i))
-    # name = json.loads(metadata[0]['content'])['name']
-    print(len(eventlist))
-    # print(PublicKey.from_hex(pubhex).to_bech32())
+    # Count all nip94 events since gifbuddy launch
+    print(gifcounter()[0])

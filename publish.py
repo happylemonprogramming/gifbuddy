@@ -18,7 +18,7 @@ async def nostrpost(private_key, content, kind=None, reply_to=None, url=None, pa
     await client.add_relay("wss://relay.damus.io")
     await client.add_relay("wss://relay.primal.net")
     # await client.add_relay("wss://relay.nostr.band")
-    await client.add_relay("wss://nostr.fmt.wiz.biz")
+    # await client.add_relay("wss://nostr.fmt.wiz.biz")
     await client.connect()
 
     # Send an event using the Nostr Signer
