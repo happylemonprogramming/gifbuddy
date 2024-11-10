@@ -1,4 +1,4 @@
-import json
+import json, requests
 from datetime import timedelta
 from nostr_sdk import Client, Kind, Alphabet, SingleLetterTag, Filter, EventSource, init_logger, LogLevel, \
    NostrDatabase, ClientBuilder, NegentropyOptions, NegentropyDirection
@@ -37,8 +37,26 @@ async def get_gifs_from_database(db_name, search_term):
 
     return event_list
 
+# Blastr API Endpoint for online relays
+def getrelays():
+    # Define the URL to send the request to
+    url = "https://api.nostr.watch/v1/online"
 
-async def getgifs(search_term):
+    # Make the GET request
+    response = requests.get(url)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Parse the response to JSON
+        data = response.json()
+
+        # Pretty-print the JSON data
+        return json.dumps(data)
+    else:
+        return "Request failed with status code:", response.status_code
+
+# Get event list
+async def getgifs():
     # Initialize client without signer
     client = Client()
 
@@ -63,9 +81,28 @@ async def getgifs(search_term):
 
     return event_list
 
+def remove_duplicates_by_hash(dicts):
+    seen_x_values = set()
+    unique_dicts = []
+
+    for d in dicts:
+        # Extract the 'x' value from the 'tags' list if it exists
+        x_value = None
+        for tag in d['tags']:
+            if tag[0] == 'x':
+                x_value = tag[1]
+                break
+
+        # If 'x' tag exists and we haven't seen this value before, keep the dictionary
+        if x_value and x_value not in seen_x_values:
+            seen_x_values.add(x_value)
+            unique_dicts.append(d)
+
+    return unique_dicts
+
+
 if __name__ == "__main__":
     import asyncio
-
     search_term = "liotta"
 
     # Variant with local database

@@ -323,6 +323,7 @@
 
     <div class="container">
         <h1>GIF Buddy🫂</h1>
+        <div id="counter">Freedom Gif Counter: <span id="counter-value">Loading...</span></div>
         <div class="search-box">
             <input type="text" id="search-input" placeholder="Gif your heart out">
             <button id="search-button">Search</button>
@@ -454,8 +455,7 @@
 
                 Object.entries(response.data).forEach(([alt, gifData]) => {
                     if (alt !== 'next') {  // Skip the 'next' key in the results
-                        const { gifUrl, gifSize, gifDims, thumb, preview } = gifData;
-
+                        const { gifUrl, gifSize, gifDims, thumb, preview, alt, image, summary } = gifData;
                         const img = document.createElement('img');
                         img.src = preview;
                         img.alt = alt;
@@ -469,6 +469,8 @@
                                 thumb,
                                 preview,
                                 alt,
+                                image,
+                                summary,
                                 searchTerm
                             });
                         });
@@ -640,20 +642,20 @@
             }
         });
 
-        // const counterValue = document.getElementById('counter-value');
+        const counterValue = document.getElementById('counter-value');
 
-        // async function fetchCounter() {
-        //     try {
-        //         const response = await axios.get('/counter');
-        //         counterValue.textContent = response.data.count;
-        //     } catch (error) {
-        //         console.error('Error fetching counter:', error);
-        //         counterValue.textContent = 'Error';
-        //     }
-        // }
+        async function fetchCounter() {
+            try {
+                const response = await axios.get('/counter');
+                counterValue.textContent = response.data.count;
+            } catch (error) {
+                console.error('Error fetching counter:', error);
+                counterValue.textContent = 'Error';
+            }
+        }
 
         // Fetch the initial counter value when the page loads
-        // fetchCounter();
+        fetchCounter();
     </script>
 
 </body>

@@ -1,10 +1,8 @@
-import json
-import base64
-from nostrpublish import nostrpost
-import os
-import hashlib
+import json, base64, os, hashlib, asyncio, time, logging, subprocess
+from publish import nostrpost
 from nip96 import urlnostrbuildupload, filenostrbuildupload
 from getevent import getevent
+from nip94 import nip94
 
 def fallbackurlgenerator(file_url, caption, alt):
     # Variables
@@ -24,10 +22,11 @@ def fallbackurlgenerator(file_url, caption, alt):
     sha256_hash = hashlib.sha256(json.dumps(data).encode('utf-8')).hexdigest()
 
     # Post nostr event and capture ID
-    event_id = nostrpost(private_key=private_key,kind=27235,content="",tags=[["u", api_url], ["method", "POST"], ["payload", sha256_hash]])
-    print(event_id)
+    event_id = asyncio.run(nostrpost(private_key, content="", url=api_url, payload=sha256_hash))
+
     # Confirm post and capture event
-    event = getevent(ids=[event_id])[0][1]
+    event = asyncio.run(getevent(id=event_id))
+    event = event[0]
     
     # Apply base64 to event
     event_base64 = base64.b64encode(json.dumps(event).encode("utf-8")).decode("utf-8")
@@ -37,6 +36,7 @@ def fallbackurlgenerator(file_url, caption, alt):
 
     # POST to Nostr.Build and pull new URL
     response = urlnostrbuildupload(event_base64, file_url, caption, alt)
+    logging.info(response)
     tags = response['nip94_event']['tags']
     for tag in tags:
         if tag[0] == 'url':
@@ -45,10 +45,10 @@ def fallbackurlgenerator(file_url, caption, alt):
     if url is None:
         raise ValueError("URL not found in the response")
 
-    print("Nostr Build URL:", url)
-    return url
+    logging.info(f"Nostr Build URL: {url}")
+    return url, tags
 
-def urlgenerator(filepath, caption, alt):
+def urlgenerator(filepath, caption, alt, MIME):
     # Variables
     private_key = os.environ["nostrdvmprivatekey"]
     api_url = "https://nostr.build/api/v2/nip96/upload"
@@ -62,7 +62,7 @@ def urlgenerator(filepath, caption, alt):
         "caption": caption,
         "expiration": "",  # "" for no expiration
         "alt": alt,
-        "content_type": "image/gif",
+        "content_type": MIME,
         "no_transform": "false"
     }
 
@@ -73,11 +73,26 @@ def urlgenerator(filepath, caption, alt):
     sha256_hash = hashlib.sha256(combined_data).hexdigest()
 
     # Post nostr event and capture ID
-    event_id = nostrpost(private_key=private_key,kind=27235,content="",tags=[["u", api_url], ["method", "POST"], ["payload", sha256_hash]])
-    print(event_id)
-    # Confirm post and capture event
-    event = getevent(ids=[event_id])[0][1]
-    
+    event_id = asyncio.run(nostrpost(private_key, content="", url=api_url, payload=sha256_hash))
+    logging.info(f'Nostr.Build Event ID: {event_id}')
+
+    start_time = time.time()
+    timeout = 30
+    # Keep trying to get the event until timeout
+    while True:
+        event = asyncio.run(getevent(id=event_id))
+        
+        if event:  # If event is found, return it
+            event = event[0]
+            break
+
+        # Wait a short time before checking again
+        time.sleep(0.5)
+
+        if time.time() - start_time >= timeout:
+            # If the loop ends without returning, raise an error due to timeout
+            raise TimeoutError(f"Failed to fetch event with ID {event_id} within {timeout} seconds.")
+
     # Apply base64 to event
     event_base64 = base64.b64encode(json.dumps(event).encode("utf-8")).decode("utf-8")
 
@@ -94,7 +109,36 @@ def urlgenerator(filepath, caption, alt):
     if url is None:
         raise ValueError("URL not found in the response")
 
-    print("Nostr Build URL:", url)
+    logging.info(f"Nostr Build URL: {url}")
+    return url, tags
+
+def decentralizeGifUrl(file_url, summary, alt, image, preview):
+    caption = f"{summary} {alt}"
+    url, tags = fallbackurlgenerator(file_url, caption, alt)
+
+    try:
+        event94 = nip94(tags, alt, summary, image, preview)
+        logging.info(f'NIP94 Event Published: {event94}')
+    except:
+        logging.info('NIP94 Failed')
+
+    return url
+
+def decentralizeGifUpload(filepath, caption, alt, MIME):
+    url, tags = urlgenerator(filepath, caption, alt, MIME)
+    for tag in tags:
+        if tag[0] == 'thumb':
+            preview = tag[1]
+    try:
+        # image_path = capture_image(filepath)
+        # image_url = urlgenerator(image_path, caption, alt, "image/png")
+        # event94 = nip94(tags, alt, caption, image_url, preview)
+        # Define and start the process
+        subprocess.Popen(["python", "decentralizeGifUpload.py", filepath, tags, caption, alt, preview])
+
+    except:
+        logging.info('NIP94 Failed')
+
     return url
 
 if __name__ == "__main__":
@@ -103,5 +147,5 @@ if __name__ == "__main__":
     caption = "raptor"
     alt = "what-jurassic-park"
 
-    url = fallbackurlgenerator(file_url, caption, alt)
+    url = asyncio.run(fallbackurlgenerator(file_url, caption, alt))
     print(url)
