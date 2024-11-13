@@ -63,7 +63,7 @@ def urlgenerator(filepath, caption, alt, MIME):
         "expiration": "",  # "" for no expiration
         "alt": alt,
         "content_type": MIME,
-        "no_transform": "false"
+        "no_transform": "true"
     }
 
     # Combine data into one string, including the file content
@@ -129,12 +129,14 @@ def decentralizeGifUpload(filepath, caption, alt, MIME):
     for tag in tags:
         if tag[0] == 'thumb':
             preview = tag[1]
+            print("Preview Image:", preview)
     try:
-        # image_path = capture_image(filepath)
-        # image_url = urlgenerator(image_path, caption, alt, "image/png")
-        # event94 = nip94(tags, alt, caption, image_url, preview)
-        # Define and start the process
-        subprocess.Popen(["python", "decentralizeGifUpload.py", filepath, tags, caption, alt, preview])
+        print('Decentralizing Gif Upload')
+        if 'DYNO' in os.environ:
+            virtualenv_python = 'python' #for Heroku
+        else:
+            virtualenv_python = r"C:\Users\clayt\Documents\Programming\gifbuddy\buddy\Scripts\python.exe"
+        subprocess.Popen([virtualenv_python, "decentralizeGifUpload.py", filepath, str(tags), caption, alt, preview])
 
     except:
         logging.info('NIP94 Failed')

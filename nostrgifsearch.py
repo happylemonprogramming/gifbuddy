@@ -1,7 +1,41 @@
 import json, requests
 from datetime import timedelta
-from nostr_sdk import Keys, NostrSigner, Client, Kind, Alphabet, SingleLetterTag, Filter, EventSource, init_logger, LogLevel, PublicKey
-init_logger(LogLevel.WARN)
+from nostr_sdk import Client, Kind, Alphabet, SingleLetterTag, Filter, EventSource, init_logger, LogLevel, \
+   NostrDatabase, ClientBuilder, NegentropyOptions, NegentropyDirection, PublicKey
+
+init_logger(LogLevel.ERROR)
+
+
+async def update_database(db_name):
+    database = NostrDatabase.lmdb(db_name)
+    client = ClientBuilder().database(database).build()
+    pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
+
+    await client.add_relay("wss://relay.damus.io")
+    await client.add_relay("wss://relay.primal.net")
+    await client.connect()
+
+    dbopts = NegentropyOptions().direction(NegentropyDirection.DOWN)
+
+    f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"]).author(PublicKey.from_bech32(pubkey))
+    await client.reconcile(f, dbopts)
+
+
+async def get_gifs_from_database(db_name, search_term):
+    database = NostrDatabase.lmdb(db_name)
+    pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
+
+    f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"]).author(PublicKey.from_bech32(pubkey))
+    events = await database.query([f])
+
+    event_list = []
+    for event in events:
+        event_str = event.as_json()
+        if search_term in event_str:
+            event_json = json.loads(event_str)
+            event_list.append(event_json)
+
+    return event_list
 
 # Blastr API Endpoint for online relays
 def getrelays():
@@ -41,8 +75,9 @@ async def getgifs():
     event_list = []
     for event in events:
         event = event.as_json()
-        event = json.loads(event)
-        event_list.append(event)
+        if search_term in event:
+            event = json.loads(event)
+            event_list.append(event)
 
     return event_list
 
@@ -65,30 +100,13 @@ def remove_duplicates_by_hash(dicts):
 
     return unique_dicts
 
-def search_by_content(dicts, search_value):
-    result = []
-    for d in dicts:
-        if d['content'] == search_value:  # Check if 'content' matches the search value
-            result.append(d)
-    return result
 
 if __name__ == "__main__":
     import asyncio
-    output = asyncio.run(getgifs())
-    print(len(output))
-    filtered_dicts = remove_duplicates_by_hash(output)
-    print(len(filtered_dicts))
-    searchTerm = input("Search:")
-    results = search_by_content(filtered_dicts, searchTerm)
-    print(len(results))
-    urls = []
-    for result in filtered_dicts:
-        for tag in result['tags']:
-            if tag[0] == 'url':
-                url = tag[1]
-                if 'star trek' in str(result):
-                    urls.append(url)
-                break
-    print(urls)
+    search_term = ""
 
-    # print(len(getrelays()))
+    # Variant with local database
+    asyncio.run(update_database("gifs"))
+    output = asyncio.run(get_gifs_from_database("gifs", search_term))
+    print("DB: " + str(len(output)))
+    print(output[0])

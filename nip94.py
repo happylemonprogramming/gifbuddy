@@ -1,5 +1,5 @@
 from publish import nostrpost
-import os, requests, hashlib, asyncio, logging
+import os, requests, hashlib, asyncio, logging, ast
 import blurhash
 from PIL import Image
 from io import BytesIO
@@ -74,6 +74,15 @@ def nip94(tags, alt, summary, image, thumb):
     # Post 1063 File Metadata Event
     private_key = os.environ["nostrdvmprivatekey"] 
     kind = 1063
+
+    if isinstance(tags, str):
+        try:
+            tags = ast.literal_eval(tags)
+            if not isinstance(tags, list):
+                tags = [tags]
+        except (ValueError, SyntaxError):
+            # If literal_eval fails, treat it as a single string item list
+            tags = [tags]
 
     tags.append(["summary", summary])
     tags.append(["alt", alt])

@@ -17,7 +17,7 @@ def filenostrbuildupload(event_base64, filepath, caption, alt):
             "expiration": "",  # "" for no expiration
             "alt": alt,
             "content_type": "image/gif",
-            "no_transform": "false"
+            "no_transform": "true"
         }
 
         # Make the POST request without the Authorization header

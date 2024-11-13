@@ -62,7 +62,7 @@ def gifcounter():
     # Fetch events for each full month
     for month in range(months_passed):
         end_timestamp = start_timestamp + interval
-        logging.info(f"Fetching events from {start_timestamp} to {end_timestamp}")
+        # logging.info(f"Fetching events from {start_timestamp} to {end_timestamp}")
         
         # Run the async fetch_events function and collect results
         eventlist = asyncio.run(fetch_events(start_timestamp, end_timestamp))
@@ -73,11 +73,11 @@ def gifcounter():
 
     # Handle any remaining time up to the current timestamp
     if start_timestamp < current_timestamp:
-        logging.info(f"Fetching events from {start_timestamp} to {current_timestamp}")
+        # logging.info(f"Fetching events from {start_timestamp} to {current_timestamp}")
         eventlist = asyncio.run(fetch_events(start_timestamp, current_timestamp))
         super_list.extend(eventlist)
 
-    logging.info(f"Total events fetched: {len(super_list)}")
+    # logging.info(f"Total events fetched: {len(super_list)}")
     return len(super_list), super_list
 
 
@@ -88,9 +88,9 @@ if __name__ == "__main__":
     # print(len(eventlist))
 
     # Get specific event
-    # event_id = '43fe4d4f7d6c6cd2a66151d6f5753a93f420e57a889e5ad94e7c5a2bee282704'
-    # eventlist = asyncio.run(getevent(id=event_id))
-    # print(eventlist)
+    event_id = 'a629eb433e3ad1b14cec3158d68762eafabbb1c08949ac261e9760e295d2dbdc'
+    eventlist = asyncio.run(getevent(id=event_id))
+    print(eventlist)
 
     # Count all nip94 events since gifbuddy launch
-    print(gifcounter()[0])
+    # print(gifcounter()[0])

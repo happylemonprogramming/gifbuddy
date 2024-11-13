@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/icon_192x192.png')}}" type="image/png">
     <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/icon_512x512.png')}}" type="image/png">
     <link rel="manifest" href="/manifest.json">
-    <script>
+    <!-- <script>
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', function() {
             navigator.serviceWorker.register("/sw.js").then(function(registration) {
@@ -20,7 +20,7 @@
             });
           });
         }
-    </script>
+    </script> -->
     <title>GIF Buddy🫂</title>
     <style>
         html, body {
@@ -347,7 +347,7 @@
         <div class="popup-content">
             <span class="popup-close">&times;</span>
             <h2>Developed by Lemon🍋</h2>
-            <img src="/static/lightningaddress.png" alt="Lightning Address" style="max-width: 250px; height: auto; border-radius: 10px; margin-top: 10px;">
+            <!-- <img src="/static/lightningaddress.png" alt="Lightning Address" style="max-width: 250px; height: auto; border-radius: 10px; margin-top: 10px;"> -->
             <div class="popup-text">
                 <div>Public key:</div>
                 <div class="popup-text-copy">
@@ -404,7 +404,7 @@
         const uploadForm = document.getElementById('uploadForm');
         const uploadResults = document.getElementById('uploadResults');
         const loadMore = document.getElementById('load-more-button');
-        console.log('Load More button found:', loadMore);
+        // console.log('Load More button found:', loadMore);
 
         // Nostr.Build and NIP94 API POST request
         async function sendGifMetadata(gifData) {
