@@ -37,8 +37,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 // If on /devupload, swipe left goes back to home
                 window.location.href = "/dev";
             }
-        } else if (direction === "down") {
-            location.reload(); // Swipe down to refresh the page
         }
     }
 
