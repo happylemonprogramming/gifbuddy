@@ -130,6 +130,7 @@ def lumatexttovideo(prompt, aspect_ratio='4:3', loop=False):
 
     response = requests.post(url, headers=headers, json=data)
     output = response.json()
+    logging.info(f"Luma AI response: {output}")
     return output
 
 def lumaimagetovideo(prompt, start_frame, end_frame, aspect_ratio='4:3', loop=False):

@@ -33,8 +33,14 @@ body {
 #qrContainer {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
     margin-top: 20px;
+}
+
+#qrcode {
+    width: fit-content; /* Let the QR code determine its natural width */
+    margin: 0 auto; /* Center horizontally if not using flex */
 }
 
 #createForm {
@@ -45,7 +51,6 @@ body {
 button.upload-button, button.create-button {
     margin: 10px;
 }
-
 
 /* h1 {
     text-align: center;
@@ -179,6 +184,16 @@ button.upload-button, button.create-button {
 
 .upload-form button:hover {
     background-color: #4527A0;
+}
+
+#payment-form {
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    border: none;
+    background-color: #5E35B1;
+    color: white;
+    cursor: pointer;
 }
 
 /* Spinner CSS */

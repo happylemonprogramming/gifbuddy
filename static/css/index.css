@@ -1,3 +1,21 @@
+/* .container {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+} */
+
+@media (max-width: 768px) {
+    .container {
+        position: absolute;
+        top: 7%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 40px); /* Adds 20px spacing on each side */
+        max-width: 600px; /* Retain the max-width */
+    }
+}
+
 .search-box {
     display: flex;
     width: 100%;
@@ -67,4 +85,31 @@
 
 #load-more-button:hover {
     background-color: #4527A0;
+}
+
+#reset-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #5E35B1;
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    display: block;
+    margin: 20px auto;
+    text-align: center;
+}
+
+#reset-button:hover {
+    background-color: #4527A0;
+}
+
+#next-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+#next-container button {
+    margin: 0 5px; /* Adds 5px space to the left and right of each button */
 }

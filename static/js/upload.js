@@ -70,6 +70,17 @@ const resultsDiv = document.getElementById('results');
 //     }
 // });
 
+function showNotification(message) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.classList.add('show');
+
+    // Hide the notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 2000);
+}
+
 // Dropzone to Fileupload click transformation
 document.getElementById('dropZone').addEventListener('click', function() {
     document.getElementById('fileUpload').click();
@@ -156,7 +167,7 @@ uploadForm.addEventListener('submit', async (e) => {
             gifElement.addEventListener('click', async () => {
                 try {
                     await navigator.clipboard.writeText(url);
-                    alert('Copied!');
+                    showNotification('Copied!');
                     
                 } catch (err) {
                     console.error('Failed to copy:', err);
@@ -167,10 +178,10 @@ uploadForm.addEventListener('submit', async (e) => {
             container.appendChild(gifElement);
             resultsDiv.insertBefore(container, resultsDiv.firstChild);
 
-            alert('File uploaded successfully!');
+            showNotification('File uploaded successfully!');
         } else {
             console.error('URL not found in response:', response.data);
-            alert('File uploaded, but URL not received. Please check the console for details.');
+            alert('File uploaded, but URL not received.');
         }
 
         uploadForm.reset();

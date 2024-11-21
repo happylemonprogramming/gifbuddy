@@ -10,6 +10,58 @@ const uploadPopup = document.getElementById('uploadPopup');
 const uploadForm = document.getElementById('uploadForm');
 const uploadResults = document.getElementById('uploadResults');
 const loadMore = document.getElementById('load-more-button');
+const startOver = document.getElementById('reset-button');
+
+
+// Secret button on bottom half of screen so users don't have to reach for input field
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("search-input");
+    // Add an overlay with instructions
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.bottom = 0;
+    overlay.style.left = 0;
+    overlay.style.width = '100%';
+    overlay.style.height = '60%';
+    // overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    overlay.style.zIndex = -1000;
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    // overlay.style.color = '#fff';
+    // overlay.style.fontSize = '18px';
+    // overlay.textContent = 'Tap anywhere to start!';
+    overlay.style.opacity = 0;
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', () => {
+        searchInput.focus();
+        overlay.style.display = 'none'; // Hide the overlay
+    });
+});
+
+// Text input field autofocus redundancy
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("search-input");
+    searchInput.focus();
+    
+    if ("virtualKeyboard" in navigator) {
+        searchInput.addEventListener("focus", () => {
+            navigator.virtualKeyboard.show();
+        });
+    } else {
+        console.warn("Virtual Keyboard API not supported in this browser.");
+    }
+
+});
+
+// Get the header element by its ID
+const secretHeader = document.getElementById('secret-header');
+
+// Add a click event listener to the header
+secretHeader.addEventListener('click', () => {
+    window.location.href = '/nostr'; // Redirect to the "/nostr" page
+});
 
 // Nostr.Build and NIP94 API POST request
 async function sendGifMetadata(gifData) {
@@ -21,7 +73,22 @@ async function sendGifMetadata(gifData) {
     }
 }
 
-// Copy to clipboard function
+// // Copy to clipboard function
+// async function copyToClipboard(text) {
+//     const tempInput = document.createElement('input');
+//     tempInput.value = text;
+//     document.body.appendChild(tempInput);
+//     tempInput.select();
+//     try {
+//         document.execCommand('copy');
+//         alert('Copied to clipboard!');
+//     } catch (err) {
+//         console.error('Fallback failed:', err);
+//         alert('Failed to copy text to clipboard.');
+//     }
+//     document.body.removeChild(tempInput);
+// }
+
 async function copyToClipboard(text) {
     const tempInput = document.createElement('input');
     tempInput.value = text;
@@ -29,12 +96,24 @@ async function copyToClipboard(text) {
     tempInput.select();
     try {
         document.execCommand('copy');
-        alert('Copied to clipboard!');
+        showNotification('Copied to clipboard!');
+        console.log('Copied to clipboard!')
     } catch (err) {
         console.error('Fallback failed:', err);
-        alert('Failed to copy text to clipboard.');
+        showNotification('Failed to copy text to clipboard.');
     }
     document.body.removeChild(tempInput);
+}
+
+function showNotification(message) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.classList.add('show');
+
+    // Hide the notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 2000);
 }
 
 // Primary gif search function
@@ -88,8 +167,9 @@ async function searchGifs(pos) {
         console.log('Updated pos:', pos);
 
         // Show or hide the "Load More" button based on the presence of a next position
-        document.getElementById('load-more-button').style.display = pos ? 'block' : 'none';
-        console.log('Load More button display:', loadMore.style.display);
+        document.getElementById('next-container').style.display = pos ? 'flex' : 'none';
+        // document.getElementById('load-more-button').style.display = pos ? 'block' : 'none';
+        // console.log('Load More button display:', loadMore.style.display);
 
         return pos; // Return the updated pos
 
@@ -105,20 +185,35 @@ searchButton.addEventListener('click', async () => {
     pos = null;  // Reset pos for a new search
     pos = await searchGifs(pos);  // Initial search
 });
-searchInput.addEventListener('keypress', async (e) => {
+// searchInput.addEventListener('keypress', async (e) => {
+//     if (e.key === 'Enter') {
+//         pos = null;  // Reset pos for a new search
+//         pos = await searchGifs(pos);  // Initial search
+//     }
+// });
+searchInput.addEventListener('keypress', async function(e) {
     if (e.key === 'Enter') {
         pos = null;  // Reset pos for a new search
         pos = await searchGifs(pos);  // Initial search
+        // Remove focus from the input field to close the keyboard
+        this.blur();  // 'this' now refers to the input element
     }
 });
 
-// Allows user to initiate search by click or enter
+// Load more button functionality
 loadMore.addEventListener('click', async () => {
     console.log('Load More button clicked');
     console.log('Current pos value:', pos);
     pos = await searchGifs(pos);
 });
 
+// Start over button functionality
+startOver.addEventListener('click', async () => {
+    resultsDiv.innerHTML = '';
+    searchInput.value = ''
+    document.getElementById('next-container').style.display = 'none';
+    searchInput.focus()
+});
 
 // Counter functionality
 const counterValue = document.getElementById('counter-value');

@@ -5,4 +5,4 @@ gifbuddy.csr
 *.mp4
 *.gif
 *.srt
-*.png
+.env

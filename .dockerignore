@@ -1,0 +1,8 @@
+buddy/
+__pycache__/
+test.py
+gifbuddy.csr
+*.mp4
+*.gif
+*.srt
+.env

@@ -1,11 +1,13 @@
 from flask import Flask, request, render_template, jsonify, send_file, send_from_directory
 import os, time, threading, sys, logging, subprocess, asyncio
 from gifsearch import fetch_gifs
+from nostrgifsearch import get_gifs_from_database, remove_duplicates_by_hash
 from nostrgifsearch import update_database, get_gifs_from_database
 from nip98 import decentralizeGifUpload
 from creategif import lumatexttovideo, getvideo, gifit
 from lightningpay import lightning_quote, invoice_status
-import mimetypes
+from meme import create_meme_from_media
+import mimetypes, uuid
 
 # Configure logging to stdout so Heroku can capture it
 logging.basicConfig(
@@ -15,6 +17,9 @@ logging.basicConfig(
 
 # Flask setup
 app = Flask(__name__)
+# static_dir = str(os.path.abspath(os.path.join(__file__ , "..", "../static")))
+# template_dir = str(os.path.abspath(os.path.join(__file__ , "..", "../templates")))
+# app = Flask(__name__, static_folder=static_dir, static_url_path="", template_folder=template_dir)
 app.config["SECRET_KEY"] = os.environ.get('flasksecret')
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -56,7 +61,12 @@ def dev():
 # Homepage
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("dev.html")
+
+# Homepage
+@app.route("/nostr")
+def nostr():
+    return render_template("nostr.html")
 
 # Upload Page
 @app.route("/upload")
@@ -67,6 +77,16 @@ def upload():
 @app.route("/create")
 def create():
     return render_template("create.html")
+
+# Creation Page
+@app.route("/creation")
+def creation():
+    return render_template("creation.html")
+
+# Meme Page
+@app.route("/meme")
+def meme():
+    return render_template("meme.html")
 
 # Search API endpoint
 @app.route("/search", methods=['POST'])
@@ -114,6 +134,31 @@ def search():
 
     return jsonify(gifs)
 
+# Search NIP94 endpoint
+@app.route("/nip94", methods=['POST'])
+def nip94():
+    # Capture user data
+    data = request.get_json()  # Get the JSON data from the request body
+    search = data.get('q')  # Extract the search term
+    pos = data.get('pos')
+    logging.info(f'Search term: {search}, Position: {pos}')  # Debugging
+
+    output = asyncio.run(get_gifs_from_database("gifs", search))
+    unique_output = remove_duplicates_by_hash(output)
+    logging.info(f"Result Count for {search}: {str(len(output))}")
+
+    gifs = []
+    
+    for event in unique_output:
+        tags = event['tags']
+        for tag in tags:
+            if tag[0] == 'url':
+                gif = tag[1]
+                gifs.append(gif)
+
+
+    return jsonify({"gifs": gifs})
+
 # Capture GIF Metadata to Pass to Nostr.Build, then Complete NIP94 endpoint
 @app.route("/gifmetadata", methods=['POST'])
 def gif_metadata():
@@ -130,11 +175,11 @@ def gif_metadata():
     
     try:
         subprocess.Popen(["python", "decentralizeGifUrl.py", gifUrl, summary, alt, image, preview])
-        logging.info(f'API Process Time: {round(time.time()-start, 0)}')
+        logging.info(f'Metadata Process Time: {round(time.time()-start, 1)}')
         return jsonify({"message": "Task is being processed."}), 202
     
     except Exception as e:
-        logging.info(f'API Process Time: {round(time.time()-start, 0)}')
+        logging.info(f'Metadata Failure Time: {round(time.time()-start, 1)}')
         return jsonify({"error": str(e)}), 500
 
 # Get URL from Nostr.Build Upload, then Complete NIP94 endpoint
@@ -154,7 +199,8 @@ def uploading():
 
         caption = request.form.get('caption', '')
         alt = file.filename[0:-4]
-        logging.info(f"Alt: {alt}")
+        logging.info(f"Caption text: {caption}")
+        logging.info(f"Alt text: {alt}")
 
         mime_type, _ = mimetypes.guess_type(filepath)
 
@@ -176,14 +222,59 @@ def creating():
     caption = data.get('caption')
     
     try:
+        logging.info("Initiating AI Video Creation")
         output = lumatexttovideo(prompt)
         task_id = output['id']
         logging.info(f"Task ID: {task_id}")
-        logging.info(f'API Process Time: {round(time.time()-start, 0)}')
+        logging.info(f'Creating Process Time: {round(time.time()-start, 1)}')
         return jsonify({'message': 'Task is being processed.', 'id': task_id}), 202
     
     except Exception as e:
-        logging.info(f'API Process Time: {round(time.time()-start, 0)}')
+        logging.info(f'Creating Failure Time: {round(time.time()-start, 1)}')
+        return jsonify({"error": str(e)}), 500
+
+# Create New Gif with AI
+@app.route("/memegifs", methods=['POST'])
+def memegifs():
+    start = time.time()
+    data = request.get_json()
+    url = data.get('url')
+    caption = data.get('caption')
+    
+    try:
+        logging.info("Creating Folder Path for Meme")
+        # Generate a unique folder name
+        unique_id = str(uuid.uuid4())
+        output_folder = os.path.join("./creations/", unique_id) #os.getcwd()
+        
+        # Create the folder
+        os.makedirs(output_folder, exist_ok=True)
+        output_path=f"{output_folder}/"
+
+        logging.info("Initiating Meme Creation")
+        filepath = create_meme_from_media(url, caption, output_path)
+        memeTime = time.time()-start
+        logging.info(f'Meme time: {memeTime}')
+
+        # Check if the file exists
+        if os.path.isfile(filepath):
+            # Process the file and additional fields as needed
+            logging.info(f"Filepath: {filepath}, Caption: {caption}, Original URL: {url}")
+            mime_type, _ = mimetypes.guess_type(filepath)
+            print('Filepath:', filepath)
+            print('Mimetype:', mime_type)
+            url = decentralizeGifUpload(filepath, caption, caption, mime_type)
+            totalTime = time.time()-start
+            logging.info(f'Total time: {totalTime}')
+            return jsonify({
+                'status':'completed',
+                'result': url,
+            }), 200
+        else:
+            return jsonify({"error": "something broke"})  
+    
+    except Exception as e:
+        logging.info(f'Creating Failure Time: {round(time.time()-start, 1)}')
         return jsonify({"error": str(e)}), 500
 
 # Get AI dreaming status
@@ -196,16 +287,16 @@ def check_gif_status():
 
     output = getvideo(id)
     state = output['state']
-    print(f"Current state: {state}")
+    logging.info(f"AI Dream State: {state}")
 
     if state == 'completed':
         url = output['assets']['video']
-        filepath = gifit(url, caption) # this coulde be used to caption any .mp4 url
+        filepath = gifit(url, caption) # this could be used to caption any .mp4 url
 
         # Check if the file exists
         if os.path.isfile(filepath):
             # Process the file and additional fields as needed
-            print(filepath, caption, prompt)
+            logging.info(f"Filepath: {filepath}, Caption: {caption}, Prompt: {prompt}")
             url = decentralizeGifUpload(filepath, caption, prompt, "image/gif")
             return jsonify({
                 'status':'completed',
@@ -222,7 +313,7 @@ def invoice():
     try:
         costPerGif = 0.50
         invoice, _, invid = lightning_quote(costPerGif, "GIFBuddy Create")
-        print("Conversion:", _)
+        logging.info(f'Posting lightning invoice ID: {invid}')
         return jsonify({
             "quote": invoice,
             "amount": costPerGif,
@@ -240,6 +331,7 @@ def invoicestatus():
     
     try:
         status = invoice_status(invid)
+        logging.info(f"Invoice Status: {status} {invid}")
         return jsonify({"status": status})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -263,9 +355,32 @@ def policy():
 def terms():
     return render_template("termsofservice.html")
 
+# Payments
+# Apple Pay Domain Association
 @app.route('/.well-known/apple-developer-merchantid-domain-association')
 def serve_apple_pay_file():
     return send_from_directory(current_dir, 'apple-developer-merchantid-domain-association')
+
+# Stripe API endpoints
+import stripe
+
+stripe.api_version = '2020-08-27'
+stripe.api_key = os.environ["stripelivekey"]
+# stripe.api_key = os.environ["stripe_test_key"]
+
+@app.route('/config', methods=['GET'])
+def get_config():
+    return jsonify({'publishableKey': os.environ['stripepublishablekey']})
+    # return jsonify({'publishableKey': os.environ["stripe_publish_test_key"]})
+
+@app.route('/create-payment-intent', methods=['POST'])
+def create_payment_intent():
+    payment_intent = stripe.PaymentIntent.create(
+        amount=69,
+        currency="USD",
+        automatic_payment_methods={'enabled': True}
+    )
+    return jsonify(clientSecret=payment_intent.client_secret)
 
 if __name__ == "__main__":
     app.run(debug=True)

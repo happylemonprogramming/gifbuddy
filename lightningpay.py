@@ -2,7 +2,7 @@ import requests
 import json
 import uuid
 from datetime import datetime
-import os
+import os, logging
 
 strikeapikey = os.environ.get('strikeapikey')
 
@@ -34,7 +34,7 @@ def lightning_invoice(amount, description):
   }
 
   response = requests.request("POST", url, headers=headers, data=payload)
-  # print(response.json())
+  logging.info(f"Strike invoice response: {response.json()}")
   invid = response.json()['invoiceId']
   return invid
 
@@ -52,6 +52,7 @@ def lightning_quote(amount, description):
   }
 
   response = requests.request("POST", url, headers=headers, data=payload)
+  logging.info(f"Strike quote response: {response.json()}")
   lninv = response.json()['lnInvoice']
   conv_rate = response.json()['conversionRate']['amount']
   return lninv, conv_rate, invid

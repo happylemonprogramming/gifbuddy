@@ -100,7 +100,7 @@ def urlgenerator(filepath, caption, alt, MIME):
     url = None
 
     # POST to Nostr.Build and pull new URL
-    response = filenostrbuildupload(event_base64, filepath, caption, alt)
+    response = filenostrbuildupload(event_base64, filepath, caption, alt, MIME)
     tags = response['nip94_event']['tags']
     for tag in tags:
         if tag[0] == 'url':

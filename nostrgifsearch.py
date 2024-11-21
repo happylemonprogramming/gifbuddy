@@ -103,10 +103,21 @@ def remove_duplicates_by_hash(dicts):
 
 if __name__ == "__main__":
     import asyncio
-    search_term = ""
+    search_term = "hello"
 
     # Variant with local database
-    asyncio.run(update_database("gifs"))
+    # asyncio.run(update_database("gifs"))
     output = asyncio.run(get_gifs_from_database("gifs", search_term))
     print("DB: " + str(len(output)))
-    print(output[0])
+    unique_output = remove_duplicates_by_hash(output)
+    print("Unique:", len(unique_output))
+    # print(unique_output)
+    gifs = []
+    for event in unique_output:
+        tags = event['tags']
+        for tag in tags:
+            if tag[0] == 'url':
+                gif = tag[1]
+                gifs.append(gif)
+    
+    print(gifs, len(gifs))

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="icon" href="{{url_for('static', filename='icons/icon_144x144.png')}}" type="image/png">
     <link rel="icon" href="{{url_for('static', filename='icons/icon_192x192.png')}}" type="image/png">
     <link rel="icon" href="{{url_for('static', filename='icons/icon_512x512.png')}}" type="image/png">
@@ -17,8 +17,9 @@
 <body>
     <div class="action-container">
         <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
-        <button class="action-button" id="searchButton" onclick="window.location.href='/dev'">Search</button>
-        <button class="action-button" id="createButton" onclick="window.location.href='/create'">Create</button>
+        <button class="action-button" id="searchButton" onclick="window.location.href='/'">Search</button>
+        <!-- <button class="action-button" id="createButton" onclick="window.location.href='/create'">Create</button> -->
+        <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
     </div>    
 
     <div class="container">
@@ -50,12 +51,15 @@
     </div>
 
     <div class="button-container">
-        <a href="https://github.com/happylemonprogramming/gifbuddy" target="_blank" class="github-button" id="githubButton">
+        <!-- <a href="https://github.com/happylemonprogramming/" target="_blank" class="github-button" id="githubButton">
             <img src="/static/githublogo.png" alt="GitHub logo" class="github-logo">
-        </a>
-        <a href="https://nostr.com/npub1hee433872q2gen90cqh2ypwcq9z7y5ugn23etrd2l2rrwpruss8qwmrsv6" target="_blank" class="github-button" id="githubButton">
+        </a> -->
+        <!-- <a href="https://nostr.com/npub1hee433872q2gen90cqh2ypwcq9z7y5ugn23etrd2l2rrwpruss8qwmrsv6" target="_blank" class="github-button" id="githubButton">
             <img src="/static/ostrich.svg" alt="GitHub logo" class="github-logo">
-        </a>
+        </a> -->
+        <button target="_blank" class="github-button" id="npub">
+            <img src="/static/ostrich.svg" alt="GitHub logo" class="github-logo">
+        </button>
         <button id="zap-button" class="zap-button">
             ⚡
         </button>

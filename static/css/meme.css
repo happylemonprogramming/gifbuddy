@@ -1,0 +1,52 @@
+#createForm {
+    width: 100%;
+    max-width: 600px;
+}
+
+button.upload-button, button.create-button {
+    margin: 10px;
+}
+
+#results {
+    width: 100%;
+    max-width: 600px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.gif {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.upload-form input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: none;
+    background-color: #23272A;
+    color: #FFFFFF;
+}
+
+.upload-form button {
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    border: none;
+    background-color: #5E35B1;
+    color: white;
+    cursor: pointer;
+}
+
+.upload-form button:hover {
+    background-color: #4527A0;
+}

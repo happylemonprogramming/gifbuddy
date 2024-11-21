@@ -1,6 +1,6 @@
 {
-    "name": "Gif Buddy",
-    "short_name": "Gif Buddy",
+    "name": "GIF Buddy",
+    "short_name": "GIF Buddy",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",

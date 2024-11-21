@@ -30,7 +30,7 @@ body {
 h1 {
     text-align: center;
     color: #FFFFFF;
-    padding: 50px 0 0 0;
+    /* padding: 50px 0 0 0; */
 }
 
 .button-container {
@@ -180,4 +180,29 @@ h1 {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    text-align: center;
+    background-color: #5E35B1;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(20px);
+    pointer-events: none;
+    z-index: 2000;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#secret-header {
+    cursor: pointer;
 }

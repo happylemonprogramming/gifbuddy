@@ -1,10 +1,10 @@
 import requests, logging
 
-def filenostrbuildupload(event_base64, filepath, caption, alt):
+def filenostrbuildupload(event_base64, filepath, caption, alt, mime):
     # Open the file in binary mode
     with open(filepath, 'rb') as file:
         files = {
-            "file": (filepath, file, "image/gif"),
+            "file": (filepath, file, mime),
         }
 
         # Prepare headers with NIP-98 Authorization
@@ -16,7 +16,7 @@ def filenostrbuildupload(event_base64, filepath, caption, alt):
             "caption": caption,
             "expiration": "",  # "" for no expiration
             "alt": alt,
-            "content_type": "image/gif",
+            "content_type": mime,
             "no_transform": "true"
         }
 
