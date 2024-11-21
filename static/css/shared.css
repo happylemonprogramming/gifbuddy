@@ -184,13 +184,13 @@ h1 {
 
 .notification {
     position: fixed;
-    top: 20px;
+    top: 50px;
     text-align: center;
     background-color: #5E35B1;
     color: #fff;
     padding: 10px 20px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 20px;
     opacity: 0;
     transition: opacity 0.3s ease, transform 0.3s ease;
     transform: translateY(20px);
