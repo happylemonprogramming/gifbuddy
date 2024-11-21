@@ -383,4 +383,5 @@ def create_payment_intent():
     return jsonify(clientSecret=payment_intent.client_secret)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 8000))
+    app.run(host="0.0.0.0", port=port, debug=True)

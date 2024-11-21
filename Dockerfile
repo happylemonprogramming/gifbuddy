@@ -16,8 +16,11 @@ COPY . /app
 # Install any needed dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port your app will run on
-EXPOSE 8000
+# Ensure the correct port is dynamically assigned by Heroku
+ENV PORT=8000
 
-# Run gunicorn with the specified timeout and target application
-CMD ["gunicorn", "-t", "600", "-b", "0.0.0.0:8000", "api:app"]
+# Expose the port for the app (this is for documentation purposes)
+EXPOSE $PORT
+
+# Define the default command to run the application
+CMD ["gunicorn", "-t", "600", "-b", "0.0.0.0:$PORT", "api:app"]
