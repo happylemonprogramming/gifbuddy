@@ -23,4 +23,4 @@ ENV PORT=8000
 EXPOSE $PORT
 
 # Define the default command to run the application
-CMD ["gunicorn", "-t", "600", "-b", "0.0.0.0:$PORT", "api:app"]
+CMD ["sh", "-c", "gunicorn -t 600 -b 0.0.0.0:$PORT api:app"]
