@@ -1,7 +1,7 @@
 import requests, os, subprocess, uuid, time, logging, mimetypes
 from urllib.parse import urlparse
-# from PIL import Image
-from io import BytesIO
+from PIL import Image
+import io
 
 def downloadvideo(url, local_filename):
     try:
@@ -204,6 +204,55 @@ def gifit(url, text):
     # Run the command
     subprocess.run(ffmpeg_cmd)
     return output_gif
+
+def resize_gif_to_limit(frames, gif_info, max_size_mb=21, max_attempts=3):
+    """Resize GIF frames iteratively until it is below the size limit or max attempts are reached."""
+    logging.info("resize_gif_to_limit: Starting resizing process")
+    attempt = 0
+    output_buffer = io.BytesIO()
+    
+    while attempt < max_attempts:
+        # Calculate scaling factor (reduce by 20% on each attempt)
+        scale_factor = 0.8 ** attempt
+        logging.info(f"resize_gif_to_limit: Attempt {attempt + 1}, scale factor: {scale_factor:.2f}")
+
+        # Resize frames
+        resized_frames = []
+        for frame in frames:
+            resized_frame = frame.resize(
+                (int(frame.width * scale_factor), int(frame.height * scale_factor)),
+                resample=Image.Resampling.LANCZOS
+            )
+            resized_frames.append(resized_frame)
+        logging.info(f"resize_gif_to_limit: Resized all frames for attempt {attempt + 1}")
+
+        # Save resized GIF to a buffer
+        output_buffer = io.BytesIO()
+        resized_frames[0].save(
+            output_buffer, 
+            format='GIF', 
+            save_all=True, 
+            append_images=resized_frames[1:], 
+            loop=0, 
+            duration=gif_info.get('duration', 100),
+            optimize=True
+        )
+
+        # Check size
+        gif_size_mb = output_buffer.tell() / (1024 * 1024)
+        logging.info(f"resize_gif_to_limit: GIF size after attempt {attempt + 1}: {gif_size_mb:.2f} MB")
+
+        if gif_size_mb <= max_size_mb:
+            logging.info(f"resize_gif_to_limit: Successfully resized GIF to {gif_size_mb:.2f} MB within limit")
+            output_buffer.seek(0)
+            return output_buffer  # Return the buffer if within size limit
+
+        attempt += 1
+
+    # Log if max attempts reached without success
+    logging.info(f"resize_gif_to_limit: Exceeded maximum attempts. Final size: {gif_size_mb:.2f} MB")
+    output_buffer.seek(0)
+    return output_buffer
 
 if __name__ == "__main__":
     import time

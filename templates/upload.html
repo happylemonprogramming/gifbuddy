@@ -22,13 +22,15 @@
         <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
     </div>    
 
+    <div id="notification" class="notification"></div>
+
     <div class="container">
         <h1 id="uploadHeader">Upload Media📤</h1>
         <form class="upload-form" id="uploadForm">
             <div class="drop-zone" id="dropZone">
-                <input type="file" id="fileUpload" style ="display: none" accept=".gif,.mp4" required>
+                <input type="file" id="fileUpload" style ="display: none" accept=".gif,.mp4,.png,.jpg,.jpeg" required>
                 <div class="drop-zone-text">Drop your file here, or click to browse</div>
-                <div class="file-size-limit">Supported file types: GIF, MP4</div>
+                <div class="file-size-limit">Supported file types: GIF, MP4, PNG, JPG</div>
                 <div class="file-size-limit">Maximum file size: 21MB</div>
                 <div class="file-info" style="display: none;">
                     <span class="file-name"></span>
@@ -36,18 +38,18 @@
                     <span class="remove-file" title="Remove file">×</span>
                 </div>
             </div>
-            <input type="text" id="caption" placeholder="GIF Search Term, Caption or Description" required>
+            <input type="text" id="caption" placeholder="Search Term, Caption or Description" required>
             <button type="submit">Upload</button>
         </form>
 
-        <!-- Loading indicator (initially hidden) -->
+        <!-- Loading indicator (initially hidden)
         <div id="loadingIndicator" style="display: none;">
             <div class="spinner"></div>
             <p>Uploading GIF...</p>
-        </div>
+        </div> -->
     
         <!-- Results container -->
-        <div id="results"></div>
+        <!-- <div id="results"></div> -->
     </div>
 
     <div class="button-container">
@@ -65,10 +67,10 @@
         </button>
     </div>
 
-    <div id="loadingIndicator" style="display: none;">
+    <!-- <div id="loadingIndicator" style="display: none;">
         <div class="spinner"></div>
         <p>Uploading...</p>
-    </div>
+    </div> -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
     <script src="{{ url_for('static', filename='js/upload.js') }}"></script>

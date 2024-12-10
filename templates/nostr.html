@@ -17,7 +17,7 @@
 <body>
     <div class="action-container">
         <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
-        <button class="action-button" id="searchButton" onclick="window.location.href='/dev'">Search</button>
+        <button class="action-button" id="searchButton" onclick="window.location.href='/'">Search</button>
         <!-- <button class="action-button" id="createButton" onclick="window.location.href='/create'">Create</button> -->
         <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
     </div>    
@@ -25,12 +25,14 @@
     <div id="notification" class="notification"></div>
 
     <div class="container">
-        <h1 id="secret-header">GIF Buddy🫂</h1>
+        <h1 id="secret-header" onclick="window.location.href='/memesearch'">GIF Buddy🫂</h1>
         <div id="counter">GIF Collection: <span id="counter-value"></span></div>
         <div class="search-box">
             <input type="text" id="search-input" placeholder="GIF It Go">
             <button id="search-button">Search</button>
         </div>
+
+        <img id="instructions" src="https://image.nostr.build/9247e8f8a307a4bdd653d43d84810b8a5bf9073fd2cb6d6dc4c583230cce0043.gif"></img>
         <div id="results"></div>
 
         <div id="next-container" style="display: none;">
@@ -38,7 +40,7 @@
             <button id="reset-button">Start Over</button>
         </div>
 
-        <div class="powered-by">
+        <div class="powered-by" onclick="window.location.href='/gifsearch'">
             Powered by Nostr
         </div>
     </div>

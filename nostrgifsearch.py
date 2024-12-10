@@ -1,12 +1,11 @@
 import json, requests
 from datetime import timedelta
 from nostr_sdk import Client, Kind, Alphabet, SingleLetterTag, Filter, EventSource, init_logger, LogLevel, \
-   NostrDatabase, ClientBuilder, NegentropyOptions, NegentropyDirection, PublicKey
+   NostrDatabase, ClientBuilder, NegentropyOptions, NegentropyDirection, PublicKey, EventId
 
 init_logger(LogLevel.ERROR)
 
-
-async def update_database(db_name):
+async def update_database(db_name, mime_type="image/gif"):
     database = NostrDatabase.lmdb(db_name)
     client = ClientBuilder().database(database).build()
     pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
@@ -17,7 +16,10 @@ async def update_database(db_name):
 
     dbopts = NegentropyOptions().direction(NegentropyDirection.DOWN)
 
-    f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"]).author(PublicKey.from_bech32(pubkey))
+    if mime_type=="image/gif":
+        f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), [mime_type]).author(PublicKey.from_bech32(pubkey))
+    else:
+        f = Filter().kind(Kind(1063)).author(PublicKey.from_bech32(pubkey)).hashtag('memeamigo')
     await client.reconcile(f, dbopts)
 
 
@@ -25,7 +27,8 @@ async def get_gifs_from_database(db_name, search_term):
     database = NostrDatabase.lmdb(db_name)
     pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
 
-    f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"]).author(PublicKey.from_bech32(pubkey))
+    # f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"]).author(PublicKey.from_bech32(pubkey))
+    f = Filter().kind(Kind(1063)).author(PublicKey.from_bech32(pubkey))
     events = await database.query([f])
 
     event_list = []
@@ -56,7 +59,7 @@ def getrelays():
         return "Request failed with status code:", response.status_code
 
 # Get event list
-async def getgifs():
+async def getgifs(search_term):
     # Initialize client without signer
     client = Client()
 
@@ -81,6 +84,7 @@ async def getgifs():
 
     return event_list
 
+# Remove duplicates
 def remove_duplicates_by_hash(dicts):
     seen_x_values = set()
     unique_dicts = []
@@ -100,24 +104,62 @@ def remove_duplicates_by_hash(dicts):
 
     return unique_dicts
 
+# Get event list
+async def getevent(hex):
+    # Initialize client without signer
+    client = Client()
+
+    # Add relays and connect
+    await client.add_relay("wss://relay.damus.io")
+    await client.add_relay("wss://relay.primal.net")
+    await client.connect()
+
+    # Get events from relays
+    f = Filter().id(EventId.from_hex(hex))
+    source = EventSource.relays(timeout=timedelta(seconds=30))
+    event = await client.get_events_of([f], source)
+
+    return event[0].as_json()
 
 if __name__ == "__main__":
     import asyncio
-    search_term = "hello"
+    # search_term = "hello"
+
+    # # Variant with local database
+    # # asyncio.run(update_database("gifs"))
+    # output = asyncio.run(get_gifs_from_database("gifs", search_term))
+    # print("DB: " + str(len(output)))
+    # unique_output = remove_duplicates_by_hash(output)
+    # print("Unique:", len(unique_output))
+    # # print(unique_output)
+    # gifs = []
+    # for event in unique_output:
+    #     tags = event['tags']
+    #     for tag in tags:
+    #         if tag[0] == 'url':
+    #             gif = tag[1]
+    #             gifs.append(gif)
+    
+    # print(gifs, len(gifs))
+
+    # search_term = "toy story"
 
     # Variant with local database
     # asyncio.run(update_database("gifs"))
-    output = asyncio.run(get_gifs_from_database("gifs", search_term))
-    print("DB: " + str(len(output)))
-    unique_output = remove_duplicates_by_hash(output)
-    print("Unique:", len(unique_output))
-    # print(unique_output)
-    gifs = []
-    for event in unique_output:
-        tags = event['tags']
-        for tag in tags:
-            if tag[0] == 'url':
-                gif = tag[1]
-                gifs.append(gif)
+    # output = asyncio.run(get_gifs_from_database("memes", ''))
+    # print("DB: " + str(len(output)))
+    # print(output)
+    # unique_output = remove_duplicates_by_hash(output)
+    # print("Unique:", len(unique_output))
+    # # print(unique_output)
+    # memes = []
+    # for event in unique_output:
+    #     tags = event['tags']
+    #     for tag in tags:
+    #         if tag[0] == 'url':
+    #             meme = tag[1]
+    #             memes.append(meme)
     
-    print(gifs, len(gifs))
+    # print(memes, len(memes))
+
+    print(asyncio.run(getevent('98dbe2dc3dede1fad7f5cd7f1bede624cbd6242e6ed782370c659b84e05b7f01')))

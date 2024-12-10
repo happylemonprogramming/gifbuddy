@@ -25,24 +25,27 @@
     <div id="notification" class="notification"></div>
     
     <div class="container">
-        <h1 id="secret-header">GIF Buddy🤙</h1>
+        <h1 id="secret-header" onclick="window.location.href='/memesearch'">GIF Buddy 🤙</h1>
         <div id="counter">GIFs Set Free: <span id="counter-value"></span></div>
         <div class="search-box">
             <input type="text" id="search-input" placeholder="GIF It Your Best Shot" autofocus onclick="this.focus();">
             <button id="search-button">Search</button>
         </div>
+
+        <img id="instructions" src="https://image.nostr.build/a4970d74814009b1b2488df13ffe8abce3c5cad925c32895b47327bfea2f811b.gif"></img>
         <div id="results"></div>
         
         <div id="next-container" style="display: none;">
             <button id="load-more-button">Load More</button>
             <button id="reset-button">Start Over</button>
         </div>
-        <!-- <button id="load-more-button" style="display: none;">Load More</button> -->
 
-        <div class="powered-by">
+        <div class="powered-by" onclick="window.location.href='/nostr'">
             Powered by Tenor
         </div>
     </div>
+
+    <button id="meme-gif-button" style="display: none;" onclick="window.location.href='/meme'">Meme GIF</button>
 
     <div class="button-container">
         <!-- <a href="https://github.com/happylemonprogramming/" target="_blank" class="github-button" id="githubButton">

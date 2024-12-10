@@ -4,23 +4,23 @@
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
-    "theme_color": "#317EFB",
-    "background_color": "#317EFB",
+    "theme_color": "#5E35B1",
+    "background_color": "#2C2F33",
     "icons": [
       {
-        "src": "/static/icons/icon_144x144.png",
+        "src": "/static/icons/buddy/icon_144x144.png",
         "sizes": "144x144",
         "type": "image/png",
         "purpose": "any maskable"
       },
       {
-        "src": "/static/icons/icon_192x192.png",
+        "src": "/static/icons/buddy/icon_192x192.png",
         "sizes": "192x192",
         "type": "image/png",
         "purpose": "any maskable"
       },
       {
-        "src": "/static/icons/icon_512x512.png",
+        "src": "/static/icons/buddy/icon_512x512.png",
         "sizes": "512x512",
         "type": "image/png",
         "purpose": "any maskable"

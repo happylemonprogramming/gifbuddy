@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link rel="icon" href="{{url_for('static', filename='icons/icon_144x144.png')}}" type="image/png">
+  <link rel="icon" href="{{url_for('static', filename='icons/icon_192x192.png')}}" type="image/png">
+  <link rel="icon" href="{{url_for('static', filename='icons/icon_512x512.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/icon_144x144.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/icon_192x192.png')}}" type="image/png">
+  <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/icon_512x512.png')}}" type="image/png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/memeedit.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+  <title>Meme Amigo 🎉</title>
+</head>
+<body>
+  <div class="action-container">
+    <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+    <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search</button>
+    <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
+  </div>    
+
+  <div id="notification" class="notification"></div>
+
+  <div class="button-container">
+    <button target="_blank" class="github-button" id="npub">
+        <img src="/static/ostrich.svg" alt="GitHub logo" class="github-logo">
+    </button>
+    <button id="zap-button" class="zap-button">⚡</button>
+  </div>
+
+  <div id="image-modal" class="modal" style="display: none;">
+    <button id="close-image" class="close-modal">Close</button>
+    <img id="preview-image" alt="Generated Meme">
+    <div id="bottom-text" class="pro-tip">Tap and Hold to Copy!</div>
+  </div>
+
+  <!-- Modal Structure -->
+  <div id="settings-modal" class="modal">
+    <div id="settings-content" class="modal-content">
+      <button id="close-settings" class="close-modal">X</button>
+      <h4>Text Settings</h4>
+
+      <!-- Font Selection -->
+      <label for="font">Font:</label>
+      <select id="font">
+        <!-- <option value="Impact">Impact</option>
+        <option value="Arial">Arial</option> -->
+        <option value="'Impact', 'Noto Sans JP', 'Noto Sans CJK JP', Arial, sans-serif">Impact</option>
+        <option value="'Arial', 'Noto Sans JP', sans-serif">Arial</option>
+        <option value="'Verdana', 'Noto Sans JP', sans-serif">Verdana</option>
+        <option value="'Noto Sans', 'Noto Sans JP', Arial, sans-serif">Noto Sans</option>
+        <option value="'Microsoft YaHei', sans-serif">Microsoft YaHei</option>
+        <option value="Meiryo, sans-serif">Meiryo</option>
+
+      </select>
+
+      <!-- Checkbox Row -->
+      <div class="checkbox-row">
+        <div><input type="checkbox" id="caps" checked/><label for="caps">ALL CAPS</label></div>
+        <div><input type="checkbox" id="bold" /><label for="bold">Bold</label></div>
+        <div><input type="checkbox" id="italic" /><label for="italic">Italic</label></div>
+      </div>
+
+      <!-- Radio Row -->
+      <div class="radio-row">
+        <div><input type="radio" id="shadow" name="effect" /><label for="shadow">Shadow</label></div>
+        <div><input type="radio" id="outline" name="effect" checked/><label for="outline">Outline</label></div>
+        <div><input type="radio" id="none" name="effect" /><label for="none">None</label></div>
+      </div>
+
+      <!-- Element Opacity -->
+      <label for="opacity">Opacity:</label>
+      <input type="range" id="opacity" name="opacity" min="0" max="100" value="100">
+
+      <!-- Color Picker -->
+      <label for="color">Text Color:</label>
+      <input type="color" id="color" value="#FFFFFF">
+
+      <!-- Action Buttons -->
+      <button id="apply-settings">Apply & Close</button>
+    </div>
+  </div>
+
+  <!-- Loading indicator (initially hidden) -->
+  <div id="loadingIndicator" style="display: none;">
+    <div class="spinner"></div>
+    <p>Generating...</p>
+  </div>
+
+  <div id="editor" class="editor-container">
+    <h1 id="memeHeader">Caption Meme 🐸</h1>
+    <label id="urlInputLabel" for="urlInput">Background Image Url:</label>
+    <input type="text" id="urlInput" placeholder="Image Url" required>
+    <div id="meme-container">
+        <img id="background-img" src="" alt="Meme background">
+        <!-- <div id="watermark">MEMEAMIGO.LOL</div> -->
+    </div>
+
+    <div class="toolbar">
+      <!-- <button class="toolbar-button" onclick="location.reload()"><span class="emoji">🔄</span></button> -->
+      <button class="toolbar-button" id="settings"><span class="emoji">⚙️</span></button>
+      <button class="toolbar-button" id="paint" onclick="jsPaint()"><span class="emoji">🎨</span></button>
+      <button class="toolbar-button" id="add-emoji"><span class="emoji">😃</span></button>
+      <button class="toolbar-button" onclick="addTextBox()">Add Text</button>
+      <button class="toolbar-button" id="log-button">Share Image</button>
+      <button class="toolbar-button" id="link-button">Copy Url</button>
+    </div>
+    
+    <!-- Emoji picker container -->
+    <div id="emoji-picker" style="display: none;"></div>
+
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js"></script>
+
+  <script src="{{ url_for('static', filename='js/gestures.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/memeedit.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/memecreate.js') }}"></script>
+
+</body>
+</html>

@@ -20,18 +20,32 @@ def fetch_gifs(search_term,limit, pos=None):
 
     return result
 
+def fetch_stickers(search_term, limit, pos=None):
+    # Construct the URL with pos if provided
+    url = f"https://tenor.googleapis.com/v2/search?q={search_term}&key={apikey}&client_key={ckey}&limit={limit}&searchfilter=sticker,static"
+    if pos != None:
+        url += f"&pos={pos}"
+    
+    # API request to Tenor
+    r = requests.get(url)
+    
+    # Load API result
+    result = json.loads(r.content)
+
+    return result
+
 if __name__ == "__main__":
-    output = fetch_gifs('uh oh',1)
-    print(output)
-    # CAEQ1ezgotOiiAMaHgoKAD-_wHv0zFJjcRIQMBvy4oDXvi_ZiMP0AAAAADAB
-    gif = output['results'][0]['media_formats']['gif']
-    description = output['results'][0]['content_description']
-    tags = output['results'][0]['tags']
-    thumb = output['results'][0]['media_formats']['tinygif']['url']
-    print(gif)
-    print(description)
-    print(tags)
-    print(thumb)
+    # output = fetch_gifs('uh oh',1)
+    # print(output)
+    # # CAEQ1ezgotOiiAMaHgoKAD-_wHv0zFJjcRIQMBvy4oDXvi_ZiMP0AAAAADAB
+    # gif = output['results'][0]['media_formats']['gif']
+    # description = output['results'][0]['content_description']
+    # tags = output['results'][0]['tags']
+    # thumb = output['results'][0]['media_formats']['tinygif']['url']
+    # print(gif)
+    # print(description)
+    # print(tags)
+    # print(thumb)
     # gifUrl = gif['url']
     # gifSize = gif['size']
     # gifDims = gif['dims']
@@ -39,3 +53,9 @@ if __name__ == "__main__":
     # preview = output['results'][0]['media_formats']['tinygifpreview']['url']
     # alt = os.path.basename(gifUrl)[0:-4]
     # print(gifUrl, gifSize, gifDims, thumb, preview, alt)
+
+    output = fetch_stickers('pepe', 1)
+    # print(output)
+    print(output['results'][0]['media_formats']['webp_transparent']['url'])
+    print(output['results'][0]['content_description'])
+    print(output['results'][0]['tags'])

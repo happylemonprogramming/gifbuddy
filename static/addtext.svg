@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" />
+  
+  <!-- Corner nodes -->
+  <circle cx="3" cy="3" r="1.5" fill="currentColor" />
+  <circle cx="21" cy="3" r="1.5" fill="currentColor" />
+  <circle cx="3" cy="21" r="1.5" fill="currentColor" />
+  <circle cx="21" cy="21" r="1.5" fill="currentColor" />
+  
+  <!-- "Aa" Text - made thinner with lighter font-weight and slightly smaller -->
+  <text x="12" y="15" text-anchor="middle" font-size="10" fill="currentColor" font-family="Arial, sans-serif">Aa</text>
+</svg>

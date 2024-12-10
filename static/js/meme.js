@@ -1,4 +1,36 @@
 const resultsDiv = document.getElementById('results');
+const captionInput = document.getElementById('captionInput'); 
+const memeForm = document.getElementById('memeForm');
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Retrieve the text from localStorage
+    const copiedText = localStorage.getItem('copiedText');
+
+    // Find the text input field
+    const memeTextInput = document.getElementById('urlInput');
+
+    if (copiedText) {
+        // Check if the copied text is a valid image URL
+        if (isValidImageUrl(copiedText)) {
+            memeTextInput.value = copiedText;
+        } else {
+            // Show a warning or clear the field if invalid
+            // alert('The copied text is not a valid image URL. Please enter a valid one.');
+            memeTextInput.value = ''; // Clear input
+        }
+
+        // Optionally clear the text from localStorage
+        localStorage.removeItem('copiedText');
+
+        // Focus on caption input
+        captionInput.focus();
+    }
+});
+
+// Helper function to validate image URLs
+function isValidImageUrl(url) {
+    return url.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i);
+}
 
 function showNotification(message) {
     const notification = document.getElementById('notification');
@@ -11,14 +43,14 @@ function showNotification(message) {
     }, 2000);
 }
 
-document.getElementById('createForm').addEventListener('submit', async function (event) {
+memeForm.addEventListener('submit', async function (event) {
     event.preventDefault(); // Prevent the form from submitting normally
     
     // Show the loading indicator
     document.getElementById('memeHeader').style.display = 'none';
     document.getElementById('urlInput').style.display = 'none';
     document.getElementById('captionInput').style.display = 'none';
-    document.querySelector('#createForm button[type="submit"]').style.display = 'none';
+    document.querySelector('#memeForm button[type="submit"]').style.display = 'none';
     document.getElementById('loadingIndicator').style.display = 'block';
     
     // Get the values from the form
@@ -89,7 +121,7 @@ document.getElementById('createForm').addEventListener('submit', async function 
                 document.getElementById('memeHeader').style.display = '';
                 document.getElementById('urlInput').style.display = '';
                 document.getElementById('captionInput').style.display = '';
-                document.querySelector('#createForm button[type="submit"]').style.display = '';
+                document.querySelector('#memeForm button[type="submit"]').style.display = '';
                 document.getElementById('loadingIndicator').style.display = 'none';
             }
         } else {
@@ -101,7 +133,7 @@ document.getElementById('createForm').addEventListener('submit', async function 
             document.getElementById('memeHeader').style.display = '';
             document.getElementById('urlInput').style.display = '';
             document.getElementById('captionInput').style.display = '';
-            document.querySelector('#createForm button[type="submit"]').style.display = '';
+            document.querySelector('#memeForm button[type="submit"]').style.display = '';
             document.getElementById('loadingIndicator').style.display = 'none';
         }
     } catch (error) {
@@ -113,6 +145,6 @@ document.getElementById('createForm').addEventListener('submit', async function 
         document.getElementById('memeHeader').style.display = '';
         document.getElementById('urlInput').style.display = '';
         document.getElementById('captionInput').style.display = '';
-        document.querySelector('#createForm button[type="submit"]').style.display = '';
+        document.querySelector('#memeForm button[type="submit"]').style.display = '';
     }
 });

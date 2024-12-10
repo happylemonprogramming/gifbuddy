@@ -11,6 +11,7 @@ const uploadForm = document.getElementById('uploadForm');
 const uploadResults = document.getElementById('uploadResults');
 // const loadMore = document.getElementById('load-more-button');
 const startOver = document.getElementById('reset-button');
+const instructions = document.getElementById('instructions');
 
 
 // Text input field autofocus redundancy
@@ -19,13 +20,13 @@ document.addEventListener("DOMContentLoaded", function () {
     searchInput.focus();
 });
 
-// Get the header element by its ID
-const secretHeader = document.getElementById('secret-header');
+// // Get the header element by its ID
+// const secretHeader = document.getElementById('secret-header');
 
-// Add a click event listener to the header
-secretHeader.addEventListener('click', () => {
-    window.location.href = '/'; // Redirect to the "/nostr" page
-});
+// // Add a click event listener to the header
+// secretHeader.addEventListener('click', () => {
+//     window.location.href = '/'; // Redirect to the "/nostr" page
+// });
 
 // // Copy to clipboard function
 // async function copyToClipboard(text) {
@@ -102,6 +103,7 @@ async function searchGifs(pos) {
 
         // If it's the initial search, clear the results
         if (pos == null) {
+            instructions.style.display = 'none';
             resultsDiv.innerHTML = ''; // Clear results only for the initial search
         }
 
@@ -113,7 +115,7 @@ async function searchGifs(pos) {
             img.className = 'gif';
             img.addEventListener('click', () => {
                 copyToClipboard(gifUrl);
-                sendGifMetadata({ gifUrl, searchTerm });
+                // sendGifMetadata({ gifUrl, searchTerm }); //No need to send metadata again
             });
             resultsDiv.appendChild(img);
         });
@@ -162,7 +164,8 @@ searchInput.addEventListener('keypress', async function(e) {
 // Start over button functionality
 startOver.addEventListener('click', async () => {
     resultsDiv.innerHTML = '';
-    searchInput.value = ''
+    searchInput.value = '';
+    instructions.style.display = 'flex';
     document.getElementById('next-container').style.display = 'none';
     searchInput.focus()
 });

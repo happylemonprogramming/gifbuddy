@@ -12,10 +12,17 @@ def capture_image(gif_path):
     frame_number = 0
     gif.seek(frame_number)
 
-    # Save the frame as a .png image
+    # Get the folder path (excluding the basename)
+    folder_path = os.path.dirname(gif_path)
+    
+    # Get the basename without the extension
     basename = os.path.basename(gif_path)[0:-4]
-    frame_path = f"uploads/{basename}.png"
-    gif.save(frame_path, "PNG")
+    
+    # Specify the new frame path in the same folder
+    frame_path = os.path.join(folder_path, f"{basename}.jpg")
+
+    # Save the frame as a .jpg image
+    gif.save(frame_path, "JPEG")
 
     logging.info(f"Frame saved as {frame_path}")
 

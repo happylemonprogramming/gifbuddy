@@ -8,18 +8,43 @@
 @media (max-width: 768px) {
     .container {
         position: absolute;
-        top: 7%;
+        top: 5%;
         left: 50%;
         transform: translateX(-50%);
-        width: calc(100% - 40px); /* Adds 20px spacing on each side */
-        max-width: 600px; /* Retain the max-width */
+        width: calc(100% - 40px);
+        max-width: 600px;
+        
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
+}
+
+#meme-gif-button {
+    position: fixed;
+    bottom: 85px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 20px;
+    background-color: #5E35B1;
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    margin: 20px auto;
+    text-align: center;
+    z-index: 9999;
+}
+
+#meme-gif-button:hover {
+    background-color: #4527A0;
 }
 
 .search-box {
     display: flex;
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 #search-input {
@@ -32,17 +57,28 @@
     border-radius: 4px 0 0 4px;
 }
 
-#search-button {
+#instructions {
+    max-width: 600px;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+#search-button, #trending-button {
     padding: 10px 20px;
     font-size: 16px;
     background-color: #5E35B1;
     color: #FFFFFF;
     border: none;
     cursor: pointer;
-    border-radius: 0 4px 4px 0;
+    border-radius: 4px;
 }
 
-#search-button:hover {
+#trending-button {
+    margin-bottom: 10px;
+}
+
+#search-button:hover, #trending-button:hover {
     background-color: #4527A0;
 }
 
@@ -52,6 +88,7 @@
     text-align: center;
     padding: 10px 0;
     margin-top: auto;
+    cursor: pointer;
 }
 
 #counter {
