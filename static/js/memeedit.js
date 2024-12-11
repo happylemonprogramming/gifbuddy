@@ -252,7 +252,8 @@ function createEmojiBox(emoji, x, y) {
 // Default settings
 let currentSettings = {
   // font: 'Impact, sans-serif',
-  font: "'Impact', 'Noto Sans JP', 'Noto Sans CJK JP', Arial, sans-serif",
+  font: "'Impact', 'Anton', 'Noto Sans JP', Arial, sans-serif",
+  // font: "'Impact', 'Noto Sans JP', 'Noto Sans CJK JP', Arial, sans-serif",
   caps: true,
   bold: false,
   italic: false,
@@ -261,7 +262,30 @@ let currentSettings = {
   color: '#ffffff' // Default to white
 };
 
-// Function to apply styles to a text box
+// // Function to apply styles to a text box
+// function applyStylesToTextBox(textBox) {
+//   // Apply font-related styles
+//   textBox.style.fontFamily = currentSettings.font;
+//   textBox.style.textTransform = currentSettings.caps ? 'uppercase' : 'none';
+//   textBox.style.fontWeight = currentSettings.bold ? 'bold' : 'normal';
+//   textBox.style.fontStyle = currentSettings.italic ? 'italic' : 'normal';
+//   textBox.style.color = currentSettings.color;
+//   textBox.style.opacity = currentSettings.opacity / 100; // Apply opacity as a percentage (0-1 scale)
+
+
+//   // Clear all previous effects
+//   textBox.style.textShadow = 'none';
+//   textBox.style.webkitTextStroke = '0px transparent'; // Explicitly reset outline
+
+//   // Apply the selected effect
+//   if (currentSettings.effect === 'shadow') {
+//     // Increase shadow intensity: bigger offsets, larger blur radius, stronger color
+//     textBox.style.textShadow = '4px 4px 10px rgba(0, 0, 0, 0.8)';   
+//   } else if (currentSettings.effect === 'outline') {
+//     textBox.style.webkitTextStroke = '1px black'; // Apply outline effect
+//   }
+// }
+
 function applyStylesToTextBox(textBox) {
   // Apply font-related styles
   textBox.style.fontFamily = currentSettings.font;
@@ -269,19 +293,21 @@ function applyStylesToTextBox(textBox) {
   textBox.style.fontWeight = currentSettings.bold ? 'bold' : 'normal';
   textBox.style.fontStyle = currentSettings.italic ? 'italic' : 'normal';
   textBox.style.color = currentSettings.color;
-  textBox.style.opacity = currentSettings.opacity / 100; // Apply opacity as a percentage (0-1 scale)
-
+  textBox.style.opacity = (currentSettings.opacity || 100) / 100;
 
   // Clear all previous effects
   textBox.style.textShadow = 'none';
-  textBox.style.webkitTextStroke = '0px transparent'; // Explicitly reset outline
+  textBox.style.webkitTextStroke = '0px transparent';
 
   // Apply the selected effect
   if (currentSettings.effect === 'shadow') {
-    // Increase shadow intensity: bigger offsets, larger blur radius, stronger color
-    textBox.style.textShadow = '4px 4px 10px rgba(0, 0, 0, 0.8)';   
+    textBox.style.textShadow = '4px 4px 10px rgba(0, 0, 0, 0.8)';
   } else if (currentSettings.effect === 'outline') {
-    textBox.style.webkitTextStroke = '1px black'; // Apply outline effect
+    const isAndroid = navigator.userAgent.includes('Android');
+    textBox.style.webkitTextStroke = isAndroid ? '1.5px black' : '1px black';
+    textBox.style.textShadow = isAndroid
+      ? '2px 2px 3px rgba(0, 0, 0, 0.9)'
+      : '1px 1px 2px rgba(0, 0, 0, 0.8)';
   }
 }
 

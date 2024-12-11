@@ -75,7 +75,7 @@ def search(query, vectorizer, doc_vectors, documents):
     return [(documents[i], similarities[i]) for i in ranked_indices if similarities[i] > 0]
 
 # Example search
-query = "funny cat"
+query = "funny animal"
 results = search(query, vectorizer, doc_vectors, documents)
 userinput = time.time()-lap2
 print('Query time:', userinput)

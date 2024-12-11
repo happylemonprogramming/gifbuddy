@@ -77,7 +77,7 @@ def index():
     host = request.host  # Get the host (e.g., gifbuddy.lol or memeamigo.lol)
 
     if 'gifbuddy.lol' in host:
-        return render_template('dev.html')
+        return render_template('gifsearch.html')
     elif 'memeamigo.lol' in host:
         return render_template('memesearch.html')
     else:
@@ -88,10 +88,10 @@ def index():
 def dev():
     return render_template("dev.html")
 
-# Development environment
+# Gif Search
 @app.route("/gifsearch")
 def gifsearch():
-    return render_template("dev.html")
+    return render_template("gifsearch.html")
 
 # Nostr Search
 @app.route("/nostr")
