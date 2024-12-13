@@ -509,7 +509,7 @@ document.querySelectorAll('.draggable').forEach(elem => {
   elem.addEventListener('input', () => {
     adjustTextSize(elem);
   });
-  
+
   elem.setAttribute('spellcheck', 'false'); // Remove spellcheck
   elem.style.caretColor = 'transparent'; // Hide caret as well
 });
@@ -595,14 +595,24 @@ document.addEventListener('click', (event) => {
       textBox.style.textShadow = 'none';
       textBox.style.webkitTextStroke = '0px transparent'; // Explicitly reset outline
 
-      // Apply the selected effect
-      if (document.querySelector('input[name="effect"]:checked').id === 'shadow') {
-        // Increase shadow intensity: bigger offsets, larger blur radius, stronger color
-        textBox.style.textShadow = '4px 4px 10px rgba(0, 0, 0, 0.8)';   
-      } else if (document.querySelector('input[name="effect"]:checked').id === 'outline') {
-        textBox.style.webkitTextStroke = '1px black'; // Apply outline effect
-      }
+      // // Apply the selected effect
+      // if (document.querySelector('input[name="effect"]:checked').id === 'shadow') {
+      //   // Increase shadow intensity: bigger offsets, larger blur radius, stronger color
+      //   textBox.style.textShadow = '4px 4px 10px rgba(0, 0, 0, 0.8)';   
+      // } else if (document.querySelector('input[name="effect"]:checked').id === 'outline') {
+      //   textBox.style.webkitTextStroke = '1px black'; // Apply outline effect
+      // }
 
+      // Apply the selected effect
+      if (currentSettings.effect === 'shadow') {
+        textBox.style.textShadow = '4px 4px 10px rgba(0, 0, 0, 0.8)';
+        // const isAndroid = navigator.userAgent.includes('Android');
+        // textBox.style.textShadow = isAndroid
+        // ? '2px 2px 3px rgba(0, 0, 0, 0.9)'
+        // : '1px 1px 2px rgba(0, 0, 0, 0.8)';
+      } else if (currentSettings.effect === 'outline') {
+        textBox.style.webkitTextStroke = '1.5px black';
+      }
       // applyStylesToTextBox(textBox)
       
       // Resize text to fit box
