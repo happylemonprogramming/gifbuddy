@@ -64,39 +64,6 @@ function showNotification(message) {
     }, 3000);
 }
 
-// function enableImagePaste(textBox) {
-//   const textContent = textBox.querySelector('.text-content');
-
-//   if (!textContent) return;
-
-//   textContent.addEventListener('paste', async (event) => {
-//     event.preventDefault();
-
-//     const clipboardData = event.clipboardData || window.clipboardData;
-//     const items = clipboardData.items;
-
-//     for (let item of items) {
-//       if (item.type.startsWith('image/')) {
-//         const file = item.getAsFile();
-//         if (file) {
-//           const imageURL = await getImageDataURL(file);
-
-//           // Apply the image as the background of the text box
-//           textBox.style.backgroundImage = `url(${imageURL})`;
-//           textBox.style.backgroundSize = 'contain'; // Adjust to fit the dimensions
-//           textBox.style.backgroundPosition = 'center';
-//           textBox.style.backgroundRepeat = 'no-repeat';
-
-//           // Clear any existing text or other elements if desired
-//           textContent.innerHTML = '';
-
-//           break; // Handle one image per paste
-//         }
-//       }
-//     }
-//   });
-// }
-
 function enableImagePaste(textBox) {
   const textContent = textBox.querySelector('.text-content');
 
@@ -302,12 +269,14 @@ function applyStylesToTextBox(textBox) {
   // Apply the selected effect
   if (currentSettings.effect === 'shadow') {
     textBox.style.textShadow = '4px 4px 10px rgba(0, 0, 0, 0.8)';
+    // const isAndroid = navigator.userAgent.includes('Android');
+    // textBox.style.textShadow = isAndroid
+    // ? '2px 2px 3px rgba(0, 0, 0, 0.9)'
+    // : '1px 1px 2px rgba(0, 0, 0, 0.8)';
   } else if (currentSettings.effect === 'outline') {
-    const isAndroid = navigator.userAgent.includes('Android');
-    textBox.style.webkitTextStroke = isAndroid ? '1.5px black' : '1px black';
-    textBox.style.textShadow = isAndroid
-      ? '2px 2px 3px rgba(0, 0, 0, 0.9)'
-      : '1px 1px 2px rgba(0, 0, 0, 0.8)';
+    textBox.style.webkitTextStroke = '1.5px black';
+    // const isAndroid = navigator.userAgent.includes('Android');
+    // textBox.style.webkitTextStroke = isAndroid ? '1.5px black' : '1px black';
   }
 }
 
@@ -540,6 +509,9 @@ document.querySelectorAll('.draggable').forEach(elem => {
   elem.addEventListener('input', () => {
     adjustTextSize(elem);
   });
+  
+  elem.setAttribute('spellcheck', 'false'); // Remove spellcheck
+  elem.style.caretColor = 'transparent'; // Hide caret as well
 });
 
 // Resizing meme-container to fit image dimensions
