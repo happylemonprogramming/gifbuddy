@@ -71,6 +71,70 @@ function showNotification(message) {
     }, 2250);
 }
 
+// // Primary GIF search function
+// async function searchGifs(pos) {
+//     const searchTerm = searchInput.value.trim();
+//     if (!searchTerm) {
+//         console.log('No search term, returning');
+//         return;
+//     }
+
+//     try {
+//         // Make a POST request to the NIP94 search endpoint
+//         const response = await axios.post('/nip94', {
+//             q: searchTerm,
+//             pos: pos // Include position (if any) for pagination
+//         });
+
+//         console.log('Search response received:', response.data);
+
+//         // Extract the GIFs array from the API response
+//         const gifs = response.data.gifs;
+
+//         // If the GIFs array is empty, alert the user
+//         if (!gifs || gifs.length === 0) {
+//             showNotification('Try something else');
+//             searchInput.value = ''; // Clear the input field
+//             setTimeout(() => {
+//                 searchInput.focus(); // Set focus on the input field
+//             }, 2250); // Adjust the delay as needed (250ms here)
+//             return;
+//         }
+
+//         // If it's the initial search, clear the results
+//         if (pos == null) {
+//             instructions.style.display = 'none';
+//             resultsDiv.innerHTML = ''; // Clear results only for the initial search
+//         }
+
+//         // Iterate over the GIFs array and append them to the results div
+//         gifs.forEach((gifUrl) => {
+//             const img = document.createElement('img');
+//             img.src = gifUrl;
+//             img.alt = 'GIF'; // Generic alt text for now
+//             img.className = 'gif';
+//             img.addEventListener('click', () => {
+//                 copyToClipboard(gifUrl);
+//                 // sendGifMetadata({ gifUrl, searchTerm }); //No need to send metadata again
+//             });
+//             resultsDiv.appendChild(img);
+//         });
+
+//         // Handle "Load More" button
+//         pos = null; // Currently, there's no pagination support in the new endpoint
+//         document.getElementById('next-container').style.display = 'flex'; // Show Start Over button
+//         // console.log('Load More button hidden due to lack of pagination.');
+
+//         return pos; // Return the updated pos (always null here)
+
+//     } catch (error) {
+//         console.error('Error fetching GIFs:', error);
+//         resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
+//         return null; // Return null in case of error
+//     }
+// }
+
+
 // Primary GIF search function
 async function searchGifs(pos) {
     const searchTerm = searchInput.value.trim();
@@ -80,6 +144,7 @@ async function searchGifs(pos) {
     }
 
     try {
+        document.getElementById('loadingIndicator').style.display = 'block';
         // Make a POST request to the NIP94 search endpoint
         const response = await axios.post('/nip94', {
             q: searchTerm,
@@ -89,15 +154,16 @@ async function searchGifs(pos) {
         console.log('Search response received:', response.data);
 
         // Extract the GIFs array from the API response
-        const gifs = response.data.gifs;
+        const gifs = response.data;
 
         // If the GIFs array is empty, alert the user
         if (!gifs || gifs.length === 0) {
+            document.getElementById('loadingIndicator').style.display = 'none';
             showNotification('Try something else');
             searchInput.value = ''; // Clear the input field
             setTimeout(() => {
                 searchInput.focus(); // Set focus on the input field
-            }, 2250); // Adjust the delay as needed (250ms here)
+            }, 2250); // Adjust the delay as needed
             return;
         }
 
@@ -108,26 +174,35 @@ async function searchGifs(pos) {
         }
 
         // Iterate over the GIFs array and append them to the results div
-        gifs.forEach((gifUrl) => {
+        gifs.forEach(({ thumb, url }) => {
+            const gifContainer = document.createElement('div');
+            gifContainer.className = 'gif-container';
+
             const img = document.createElement('img');
-            img.src = gifUrl;
+            console.log(thumb)
+            img.src = thumb;
             img.alt = 'GIF'; // Generic alt text for now
             img.className = 'gif';
+            // img.title = `Relevance Score: ${score.toFixed(4)}`; // Optional tooltip for score
+
             img.addEventListener('click', () => {
-                copyToClipboard(gifUrl);
-                // sendGifMetadata({ gifUrl, searchTerm }); //No need to send metadata again
+                copyToClipboard(url);
+                showNotification('URL copied to clipboard!');
             });
-            resultsDiv.appendChild(img);
+
+            gifContainer.appendChild(img);
+            resultsDiv.appendChild(gifContainer);
+            document.getElementById('loadingIndicator').style.display = 'none';
         });
 
         // Handle "Load More" button
         pos = null; // Currently, there's no pagination support in the new endpoint
         document.getElementById('next-container').style.display = 'flex'; // Show Start Over button
-        // console.log('Load More button hidden due to lack of pagination.');
 
         return pos; // Return the updated pos (always null here)
 
     } catch (error) {
+        document.getElementById('loadingIndicator').style.display = 'none';
         console.error('Error fetching GIFs:', error);
         resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
         return null; // Return null in case of error

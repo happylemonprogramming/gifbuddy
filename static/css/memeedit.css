@@ -218,10 +218,6 @@
       /* width: calc(100% - 40px);  */
       max-width: 600px; /* Retain the max-width */
   }
-
-  #paint {
-    display: none;
-  }
 }
 
 .toolbar {
@@ -470,4 +466,58 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  padding: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 0 10px;
+}
+
+.search-container input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-container button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.sticker-grid img {
+  width: 100%;
+  height: 100px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.sticker-grid img:hover {
+  transform: scale(1.1);
+}
+
+#sticker-content {
+  position: absolute;
+  top: 5%;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 600px;
 }

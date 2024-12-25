@@ -1,87 +1,95 @@
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# from sklearn.metrics.pairwise import cosine_similarity
-
-# # Example data
-# documents = [
-#     "A cat playing piano",
-#     "A dog jumping into a pool",
-#     "A scenic sunset over mountains"
-# ]
-
-# # Create the vectorizer
-# vectorizer = TfidfVectorizer()
-# doc_vectors = vectorizer.fit_transform(documents)
-
-# # Search function
-# def search(query, doc_vectors, documents):
-#     query_vector = vectorizer.transform([query])
-#     similarities = cosine_similarity(query_vector, doc_vectors).flatten()
-#     ranked_indices = similarities.argsort()[::-1]
-#     return [(documents[i], similarities[i]) for i in ranked_indices]
-
-# # Example search
-# query = "funny cat"
-# results = search(query, doc_vectors, documents)
-
-# # Display results
-# for doc, score in results:
-#     print(f"Document: {doc}, Score: {score:.2f}")
-
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
-import pickle, time
-start = time.time()
+import numpy as np
+import faiss
+import time
+import asyncio, time
+from nostrgifsearch import get_gifs_from_database, remove_duplicates_by_hash
 
-# Example data (documents)
-documents = [
-    "A cat playing piano",
-    "A dog jumping into a pool",
-    "A scenic sunset over mountains"
-]
+class GifSearch:
+    def __init__(self):
+        self.vectorizer = None
+        self.index = None
+        self.gif_data = []
+        
+    def build_index(self, gif_repository):
+        """Build search index from GIF repository"""
+        start_process = time.time()
+        self.gif_data = gif_repository
+        
+        # Extract content for indexing
+        documents = [item['content'] for item in gif_repository]
+        
+        # Create and fit vectorizer
+        self.vectorizer = TfidfVectorizer(lowercase=True)
+        vectors = self.vectorizer.fit_transform(documents).toarray().astype(np.float32)
+        
+        # Normalize vectors
+        norms = np.linalg.norm(vectors, axis=1, keepdims=True)
+        vectors = np.divide(vectors, norms, out=vectors, where=norms!=0)
+        
+        # Initialize FAISS index
+        dimension = vectors.shape[1]
+        self.index = faiss.IndexFlatIP(dimension)
+        self.index.add(vectors)
+        
+        print(f"Index build time: {time.time() - start_process:.4f} seconds")
+    
+    def search(self, query, k=30, threshold=0.1):
+        """Search for GIFs and return full dictionary entries"""
+        # Vectorize query
+        query_vector = self.vectorizer.transform([query]).toarray().astype(np.float32)
+        
+        # Normalize query vector
+        query_norm = np.linalg.norm(query_vector)
+        if query_norm != 0:
+            query_vector = query_vector / query_norm
+        
+        # Search
+        scores, indices = self.index.search(query_vector, k)
+        
+        # Return full dictionaries with scores
+        results = []
+        for idx, score in zip(indices[0], scores[0]):
+            if score > threshold and idx != -1:
+                gif_dict = self.gif_data[idx]
+                results.append({
+                    'score': float(score),
+                    'gif': gif_dict
+                })
+        
+        return results
 
-# Create the vectorizer and compute document vectors
-vectorizer = TfidfVectorizer()
-doc_vectors = vectorizer.fit_transform(documents)
 
-# Save the vectorizer and vectors for future use
-with open("tfidf_vectorizer.pkl", "wb") as f:
-    pickle.dump(vectorizer, f)
-with open("doc_vectors.pkl", "wb") as f:
-    pickle.dump(doc_vectors, f)
-with open("documents.pkl", "wb") as f:
-    pickle.dump(documents, f)
+# Get Gifs from NIP94
+def nostr_gifs(query, limit):
+    # Get unique gif set
+    start = time.time()
+    output = asyncio.run(get_gifs_from_database("gifs", ""))
+    print(f"Get Gifs Time: {round(time.time()-start,2)} seconds")
+    unique_output = remove_duplicates_by_hash(output)
+    print(f"Unique Gif Count: {len(unique_output)}")
+    gif_repository = unique_output
+    
+    # Initialize and build index
+    searcher = GifSearch()
+    searcher.build_index(gif_repository)
+    nostr_gifs = []
 
-save = time.time()-start
-print('Save time:', save)
-lap1 = time.time()
+    # Search
+    results = searcher.search(query, limit)
+    
+    # Parse results for gif urls
+    for result in results:
+        gif = result["gif"]
+        # score = result['score']
+        thumb = next((tag[1] for tag in gif['tags'] if tag[0] == 'thumb'), None)
+        url = next((tag[1] for tag in gif['tags'] if tag[0] == 'url'), None)
+        if thumb and url:
+            nostr_gifs.append({"thumb": thumb, "url": url})
 
-# Load precomputed data
-with open("tfidf_vectorizer.pkl", "rb") as f:
-    vectorizer = pickle.load(f)
-with open("doc_vectors.pkl", "rb") as f:
-    doc_vectors = pickle.load(f)
-with open("documents.pkl", "rb") as f:
-    documents = pickle.load(f)
+    print(f"Total Time: {round(time.time()-start,2)} seconds")
+    return nostr_gifs
 
-load = time.time()-lap1
-print('Load time:', load)
-lap2 = time.time()
-
-# Search function
-def search(query, vectorizer, doc_vectors, documents):
-    query_vector = vectorizer.transform([query])  # Compute vector for the query
-    similarities = cosine_similarity(query_vector, doc_vectors).flatten()
-    ranked_indices = similarities.argsort()[::-1]
-    return [(documents[i], similarities[i]) for i in ranked_indices if similarities[i] > 0]
-
-# Example search
-query = "funny animal"
-results = search(query, vectorizer, doc_vectors, documents)
-userinput = time.time()-lap2
-print('Query time:', userinput)
-
-# Display results
-for doc, score in results:
-    print(f"Document: {doc}, Score: {score:.2f}")
-total = time.time()-start
-print('Final time:', total)
+# Example usage
+if __name__ == "__main__":
+    print(nostr_gifs('butt', 10))

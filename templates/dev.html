@@ -25,23 +25,16 @@
     <div id="notification" class="notification"></div>
     
     <div class="container">
-        <h1 id="secret-header" onclick="window.location.href='/memesearch'">GIF Buddy 🤙</h1>
-        <div id="counter">GIFs Set Free: <span id="counter-value"></span></div>
+        <h1 id="secret-header" onclick="window.location.href='/memesearch'">Decode Image 🤫</h1>
         <div class="search-box">
-            <input type="text" id="search-input" placeholder="GIF It Your Best Shot" autofocus onclick="this.focus();">
-            <button id="search-button">Search</button>
+            <input type="text" id="search-input" placeholder="Enter Image URL" autofocus onclick="this.focus();">
+            <button id="search-button">Decode</button>
         </div>
 
-        <img id="instructions" src="https://image.nostr.build/a4970d74814009b1b2488df13ffe8abce3c5cad925c32895b47327bfea2f811b.gif"></img>
-        <div id="results"></div>
-        
-        <div id="next-container" style="display: none;">
-            <button id="load-more-button">Load More</button>
-            <button id="reset-button">Start Over</button>
-        </div>
-
-        <div class="powered-by" onclick="window.location.href='/nostr'">
-            Powered by Tenor
+        <img id="instructions" src=""></img>
+        <p id="lsbdata" style="display: none;"></p>
+        <div id="clickinstructions" class="powered-by" style="display: none;">
+            Click Image to Copy Text Content
         </div>
     </div>
 
@@ -62,8 +55,14 @@
         </button>
     </div>
 
+    <!-- Loading indicator (initially hidden) -->
+    <div id="loadingIndicator" style="display: none;">
+    <div class="spinner"></div>
+    <p>Generating...</p>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dev.js') }}"></script>
     <script src="{{ url_for('static', filename='js/gestures.js') }}"></script>
 </body>
 </html>

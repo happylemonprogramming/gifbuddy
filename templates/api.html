@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_144x144.png')}}" type="image/png">
+        <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_192x192.png')}}" type="image/png">
+        <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_512x512.png')}}" type="image/png">
+        <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_144x144.png')}}" type="image/png">
+        <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_192x192.png')}}" type="image/png">
+        <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_512x512.png')}}" type="image/png">
+        <link rel="manifest" href="/manifest.json">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/api.css') }}">
+        <title>GIF Buddy🫂</title>
+    </head>
+    <body>
+        <header class="header">
+            <h1>API Documentation</h1>
+        </header>
+        <main class="content">
+            <section class="section">
+                <h2>Gif Search Request</h2>
+                <p><strong>Endpoint:</strong></p>
+                <pre>
+                    /api/search_gifs
+                </pre>
+                <p><strong>Method:</strong> POST</p>
+                <p><strong>Headers:</strong></p>
+                <pre>
+                Content-Type: application/json
+                API-Key: YOUR_API_KEY_HERE
+                </pre>                
+                <p><strong>Body (JSON):</strong></p>
+                <pre>
+                    {
+                        "q": "",  // Required. The search term to find GIFs.
+                        "pos": "" // Optional. A token to fetch the next set of results.
+                    }
+                </pre>
+
+                <h2>Gif Search Response</h2>
+                <p><strong>Status Code:</strong> 200 OK</p>
+                <p><strong>Response Body (JSON):</strong></p>
+                <pre>
+                    {
+                        "funny_cat": {
+                            "gifUrl": "https://example.com/gif.gif",
+                            "gifSize": "204800",
+                            "gifDims": [300, 200],
+                            "thumb": "https://example.com/thumbnail.gif",
+                            "preview": "https://example.com/preview.gif",
+                            "alt": "A funny cat",
+                            "image": "https://example.com/image.jpg",
+                            "summary": "funny cat GIF"
+                        },
+                        "next": "abcd1234"
+                    }
+                </pre>
+            </section>
+        </main>
+        <footer class="footer">
+            <p>© 2024 API Documentation</p>
+        </footer>
+    </body>
+</html>

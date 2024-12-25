@@ -84,6 +84,23 @@
     </div>
   </div>
 
+  <!-- Add this modal structure after the existing modals -->
+  <div id="sticker-modal" class="modal">
+    <div id="sticker-content" class="modal-content">
+      <button id="close-stickers" class="close-modal">X</button>
+      <h4>Search Stickers</h4>
+      
+      <div class="search-container">
+        <input type="text" id="sticker-search" placeholder="Search stickers...">
+        <button id="search-stickers">Search</button>
+      </div>
+      
+      <div id="sticker-results" class="sticker-grid">
+        <!-- Sticker results will be populated here -->
+      </div>
+    </div>
+  </div>
+
   <!-- Loading indicator (initially hidden) -->
   <div id="loadingIndicator" style="display: none;">
     <div class="spinner"></div>
@@ -102,8 +119,9 @@
     <div class="toolbar">
       <!-- <button class="toolbar-button" onclick="location.reload()"><span class="emoji">🔄</span></button> -->
       <button class="toolbar-button" id="settings"><span class="emoji">⚙️</span></button>
-      <button class="toolbar-button" id="paint" onclick="jsPaint()"><span class="emoji">🎨</span></button>
+      <!-- <button class="toolbar-button" id="paint" onclick="jsPaint()"><span class="emoji">🎨</span></button> -->
       <button class="toolbar-button" id="add-emoji"><span class="emoji">😃</span></button>
+      <button class="toolbar-button" id="stickers">Stickers</button>
       <button class="toolbar-button" onclick="addTextBox()">Add Text</button>
       <button class="toolbar-button" id="log-button">Share Image</button>
       <button class="toolbar-button" id="link-button">Copy Url</button>

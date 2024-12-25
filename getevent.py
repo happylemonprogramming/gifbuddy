@@ -88,17 +88,17 @@ if __name__ == "__main__":
     # print(len(eventlist))
 
     # Get specific event
-    # event_id = 'a629eb433e3ad1b14cec3158d68762eafabbb1c08949ac261e9760e295d2dbdc'
-    # eventlist = asyncio.run(getevent(id=event_id))
-    # print(eventlist)
+    event_id = '3589d9a28644890fd3904d11854669327a2c19f4123760dd68bbaccd9502fc9e'
+    eventlist = asyncio.run(getevent(id=event_id))
+    print(eventlist)
 
     # Count all nip94 events since gifbuddy launch
     # print(gifcounter()[0])
 
     # Get pubkeyhex
-    pubkeyhex = 'ae1008d23930b776c18092f6eab41e4b09fcf3f03f3641b1b4e6ee3aa166d760'
-    pubkey = PublicKey.from_hex(pubkeyhex).to_bech32()
-    print(pubkey)
+    # pubkeyhex = 'ae1008d23930b776c18092f6eab41e4b09fcf3f03f3641b1b4e6ee3aa166d760'
+    # pubkey = PublicKey.from_hex(pubkeyhex).to_bech32()
+    # print(pubkey)
 
     # pubkey = 'npub1hee433872q2gen90cqh2ypwcq9z7y5ugn23etrd2l2rrwpruss8qwmrsv6'
     # pubkeyhex = PublicKey.from_bech32(pubkey).to_hex()

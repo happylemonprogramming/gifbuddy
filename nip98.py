@@ -174,18 +174,26 @@ def decentralizeGifUrl(file_url, summary, alt, MIME, image=None, preview=None):
 #     return url
 
 if __name__ == "__main__":
-    # # User Input
-    # file_url = "https://media.tenor.com/lDcJViIM2VIAAAAC/what-jurassic-park.gif"
-    # caption = "raptor"
-    # alt = "what-jurassic-park"
+    import sys
+    # Configure logging to stdout so Heroku can capture it
+    logging.basicConfig(
+        stream=sys.stdout,
+        level=logging.INFO
+    )
+    # User Input
+    file_url = "https://media.tenor.com/lDcJViIM2VIAAAAC/what-jurassic-park.gif"
+    summary = "raptor"
+    alt = "what-jurassic-park"
 
     # url = asyncio.run(fallbackurlgenerator(file_url, caption, alt))
     # print(url)
 
-    # Meme Input
-    file_url = "https://i.imgflip.com/430rn7.jpg"
-    caption = "dog"
-    alt = "Buff Doge vs. Cheems"
+    # # Meme Input
+    # file_url = "https://i.imgflip.com/430rn7.jpg"
+    # caption = "dog"
+    # alt = "Buff Doge vs. Cheems"
 
-    output = decentralizeGifUrl(file_url, caption, alt, file_url, file_url)
+    import mimetypes
+    mime_type, _ = mimetypes.guess_type(file_url)
+    output = decentralizeGifUrl(file_url, summary, alt, mime_type)
     print(output)

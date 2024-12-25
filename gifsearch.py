@@ -23,6 +23,7 @@ def fetch_gifs(search_term,limit, pos=None):
 def fetch_stickers(search_term, limit, pos=None):
     # Construct the URL with pos if provided
     url = f"https://tenor.googleapis.com/v2/search?q={search_term}&key={apikey}&client_key={ckey}&limit={limit}&searchfilter=sticker,static"
+    print(f"limit {limit}")
     if pos != None:
         url += f"&pos={pos}"
     

@@ -616,6 +616,97 @@ function jsPaint() {
   window.location.href = `https://jspaint.app/#load:${memeTemplate}`;
 }
 
+// Get modal elements
+const stickerModal = document.getElementById('sticker-modal');
+const closeStickerBtn = document.getElementById('close-stickers');
+const searchInput = document.getElementById('sticker-search');
+const searchButton = document.getElementById('search-stickers');
+const resultsContainer = document.getElementById('sticker-results');
+const stickerButton = document.getElementById('stickers');
+stickerButton.onclick = openStickerModal;
+
+// Open/close modal functions
+function openStickerModal() {
+  stickerModal.style.display = 'block';
+}
+
+function closeStickerModal() {
+  stickerModal.style.display = 'none';
+}
+
+// Close modal when clicking the close button
+closeStickerBtn.onclick = closeStickerModal;
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  if (event.target === stickerModal) {
+    closeStickerModal();
+  }
+};
+
+// Event listeners for search
+searchButton.onclick = () => searchStickers(searchInput.value);
+searchInput.onkeypress = (e) => {
+  if (e.key === 'Enter') {
+    searchStickers(searchInput.value);
+  }
+};
+
+// Display stickers in the grid
+function displayStickers(data) {
+  resultsContainer.innerHTML = '';
+  const stickers = data.stickers || [];
+  stickers.forEach(sticker => {
+      const img = document.createElement('img');
+      img.src = sticker.url;
+      img.alt = sticker.description || 'Sticker';
+      img.onclick = () => addStickerToMeme(sticker.url);
+      // Add loading="lazy" for better performance with many images
+      img.loading = 'lazy';
+      resultsContainer.appendChild(img);
+  });
+}
+
+// Search functionality remains the same
+async function searchStickers(searchTerm) {
+  try {
+      const response = await fetch(`/stickers?q=${encodeURIComponent(searchTerm)}`);
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      displayStickers(data);
+  } catch (error) {
+      console.error('Error fetching stickers:', error);
+      resultsContainer.innerHTML = '<p>Error loading stickers. Please try again.</p>';
+  }
+}
+
+// Add sticker to meme canvas
+function addStickerToMeme(stickerUrl) {
+  // Create a text box at the center of the container
+  const memeContainer = document.getElementById('meme-container');
+  const x = memeContainer.offsetWidth / 2 - 125; // Half of default width (250px)
+  const y = memeContainer.offsetHeight / 2 - 55; // Half of default height (110px)
+  
+  const textBox = createTextBox('', x, y);
+  
+  // Set the sticker as the background
+  textBox.style.backgroundImage = `url(${stickerUrl})`;
+  textBox.style.backgroundSize = 'contain';
+  textBox.style.backgroundPosition = 'center';
+  textBox.style.backgroundRepeat = 'no-repeat';
+  
+  // Clear content editable div to ensure it's empty
+  const textContent = textBox.querySelector('.text-content');
+  textContent.innerHTML = '';
+  
+  // Make the background visible by setting a transparent text color
+  textContent.style.color = 'transparent';
+  
+  closeStickerModal();
+}
+
 // // Swipe gesture to reset page
 // document.addEventListener("DOMContentLoaded", function () {
 //     let startX = 0, startY = 0;
