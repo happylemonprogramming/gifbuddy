@@ -80,6 +80,7 @@
       <input type="color" id="color" value="#FFFFFF">
 
       <!-- Action Buttons -->
+      <!-- <button id="removebg-settings">Remove Background</button> -->
       <button id="apply-settings">Apply & Close</button>
     </div>
   </div>
@@ -97,6 +98,18 @@
       
       <div id="sticker-results" class="sticker-grid">
         <!-- Sticker results will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Add this modal structure after the existing modals -->
+  <div id="ai-modal" class="modal">
+    <div id="ai-content" class="modal-content">
+      <button id="close-ai" class="close-modal">X</button>
+      <h4>Generate Image</h4>
+      <div class="search-container">
+        <input type="text" id="ai-input" placeholder="Generate Image...">
+        <button id="ai-button">Create</button>
       </div>
     </div>
   </div>
@@ -121,6 +134,7 @@
       <button class="toolbar-button" id="settings"><span class="emoji">⚙️</span></button>
       <!-- <button class="toolbar-button" id="paint" onclick="jsPaint()"><span class="emoji">🎨</span></button> -->
       <button class="toolbar-button" id="add-emoji"><span class="emoji">😃</span></button>
+      <!-- <button class="toolbar-button" id="ai-generator"><span class="emoji">🤖</span></button> -->
       <button class="toolbar-button" id="stickers">Stickers</button>
       <button class="toolbar-button" onclick="addTextBox()">Add Text</button>
       <button class="toolbar-button" id="log-button">Share Image</button>

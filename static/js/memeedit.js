@@ -144,7 +144,7 @@ function createTextBox(text, x, y) {
   textBox.style.top = `${y}px`;
 
   // Set default size
-  textBox.style.width = '250px';
+  textBox.style.width = '275px';
   textBox.style.height = '110px';
   
   document.getElementById('meme-container').appendChild(textBox);
@@ -228,30 +228,6 @@ let currentSettings = {
   opacity: 100,
   color: '#ffffff' // Default to white
 };
-
-// // Function to apply styles to a text box
-// function applyStylesToTextBox(textBox) {
-//   // Apply font-related styles
-//   textBox.style.fontFamily = currentSettings.font;
-//   textBox.style.textTransform = currentSettings.caps ? 'uppercase' : 'none';
-//   textBox.style.fontWeight = currentSettings.bold ? 'bold' : 'normal';
-//   textBox.style.fontStyle = currentSettings.italic ? 'italic' : 'normal';
-//   textBox.style.color = currentSettings.color;
-//   textBox.style.opacity = currentSettings.opacity / 100; // Apply opacity as a percentage (0-1 scale)
-
-
-//   // Clear all previous effects
-//   textBox.style.textShadow = 'none';
-//   textBox.style.webkitTextStroke = '0px transparent'; // Explicitly reset outline
-
-//   // Apply the selected effect
-//   if (currentSettings.effect === 'shadow') {
-//     // Increase shadow intensity: bigger offsets, larger blur radius, stronger color
-//     textBox.style.textShadow = '4px 4px 10px rgba(0, 0, 0, 0.8)';   
-//   } else if (currentSettings.effect === 'outline') {
-//     textBox.style.webkitTextStroke = '1px black'; // Apply outline effect
-//   }
-// }
 
 function applyStylesToTextBox(textBox) {
   // Apply font-related styles
@@ -608,8 +584,84 @@ document.addEventListener('click', (event) => {
 
       settingsModal.style.display = 'none'; // Close the modal
     };
-  }
+
+    // Update your button click handler
+    const removeBGbutton = document.getElementById('removebg-settings');
+    removeBGbutton.onclick = async function() {
+      try {
+        // Disable button while processing
+        removeBGbutton.disabled = true;
+        
+        // Get the textbox background image
+        // const textBox = document.querySelector('.text-box'); // Adjust selector as needed
+        const backgroundImage = textBox.style.backgroundImage;
+        
+        if (!backgroundImage) {
+          alert('No image found in the textbox');
+          return;
+        }
+
+        // Get base64 from background image
+        const base64Image = getBase64FromBackgroundImage(backgroundImage);
+        if (!base64Image) {
+          alert('Could not process the image');
+          return;
+        }
+
+        // Call API and get processed base64 image
+        const processedBase64 = await removeBG(base64Image);
+
+        // Add data URL prefix if not present
+        const imageUrl = processedBase64.startsWith('data:image') 
+          ? processedBase64 
+          : `data:image/png;base64,${processedBase64}`;
+
+        // Update the textbox background with the new image
+        textBox.style.backgroundColor = 'transparent';
+        textBox.style.backgroundImage = `url(${imageUrl})`;
+        
+      } catch (error) {
+        console.error('Failed to remove background:', error);
+        alert('Failed to remove background. Please try again.');
+      } finally {
+        // Re-enable button
+        removeBGbutton.disabled = false;
+      }
+    };
+  };
 });
+
+// Function to extract base64 from CSS background-image URL
+function getBase64FromBackgroundImage(backgroundImageStyle) {
+  // Remove url() and quotes from CSS background-image
+  const urlMatch = backgroundImageStyle.match(/url\(['"]?(.*?)['"]?\)/);
+  if (!urlMatch) return null;
+  return urlMatch[1];
+}
+
+// Function to call the remove background API
+async function removeBG(base64Image) {
+  try {
+    const response = await fetch('/removebg', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        image_url: base64Image
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to remove background');
+    }
+
+    return await response.text();
+  } catch (error) {
+    console.error('Error removing background:', error);
+    throw error;
+  }
+}
 
 function jsPaint() {
   const memeTemplate = urlInput.value; // Assuming urlInput is an input element
@@ -705,6 +757,82 @@ function addStickerToMeme(stickerUrl) {
   textContent.style.color = 'transparent';
   
   closeStickerModal();
+}
+
+// Get AI modal elements
+const aiModal = document.getElementById('ai-modal');
+const aiGenerator = document.getElementById('ai-generator');
+const closeAIBtn = document.getElementById('close-ai');
+const aiInput = document.getElementById('ai-input');
+const aiButton = document.getElementById('ai-button');
+
+// Open modal
+aiGenerator.onclick = openAIModal;
+aiInput.onkeypress = (e) => {
+  if (e.key === 'Enter') {
+    searchStickers(searchInput.value);
+  }
+};
+
+
+// Open/close modal functions
+function openAIModal() {
+  aiModal.style.display = 'block';
+}
+
+function closeAIModal() {
+  aiModal.style.display = 'none';
+}
+
+// Close modal when clicking the close button
+closeAIBtn.onclick = closeAIModal;
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  if (event.target === aiModal) {
+    closeAIModal();
+  }
+};
+
+// Primary AI function to fetch image
+async function aiCreate(prompt) {
+  try {
+    const response = await fetch(`https://image-generator.lemonknowsall.workers.dev/?prompt=${encodeURIComponent(prompt)}`, {
+      method: 'GET',
+      mode: 'cors', // Explicitly set CORS mode
+    });
+    
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    
+    const blob = await response.blob();
+    const imageUrl = URL.createObjectURL(blob);
+    console.log('Generated image URL:', imageUrl);
+    urlInput.value = imageUrl
+    
+  } catch (error) {
+    console.error('Error fetching image:', error);
+    resultsContainer.innerHTML = '<p>Error generating image. Please try again.</p>';
+  }
+}
+
+// Fetch image, close modal, preview image
+aiButton.onclick = async () => {
+  aiButton.disabled = true;  // Disable button while processing
+  try {
+    document.getElementById('loadingIndicator').style.display = 'block';
+    await aiCreate(aiInput.value);
+    closeAIModal();
+    handleImagePreview(); // Trigger preview validation for programmatic value
+  } catch (error) {
+    document.getElementById('loadingIndicator').style.display = 'none';
+    aiButton.disabled = false;  // Re-enable button
+    console.error('Error:', error);
+  } finally {
+    document.getElementById('loadingIndicator').style.display = 'none';
+    aiButton.disabled = false;  // Re-enable button
+  }
 }
 
 // // Swipe gesture to reset page

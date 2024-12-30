@@ -1,76 +1,3 @@
-// async function copyToClipboard(text) {
-//   console.log("Attempting to copy:", text);
-  
-//   // Remove localStorage dependency for this use case
-//   const tempInput = document.createElement('input');
-//   tempInput.value = text;
-//   document.body.appendChild(tempInput);
-//   tempInput.select();
-  
-//   try {
-//       const copied = document.execCommand('copy');
-//       console.log("execCommand copy result:", copied);
-//       if (copied) {
-//           showNotification('Copied to clipboard!');
-//           return;
-//       }
-//   } catch (err) {
-//       console.error('Clipboard API failed:', err);
-//   }
-  
-//   try {
-//       await navigator.clipboard.writeText(text);
-//       showNotification('Copied to clipboard!');
-//   } catch (e) {
-//       console.error('Fallback clipboard write failed:', e);
-//       showNotification('Failed to copy text to clipboard.');
-//   }
-  
-//   document.body.removeChild(tempInput);
-// }
-
-// async function copyToClipboard(text) {
-//   const tempInput = document.createElement('input');
-//   tempInput.value = text;
-//   document.body.appendChild(tempInput);
-//   tempInput.select();
-//   try {
-//       // Copy text to clipboard
-//       document.execCommand('copy');
-//       // await navigator.clipboard.writeText(text);
-//       showNotification('Copied to clipboard!');
-
-//       // Save the text in localStorage for the next page
-//       localStorage.setItem('copiedText', text);
-//       console.log('Copied to clipboard and saved to local storage!')
-
-//   } catch (err) {
-//     try {
-//       // Modern clipboard API
-//       await navigator.clipboard.writeText(data.url);
-//       showNotification("URL Copied!");
-//     } catch {
-//       console.error('Fallback failed:', err);
-//       showNotification('Failed to copy text to clipboard.');
-//     }
-//   }
-//   document.body.removeChild(tempInput);
-// }
-
-// function copyTextToClipboard(text) {
-//   try {
-//     copy(String(text), {
-//       format: 'text/plain',
-//       onCopy: () => {
-//         showNotification('Copied to clipboard!');
-//       }
-//     });
-//   } catch (err) {
-//     console.error('Failed to copy text:', err);
-//     showNotification('Failed to copy text to clipboard.');
-//   }
-// }
-
 function copyTextToClipboard(text) {
   try {
       // Create a temporary element to hold the text
@@ -99,86 +26,6 @@ function copyTextToClipboard(text) {
   }
 }
 
-
-// async function copyToClipboard(text) {
-//   try {
-//     if (navigator.clipboard) {
-//       await navigator.clipboard.writeText(text);
-//       showNotification('Copied to clipboard!');
-//     } else {
-//       // Fallback for older browsers or iOS Safari
-//       const textArea = document.createElement('textarea');
-//       textArea.value = text;
-//       document.body.appendChild(textArea);
-//       textArea.select();
-//       document.execCommand('copy');
-//       document.body.removeChild(textArea);
-//       showNotification('Copied to clipboard!');
-//     }
-//   } catch (err) {
-//     try {
-//       const copyRequest = localStorage.getItem('copyRequest');
-//       if (navigator.clipboard) {
-//         await navigator.clipboard.writeText(copyRequest);
-//         showNotification('Copied to clipboard!');
-//       } else {
-//         // Fallback for older browsers or iOS Safari
-//         const textArea = document.createElement('textarea');
-//         textArea.value = copyRequest;
-//         document.body.appendChild(textArea);
-//         textArea.select();
-//         document.execCommand('copy');
-//         document.body.removeChild(textArea);
-//         showNotification('Copied to clipboard!');
-//       }
-//     } catch {
-//       console.error('Failed to copy text:', err);
-//       showNotification('Failed to copy text to clipboard.');
-//     }
-//   }
-// }
-
-// async function copyToClipboardWhenFocused(text) {
-//   if (document.hasFocus()) {
-//     localStorage.setItem('copiedText', text);
-//     const tempInput = document.createElement('input');
-//     tempInput.value = text;
-//     document.body.appendChild(tempInput);
-//     tempInput.select();
-//     try {
-//       document.execCommand('copy');
-//       showNotification('Copied to clipboard!');
-//     } catch (err) {
-//       console.error('Clipboard API failed:', err);
-//       try {
-//         await navigator.clipboard.writeText(text);
-//         showNotification('Copied to clipboard!');
-//       } catch (e) {
-//         console.error('Fallback failed:', e);
-//         showNotification('Failed to copy text to clipboard.');
-//       }
-//     }
-//     document.body.removeChild(tempInput);
-//   } else {
-//     // Optionally, store the text to copy later when the document is focused
-//     localStorage.setItem('copiedText', text);
-//     console.log('Document is not focused. Text saved to localStorage for later:', text);
-//   }
-// }
-
-// window.addEventListener('focus', async () => {
-//   // const copiedText = localStorage.getItem('copiedText');
-//   const imageModal = document.getElementById('image-modal');
-
-//   if (imageModal.style.display === 'flex') {
-//     const copiedText = localStorage.getItem('copiedText');
-//     console.log('Focused Modal Text:')
-//     console.log(copiedText)
-//     await copyToClipboardWhenFocused(copiedText);
-//     localStorage.removeItem('copiedText');
-//   }
-// });
-
 document.getElementById('log-button').addEventListener('click', async () => {
     const container = document.getElementById('meme-container');
     const backgroundImg = document.getElementById('background-img');
@@ -192,11 +39,17 @@ document.getElementById('log-button').addEventListener('click', async () => {
 
     picker.style.display = 'none';
 
-    if (backgroundImg.src.toLowerCase().includes('.gif')) {
+    if (backgroundImg.src.toLowerCase().includes('.gif') || backgroundImg.src.toLowerCase().includes('.webp')) {
+      console.log('Before createGIFMeme function', { 
+          containerWidth: container.offsetWidth, 
+          containerHeight: container.offsetHeight,
+          imageUrl: imageUrl
+        });
         // Hide the background image temporarily
         backgroundImg.style.display = 'none';
 
         console.log('Capturing meme background');
+        console.log(imageUrl)
         await createGIFMeme(container, imageUrl);
 
         // Show the background image again after capture
@@ -221,8 +74,8 @@ document.getElementById('link-button').addEventListener('click', async () => {
 
   picker.style.display = 'none';
 
-  if (backgroundImg.src.toLowerCase().includes('.gif')) {
-      // Hide the background image temporarily
+  if (backgroundImg.src.toLowerCase().includes('.gif') || backgroundImg.src.toLowerCase().includes('.webp')) {
+    // Hide the background image temporarily
       backgroundImg.style.display = 'none';
 
       console.log('Capturing meme background');
@@ -237,93 +90,7 @@ document.getElementById('link-button').addEventListener('click', async () => {
   }
 });
 
-// // Update createMeme function to send both image and URL to API
-// async function createGIFMeme(container, imageUrl) {
-//   container.classList.add('capture-mode');
-//   try {
-//       const canvas = await html2canvas(container, {
-//           scale: 2, // Adjust for performance
-//           useCORS: true,
-//           width: container.offsetWidth,
-//           height: container.offsetHeight,
-//           backgroundColor: null, // Ensure the background is transparent
-//           logging: false // Disable console logging for cleaner output
-//       });
-
-//       container.classList.remove('capture-mode');
-//       document.getElementById('loadingIndicator').style.display = 'block';
-
-//       canvas.toBlob(async (blob) => {
-//           if (!blob) {
-//               console.error("Failed to generate blob from canvas");
-//               return;
-//           }
-
-//           try {
-//               // Prepare the FormData to send the image and URL
-//               const formData = new FormData();
-//               formData.append('transparent_image', blob, 'meme.png'); // Attach the image as 'transparent_image'
-//               formData.append('gif_url', imageUrl); // Attach the image URL
-
-//               // Send the data to the API endpoint
-//               const response = await fetch('/memecreate', {
-//                   method: 'POST',
-//                   body: formData
-//               });
-
-//               document.getElementById('loadingIndicator').style.display = 'none';
-
-//               if (!response.ok) {
-//                   throw new Error(`API returned an error: ${response.status}`);
-//               }
-
-//               // Get the Blob from the response
-//               const memeBlob = await response.blob();
-
-//               try {
-//                 // Attempt to copy the blob to the clipboard
-//                 const clipboardItem = new ClipboardItem({ 'image/gif': memeBlob });
-//                 await navigator.clipboard.write([clipboardItem]);
-//                 showNotification("Copied!");
-//               } catch (clipboardError) {
-//                 console.warn("Clipboard write failed, attempting alternative methods...");
-      
-//                 try {
-//                   // Try to use the Web Share API
-//                   if (navigator.share) {
-//                     const shareData = {
-//                       files: [new File([memeBlob], 'memeamigo.gif', { type: 'image/gif' })],
-//                       // title: 'MEME AMIGO!',
-//                     };
-//                     await navigator.share(shareData);
-//                     console.log('Meme shared successfully!');
-//                     fallbackDownload(memeBlob);
-//                   } else {
-//                     throw new Error('Web Share API not supported');
-//                   }
-//                 } catch (shareError) {
-//                   console.warn("Web Share API failed or unsupported, falling back to download...");
-//                   try {
-//                     // Fallback to download only
-//                     console.log(memeBlob)
-//                     fallbackDownload(memeBlob);
-//                   } catch (downloadError) {
-//                     console.error("All methods failed:", downloadError.message);
-//                   }
-//                 }
-//               }
-
-//           } catch (apiError) {
-//               console.error("Failed to send data to API:", apiError.message);
-//               document.getElementById('loadingIndicator').style.display = 'none';
-//               alert("Failed to send data to the server.");
-//           }
-//       }, 'image/png');
-//   } catch (error) {
-//       document.getElementById('loadingIndicator').style.display = 'none';
-//       alert("An unexpected error occurred during capture:", error.message);
-//   }
-// }
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Update createMeme function to send both image and URL to API
 async function createGIFMeme(container, imageUrl) {
@@ -336,8 +103,10 @@ async function createGIFMeme(container, imageUrl) {
   container.classList.add('capture-mode');
   try {
       console.log('Attempting to capture canvas with html2canvas');
+      await document.fonts.ready;
       const canvas = await html2canvas(container, {
-          scale: 2, // Adjust for performance
+          scale: window.devicePixelRatio,
+          // scale: 2, // Adjust for performance
           useCORS: true,
           width: container.offsetWidth,
           height: container.offsetHeight,
@@ -448,7 +217,7 @@ async function createGIFMeme(container, imageUrl) {
 
 // Create meme image url functionality
 async function createMemeUrl(container) {
-    container.classList.add('capture-mode');
+    // container.classList.add('capture-mode');
     try {
         const canvas = await html2canvas(container, {
             scale: 2, // Adjust for performance
@@ -457,7 +226,7 @@ async function createMemeUrl(container) {
             height: container.offsetHeight,
         });
 
-        container.classList.remove('capture-mode');
+        // container.classList.remove('capture-mode');
         document.getElementById('loadingIndicator').style.display = 'block';
 
         canvas.toBlob(async (blob) => {
@@ -492,19 +261,6 @@ async function createMemeUrl(container) {
                 document.getElementById('loadingIndicator').style.display = 'none';
 
                 fallbackUrl(data.url);
-
-                // try {
-                //   // Log the URL to verify it's correct
-                //   console.log("Attempting to copy");
-              
-                //   copyTextToClipboard(String(data.url));
-
-                //   console.log("Copy action complete")
-
-                // } catch (copyError) {
-                //     console.error("Failed to copy URL:", copyError);
-                //     fallbackUrl(data.url);
-                // }
 
             } catch (apiError) {
                 console.error("Failed to send data to API:", apiError.message);
@@ -567,17 +323,6 @@ async function createGIFMemeUrl(container, imageUrl) {
 
                 document.getElementById('loadingIndicator').style.display = 'none';
 
-                // try {
-                //   // Log the URL to verify it's correct
-                //   console.log("Meme URL created:", data.url);
-              
-                //   copyTextToClipboard(String(data.url));
-
-                // } catch (copyError) {
-                //     console.error("Failed to copy URL:", copyError);
-                //     fallbackUrl(data.url);
-                // }
-
             } catch (apiError) {
                 console.error("Failed to send data to API:", apiError.message);
                 document.getElementById('loadingIndicator').style.display = 'none';
@@ -594,7 +339,7 @@ async function createGIFMemeUrl(container, imageUrl) {
 
 // Create meme functionality
 async function createMeme(container) {
-    container.classList.add('capture-mode');
+    // container.classList.add('capture-mode');
       try {
         const canvas = await html2canvas(container, {
           scale: 2, // Adjust for performance
@@ -603,7 +348,7 @@ async function createMeme(container) {
           height: container.offsetHeight,
         });
   
-        container.classList.remove('capture-mode');
+        // container.classList.remove('capture-mode');
         
         canvas.toBlob(async (blob) => {
           if (!blob) {

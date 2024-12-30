@@ -20,6 +20,7 @@ from meme import create_meme_from_media
 from nostrAddressDatabase import get_from_dynamodb
 from lsbSteganography import lsbdecode
 from api import api_service
+from memegifs import AnimatedImageProcessor, Path
 # from searchAlgo import nostr_gifs
 
 # Configure logging to stdout so Heroku can capture it
@@ -281,103 +282,170 @@ def caption_meme():
 
 @app.route('/memecreate', methods=['POST'])
 def meme_create():
-    start = time.time()
-    # Get the transparent image and GIF URL from the request
-    logging.info("gifcreateurl: Received POST request")
-    transparent_image_file = request.files.get('transparent_image')
-    gif_url = request.form.get('gif_url')
-
-    # Validate inputs
-    if not transparent_image_file or not gif_url:
-        logging.info("memecreate: Missing transparent image or GIF URL")
-        return jsonify({"error": "Missing transparent image or GIF URL"}), 400
-
     try:
-        # Open the transparent overlay image
-        overlay = Image.open(transparent_image_file).convert("RGBA")
-        logging.info("memecreate: Transparent image loaded successfully")
+        transparent_image = request.files.get('transparent_image')
+        gif_url = request.form.get('gif_url')
 
-        # Fetch the GIF from the URL
-        response = requests.get(gif_url)
-        if response.status_code != 200:
-            logging.info(f"memecreate: Failed to fetch GIF from URL {gif_url}")
-            return jsonify({"error": "Failed to fetch GIF"}), 400
+        if not transparent_image or not gif_url:
+            return jsonify({"error": "Missing transparent image or media URL"}), 400
 
-        # Open the GIF from memory
-        with Image.open(io.BytesIO(response.content)) as gif:
-            # Additional validation
-            if gif.format != 'GIF':
-                logging.error(f"Not a GIF: {gif.format}")
-                return jsonify({"error": "File is not a GIF"}), 400
+        processor = AnimatedImageProcessor()
+        result = processor.process_animated_image(transparent_image, gif_url)
 
-            logging.info(f"Original GIF info: {gif.info}")
-            logging.info("memecreate: GIF loaded successfully from URL")
-            
-            frames = []
+        if result.size_mb > 21:
+            return jsonify({"error": "Unable to reduce file size below 21MB"}), 400
 
-            # Process each frame of the GIF with improved handling
-            for frame_num in range(gif.n_frames):
-                gif.seek(frame_num)
-                # logging.info(f"Frame {frame_num} mode: {gif.mode}, size: {gif.size}")
-                
-                current_frame = gif.copy().convert("RGBA")
-                current_frame = current_frame.resize(overlay.size)
-                
-                # Create a new frame with consistent palette
-                combined_frame = Image.new("RGBA", current_frame.size)
-                combined_frame.paste(current_frame, (0, 0), current_frame)
-                combined_frame.paste(overlay, (0, 0), overlay)
-                
-                frames.append(combined_frame)
+        return send_file(
+            result.buffer,
+            mimetype=f'image/{result.format}',
+            as_attachment=False,
+            download_name=f"memeamigo.{result.format}"
+        )
 
-            logging.info("memecreate: All GIF frames processed successfully")
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        logging.error(f"memecreate error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
-            # Resize GIF iteratively if needed
-            output_buffer = io.BytesIO()
-            try:
-                frames[0].save(
-                    output_buffer,
-                    format="GIF",
-                    save_all=True,
-                    append_images=frames[1:],
-                    duration=gif.info.get("duration", 100),
-                    loop=gif.info.get("loop", 0),
-                    disposal=2,  # Reset to background color before rendering next frame
-                    optimize=True,
-                    quality=85,
-                    quantization=2  # Reduce color depth
-                )
-            except Exception as save_error:
-                logging.error(f"Error saving GIF: {save_error}")
-                return jsonify({"error": "Failed to save GIF"}), 500
+@app.route('/gifcreateurl', methods=['POST'])
+def gif_create_url():
+    try:
+        transparent_image = request.files.get('transparent_image')
+        gif_url = request.form.get('gif_url')
 
-            gif_size_mb = output_buffer.tell() / (1024 * 1024)
-            logging.info(f"memecreate: Final GIF size: {gif_size_mb:.2f} MB")
+        if not transparent_image or not gif_url:
+            return jsonify({"error": "Missing transparent image or media URL"}), 400
 
-            if gif_size_mb > 21:
-                logging.info("memecreate: GIF exceeds size limit, attempting resizing")
-                output_buffer = resize_gif_to_limit(frames, gif.info)
+        processor = AnimatedImageProcessor()
+        result = processor.process_animated_image(transparent_image, gif_url)
 
-            gif_size_mb = output_buffer.tell() / (1024 * 1024)
-            if gif_size_mb > 21:
-                logging.info("memecreate: Resizing failed to reduce GIF size below 21MB")
-                return jsonify({"error": "Unable to reduce GIF size below 21MB"}), 400
+        if result.size_mb > 21:
+            return jsonify({"error": "Unable to reduce file size below 21MB"}), 400
 
-            # Return the generated GIF directly in the response
-            output_buffer.seek(0)  # Ensure the buffer is at the start
-            return send_file(
-                output_buffer,
-                mimetype='image/gif',
-                as_attachment=False,  # The GIF will be displayed in the browser
-                download_name="memeamigo.gif"
-            )
+        # Save and generate URL
+        unique_id = str(uuid.uuid4())
+        output_path = Path("./creations") / unique_id / f"output_meme.{result.format}"
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(output_path, "wb") as f:
+            f.write(result.buffer.getvalue())
 
-    except Image.UnidentifiedImageError:
-        logging.error("Could not identify image")
-        return jsonify({"error": "Invalid image file"}), 400
+        url, _ = urlgenerator(str(output_path), "memeamigo", "memeamigo", f"image/{result.format}")
+        delete_path(output_path)
+
+        return jsonify({
+            "status": "success",
+            "message": "Animated meme created successfully",
+            "url": url,
+            "processing_time": result.processing_time,
+            "frame_count": result.frame_count,
+            "size_mb": result.size_mb
+        }), 200
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         logging.error(f"gifcreateurl error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+# @app.route('/memecreate', methods=['POST'])
+# def meme_create():
+#     start = time.time()
+#     logging.info("memecreate: Received POST request")
+    
+#     # Get the transparent image and media URL from the request
+#     transparent_image_file = request.files.get('transparent_image')
+#     gif_url = request.form.get('gif_url')
+
+#     # Validate inputs
+#     if not transparent_image_file or not gif_url:
+#         logging.info("memecreate: Missing transparent image or media URL")
+#         return jsonify({"error": "Missing transparent image or media URL"}), 400
+
+#     try:
+#         # Open the transparent overlay image
+#         overlay = Image.open(transparent_image_file).convert("RGBA")
+#         logging.info("memecreate: Transparent image loaded successfully")
+
+#         # Fetch the media file from the URL
+#         response = requests.get(gif_url)
+#         if response.status_code != 200:
+#             logging.info(f"memecreate: Failed to fetch media from URL {gif_url}")
+#             return jsonify({"error": "Failed to fetch media"}), 400
+
+#         # Open the media from memory
+#         with Image.open(io.BytesIO(response.content)) as media:
+#             media_format = media.format
+#             if media_format not in ('GIF', 'WEBP'):
+#                 logging.error(f"Unsupported media format: {media_format}")
+#                 return jsonify({"error": f"File is not a supported format (GIF/Animated WEBP). Received: {media_format}"}), 400
+
+#             # Check if the WebP file is animated
+#             if media_format == "WEBP" and not getattr(media, "is_animated", False):
+#                 logging.error("Static WebP detected")
+#                 return jsonify({"error": f"File is not a supported format (GIF/Animated WEBP). Received: {media_format}"}), 400
+
+#             frames = []
+
+#             # Handle animated WebP or GIF
+#             if getattr(media, "is_animated", False):
+#                 logging.info(f"memecreate: Processing animated {media_format}")
+#                 for frame_num in range(media.n_frames):
+#                     media.seek(frame_num)
+#                     current_frame = media.copy().convert("RGBA")
+#                     current_frame = current_frame.resize(overlay.size)
+
+#                     combined_frame = Image.new("RGBA", current_frame.size)
+#                     combined_frame.paste(current_frame, (0, 0), current_frame)
+#                     combined_frame.paste(overlay, (0, 0), overlay)
+#                     frames.append(combined_frame)
+
+#             output_buffer = io.BytesIO()
+#             output_format = "WEBP" if media_format == "WEBP" else "GIF"
+#             save_params = {
+#                 "format": output_format,
+#                 "save_all": True,
+#                 "append_images": frames[1:],
+#                 "duration": media.info.get("duration", 100),
+#                 "loop": media.info.get("loop", 0),
+#                 "optimize": True,
+#                 "quality": 75,
+#             }
+
+#             # Save the processed image
+#             try:
+#                 frames[0].save(output_buffer, **save_params)
+#             except Exception as save_error:
+#                 logging.error(f"Error saving {output_format}: {save_error}")
+#                 return jsonify({"error": f"Failed to save {output_format}"}), 500
+
+#             media_size_mb = output_buffer.tell() / (1024 * 1024)
+#             logging.info(f"memecreate: Final {output_format} size: {media_size_mb:.2f} MB")
+
+#             if media_size_mb > 21:
+#                 logging.info(f"memecreate: {output_format} exceeds size limit")
+#                 return jsonify({"error": f"Unable to reduce {output_format} size below 21MB"}), 400
+
+#             # Return the generated media directly in the response
+#             output_buffer.seek(0)
+#             logging.info(f"Total API Call Time: {round(time.time()-start,2)}")
+
+#             return send_file(
+#                 output_buffer,
+#                 mimetype=f'image/{output_format.lower()}',
+#                 as_attachment=False,
+#                 download_name=f"memeamigo.{output_format.lower()}"
+#             )
+
+#     except Image.UnidentifiedImageError:
+#         logging.error("Could not identify image")
+#         return jsonify({"error": "Invalid image file"}), 400
+#     except Exception as e:
+#         logging.error(f"memecreate error: {str(e)}")
+#         return jsonify({"error": str(e)}), 500
+
 
 # Create Image Meme Url
 @app.route('/memecreateurl', methods=['POST'])
@@ -446,123 +514,6 @@ def fallback_meme_create_url():
         logging.error(f"Error creating meme URL: {str(e)}")
         return jsonify({"error": "Failed to create meme"}), 500
 
-@app.route('/gifcreateurl', methods=['POST'])
-def gif_create_url():
-    start = time.time()
-    # Get the transparent image and GIF URL from the request
-    logging.info("gifcreateurl: Received POST request")
-    transparent_image_file = request.files.get('transparent_image')
-    gif_url = request.form.get('gif_url')
-
-    # Validate inputs
-    if not transparent_image_file or not gif_url:
-        logging.info("gifcreateurl: Missing transparent image or GIF URL")
-        return jsonify({"error": "Missing transparent image or GIF URL"}), 400
-
-    try:
-        # Open the transparent overlay image
-        overlay = Image.open(transparent_image_file).convert("RGBA")
-        logging.info("gifcreateurl: Transparent image loaded successfully")
-
-        # Fetch the GIF from the URL
-        response = requests.get(gif_url)
-        if response.status_code != 200:
-            logging.info(f"gifcreateurl: Failed to fetch GIF from URL {gif_url}")
-            return jsonify({"error": "Failed to fetch GIF"}), 400
-
-        # Open the GIF from memory
-        with Image.open(io.BytesIO(response.content)) as gif:
-            # Additional validation
-            if gif.format != 'GIF':
-                logging.error(f"Not a GIF: {gif.format}")
-                return jsonify({"error": "File is not a GIF"}), 400
-
-            logging.info(f"Original GIF info: {gif.info}")
-            logging.info("gifcreateurl: GIF loaded successfully from URL")
-            
-            frames = []
-
-            # Process each frame of the GIF with improved handling
-            for frame_num in range(gif.n_frames):
-                gif.seek(frame_num)
-                # logging.info(f"Frame {frame_num} mode: {gif.mode}, size: {gif.size}")
-                
-                current_frame = gif.copy().convert("RGBA")
-                current_frame = current_frame.resize(overlay.size)
-                
-                # Create a new frame with consistent palette
-                combined_frame = Image.new("RGBA", current_frame.size)
-                combined_frame.paste(current_frame, (0, 0), current_frame)
-                combined_frame.paste(overlay, (0, 0), overlay)
-                
-                frames.append(combined_frame)
-
-            logging.info("gifcreateurl: All GIF frames processed successfully")
-
-            # Resize GIF iteratively if needed
-            output_buffer = io.BytesIO()
-            try:
-                frames[0].save(
-                    output_buffer,
-                    format="GIF",
-                    save_all=True,
-                    append_images=frames[1:],
-                    duration=gif.info.get("duration", 100),
-                    loop=gif.info.get("loop", 0),
-                    disposal=2,  # Reset to background color before rendering next frame
-                    optimize=True,
-                    quality=85,
-                    quantization=2  # Reduce color depth
-                )
-            except Exception as save_error:
-                logging.error(f"Error saving GIF: {save_error}")
-                return jsonify({"error": "Failed to save GIF"}), 500
-
-            gif_size_mb = output_buffer.tell() / (1024 * 1024)
-            logging.info(f"gifcreateurl: Final GIF size: {gif_size_mb:.2f} MB")
-
-            if gif_size_mb > 21:
-                logging.info("gifcreateurl: GIF exceeds size limit, attempting resizing")
-                output_buffer = resize_gif_to_limit(frames, gif.info)
-
-            gif_size_mb = output_buffer.tell() / (1024 * 1024)
-            if gif_size_mb > 21:
-                logging.info("gifcreateurl: Resizing failed to reduce GIF size below 21MB")
-                return jsonify({"error": "Unable to reduce GIF size below 21MB"}), 400
-
-            # Save the resized GIF
-            unique_id = str(uuid.uuid4())
-            output_folder = os.path.join("./creations/", unique_id)
-            os.makedirs(output_folder, exist_ok=True)
-            output_file_path = os.path.join(output_folder, "output_meme.gif")
-            
-            try:
-                with open(output_file_path, "wb") as f:
-                    f.write(output_buffer.getvalue())
-            except IOError as file_error:
-                logging.error(f"Error writing GIF file: {file_error}")
-                return jsonify({"error": "Failed to write GIF file"}), 500
-
-            logging.info(f"gifcreateurl: GIF saved to {output_file_path}")
-
-            # Create URL
-            url, _ = urlgenerator(output_file_path, "memeamigo", "memeamigo", "image/gif")
-            logging.info(f"gifcreateurl: Generated URL: {url}")
-            delete_path(output_file_path)
-            logging.info(f"Total API Call Time: {round(time.time()-start,2)}")
-            return jsonify({
-                "status": "success",
-                "message": "GIF meme created successfully",
-                "url": url
-            }), 200
-
-    except Image.UnidentifiedImageError:
-        logging.error("Could not identify image")
-        return jsonify({"error": "Invalid image file"}), 400
-    except Exception as e:
-        logging.error(f"gifcreateurl error: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
 # Search GIFs API endpoint
 @app.route("/search", methods=['POST'])
 def search():
@@ -579,8 +530,8 @@ def search():
         gifURL = gif['url']
         gifSize = gif['size']
         gifDims = gif['dims']
-        thumb = result['media_formats']['nanogifpreview']['url'] # not always gif format
-        preview = result['media_formats']['tinygif']['url']
+        thumb = result['media_formats']['tinygif']['url'] # not always gif format
+        preview = result['media_formats']['webp']['url']
         image = result['media_formats']['gifpreview']['url']
         basename = os.path.basename(gifURL)[0:-4]
         try:
@@ -933,7 +884,36 @@ def deliver(filename):
         return send_from_directory(output_folder, filename, as_attachment=False)
     except FileNotFoundError:
         return jsonify({"error": "File not found"}), 404
+# _____________________________________________________________________________________
+# Premium endpoints
+from premium import removeBG, image_url_to_base64
+@app.route("/removebg", methods=["POST"])  # Changed to POST method
+def remove_background():
+    data = request.get_json()
+    image_url = data.get('image_url')
 
+    # Validate inputs
+    if not image_url:
+        return jsonify({"error": "Missing image url"}), 400
+    
+    try:
+        # If the image is already base64, no need to convert
+        if image_url.startswith('data:image'):
+            image_base64 = image_url
+        else:
+            image_base64 = image_url_to_base64(image_url)
+            
+        logging.info("Processing image for background removal")
+        removedbg_image_base64 = removeBG(image_base64)
+        logging.info("Background removal completed")
+
+        return removedbg_image_base64
+    
+    except Exception as e:
+        logging.error(f"Error removing background: {str(e)}")
+        return jsonify({"error": "Something went wrong"}), 500
+
+# _____________________________________________________________________________________
 # Stripe API endpoints
 import stripe
 

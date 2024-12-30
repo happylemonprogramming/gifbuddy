@@ -15,7 +15,7 @@ def removeBG(base64_image):
     payload = {
         "image_file": base64_image,
         "extra": {
-            "response_image_type": "jpeg"
+            "response_image_type": "png"
         }
     }
 
@@ -24,7 +24,7 @@ def removeBG(base64_image):
 
     # Check and print the response
     if response.status_code == 200:
-        print("Response:", response.json())
+        print("Novita AI status:", response.json()['task']['status'])
         return response.json()["image_file"]
     else:
         print(f"Error: {response.status_code} - {response.text}")
@@ -48,7 +48,7 @@ def image_url_to_base64(image_url):
         print(f"An error occurred: {e}")
         raise
 
-def save_image(encoded_image, filepath="noBG.jpg"):
+def save_image(encoded_image, filepath="noBG.png"):
     # Decode the base64 string
     image_bytes = base64.b64decode(encoded_image)
 
@@ -63,5 +63,4 @@ if __name__ == "__main__":
     image_url = "https://t3.ftcdn.net/jpg/04/54/61/60/360_F_454616053_mtdrL3fKzWOlQigtj9Rj25h6ZGeFgZOM.jpg"
     base64_image = image_url_to_base64(image_url)
     noBG_bas64 = removeBG(base64_image)
-    print(noBG_bas64)
     save_image(noBG_bas64)
