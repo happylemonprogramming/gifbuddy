@@ -1,4 +1,4 @@
-import json, base64, os, hashlib, asyncio, time, logging, subprocess
+import json, base64, os, hashlib, asyncio, time, logging, subprocess, requests
 from publish import nostrpost
 from nip96 import urlnostrbuildupload, filenostrbuildupload
 from getevent import getevent
@@ -136,10 +136,25 @@ def decentralizeGifUrl(file_url, summary, alt, MIME, image=None, preview=None):
     try:
         event94 = nip94(tags, alt, summary, image, preview)
         logging.info(f'NIP94 Event Published: {event94}')
+        blastr_event = getevent(id=event94)
+        blastoff = blastr(blastr_event[0])
+        logging.info(f"Blastr Response: {blastoff}")
+
     except:
         logging.info('NIP94 Failed')
 
     return url
+
+def blastr(event):
+    endpoint = "https://blastr-nb.lemonknowsall.workers.dev/event"
+    headers = {"Content-Type": "application/json"}
+    payload = ['EVENT', event]
+
+    response = requests.post(endpoint, headers=headers, json=payload)
+
+    # logging.info(f"Status Code: {response.status_code}")
+    # logging.info(f"Response JSON: {response.text}")
+    return response.text, response.status_code
 
 # def decentralizeGifUpload(filepath, caption, alt, MIME):
 #     url, tags = urlgenerator(filepath, caption, alt, MIME)

@@ -77,6 +77,22 @@ def require_api_key(api_cache: ApiKeyCache) -> Callable:
 def api():
     return render_template("api.html")
 
+@api_service.route("/blastr", methods=['POST'])
+@require_api_key(api_cache)
+def blastr():
+    data = request.get_json()
+    event = data.get('event')
+
+    endpoint = "https://blastr-nb.lemonknowsall.workers.dev/event"
+    headers = {"Content-Type": "application/json"}
+    payload = ['EVENT', event]
+
+    response = requests.post(endpoint, headers=headers, json=payload)
+
+    logging.info(f"Status Code: {response.status_code}")
+    logging.info(f"Response JSON: {response.text}")
+    return response.text, response.status_code
+
 # Trending Memes
 @api_service.route('/api/trending_memes', methods=['GET'])
 @require_api_key(api_cache)

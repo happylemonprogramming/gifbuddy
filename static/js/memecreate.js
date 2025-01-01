@@ -429,3 +429,73 @@ document.getElementById('close-image').addEventListener('click', () => {
     const imageModal = document.getElementById('image-modal');
     imageModal.style.display = 'none';
 });
+
+// Upload from camera roll
+document.addEventListener('DOMContentLoaded', function() {
+  const fileInput = document.getElementById('fileInput');
+  const urlInput = document.getElementById('urlInput');
+  const uploadBtn = document.getElementById('uploadImageBtn');
+  const backgroundImg = document.getElementById('background-img');
+  const memeContainer = document.getElementById('meme-container');
+
+  // Function to update container dimensions while respecting max-width
+  function updateContainerDimensions() {
+      if (backgroundImg.complete) {
+          const imgWidth = backgroundImg.width;
+          const imgHeight = backgroundImg.height;
+          const maxWidth = window.innerWidth > 768 ? 700 : 600;
+          
+          // Calculate scaled height while respecting max-width
+          let finalWidth = Math.min(imgWidth, maxWidth);
+          let finalHeight = (imgHeight * finalWidth) / imgWidth;
+          
+          // Only set height - width will be handled by CSS
+          memeContainer.style.height = finalHeight + 'px';
+      }
+  }
+
+  // Function to convert blob to base64
+  function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+      });
+  }
+
+  // Trigger file input when upload button is clicked
+  uploadBtn.addEventListener('click', () => {
+      fileInput.click();
+  });
+
+  // Handle file selection
+  fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+          if (!file.type.startsWith('image/')) {
+              alert('Please select an image file');
+              return;
+          }
+
+          try {
+              const base64Url = await blobToBase64(file);
+              backgroundImg.src = base64Url;
+              urlInput.value = base64Url;
+              backgroundImg.crossOrigin = "anonymous";
+              
+              backgroundImg.onload = () => {
+                  updateContainerDimensions();
+              };
+          } catch (error) {
+              console.error('Error processing image:', error);
+              alert('Error processing image');
+          }
+      }
+  });
+
+  // Handle window resizing
+  window.addEventListener('resize', updateContainerDimensions);
+  backgroundImg.addEventListener('load', updateContainerDimensions);
+  urlInput.addEventListener('change', updateContainerDimensions);
+});

@@ -9,6 +9,24 @@
   box-sizing: border-box;
 }
 
+.input-container {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Adjust spacing between elements */
+}
+
+#urlInput {
+  flex: 1; /* Allows the input to expand and take available space */
+  padding: 8px;
+}
+
+#uploadImageBtn {
+  padding: 2px;
+  width: 50px;
+  height: 40px;
+}
+
 #urlInputLabel {
   margin-bottom: 5px;
   font-size: 16px;
@@ -175,7 +193,9 @@
   line-height: 1;
 }
 
-.editor-container {
+/* .editor-container {
+    position: absolute;
+    top: 5%;
     width: 100%;
     max-width: 700px;
     height: auto;
@@ -188,10 +208,59 @@
 #meme-container {
   position: relative;
   width: 100%;
+  max-width: 700px;
   margin: 0 auto;
   height: auto;
   background: transparent;
   overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .editor-container {
+      position: absolute;
+      top: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 600px;
+  }
+
+  #meme-container {
+    max-width: 600px;
+  }
+} */
+
+.editor-container {
+  position: absolute;
+  top: 5%;
+  width: 100%;
+  max-width: 700px;
+  height: auto;
+  align-items: center;
+  margin: 0 auto;
+  padding: 0;
+  object-fit: contain;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#meme-container {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  height: auto;
+  background: transparent;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .editor-container {
+      max-width: 600px;
+  }
+
+  #meme-container {
+      max-width: 600px;
+  }
 }
 
 #watermark {
@@ -220,16 +289,7 @@
   background-blend-mode: normal;  /* This can help with transparency */
 }
 
-@media (max-width: 768px) {
-  .editor-container {
-      position: absolute;
-      top: 5%;
-      left: 50%;
-      transform: translateX(-50%);
-      /* width: calc(100% - 40px);  */
-      max-width: 600px; /* Retain the max-width */
-  }
-}
+
 
 .toolbar {
     display: flex;
@@ -269,12 +329,12 @@
   transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
 }
 
-.toolbar-button:hover {
+.toolbar-button:hover, .camera-button:hover {
     background-color: #5E35B1; /* Color on hover */
     color: #FFFFFF;
 }
 
-.toolbar-button:focus {
+.toolbar-button:focus, .camera-button:focus {
     outline: none; /* Optional: remove focus outline */
 }
 

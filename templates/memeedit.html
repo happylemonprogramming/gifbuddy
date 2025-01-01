@@ -121,9 +121,13 @@
   </div>
 
   <div id="editor" class="editor-container">
-    <h1 id="memeHeader">Caption Meme 🐸</h1>
-    <label id="urlInputLabel" for="urlInput">Background Image Url:</label>
-    <input type="text" id="urlInput" placeholder="Image Url" required>
+    <!-- <h1 id="memeHeader">Caption Meme 🐸</h1> -->
+    <div class="input-container">
+      <label id="urlInputLabel" for="urlInput">URL:</label>
+      <input type="text" id="urlInput" placeholder="Image Url" required>
+      <button class="toolbar-button" id="uploadImageBtn"><span class="emoji">📸</span></button>
+      <input type="file" id="fileInput" accept="image/*" style="display: none">
+    </div>
     <div id="meme-container">
         <img id="background-img" src="" alt="Meme background">
         <!-- <div id="watermark">MEMEAMIGO.LOL</div> -->
@@ -135,7 +139,7 @@
       <!-- <button class="toolbar-button" id="paint" onclick="jsPaint()"><span class="emoji">🎨</span></button> -->
       <button class="toolbar-button" id="add-emoji"><span class="emoji">😃</span></button>
       <!-- <button class="toolbar-button" id="ai-generator"><span class="emoji">🤖</span></button> -->
-      <button class="toolbar-button" id="stickers">Stickers</button>
+      <button class="toolbar-button" id="stickers"> Add Sticker</button>
       <button class="toolbar-button" onclick="addTextBox()">Add Text</button>
       <button class="toolbar-button" id="log-button">Share Image</button>
       <button class="toolbar-button" id="link-button">Copy Url</button>
