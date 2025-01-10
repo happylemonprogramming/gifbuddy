@@ -15,12 +15,26 @@
     <title>GIF Buddy🫂</title>
 </head>
 <body>
-    <div class="action-container">
+    <!-- <div class="action-container">
         <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
         <button class="action-button" id="searchButton" onclick="window.location.href='/'">Search</button>
-        <!-- <button class="action-button" id="createButton" onclick="window.location.href='/create'">Create</button> -->
         <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
-    </div>    
+    </div>     -->
+
+    <nav class="nav-container">
+        <button class="hamburger">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        <div class="action-container">
+            <button class="action-button" id="searchButton" onclick="window.location.href='/gifsearch'">Search GIFs</button>
+            <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search Memes</button>
+            <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Create Meme</button>
+            <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collections</button>
+            <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+        </div>
+    </nav>
 
     <div id="notification" class="notification"></div>
 

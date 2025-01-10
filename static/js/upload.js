@@ -126,7 +126,7 @@ uploadForm.addEventListener('submit', async (e) => {
 
     if (!file) {
         alert('Please select a file to upload.');
-        document.getElementById('loadingIndicator').style.display = 'none';
+        // document.getElementById('loadingIndicator').style.display = 'none';
         return;
     }
 
@@ -143,7 +143,7 @@ uploadForm.addEventListener('submit', async (e) => {
         });
 
         showNotification('File sent for processing!');
-        document.getElementById('loadingIndicator').style.display = 'none';
+        // document.getElementById('loadingIndicator').style.display = 'none';
 
 
         // console.log('File uploaded successfully:', response.data.url);
@@ -200,8 +200,8 @@ uploadForm.addEventListener('submit', async (e) => {
             console.error('Error uploading file:', error);
             alert('An error occurred while uploading the file.');
         }
-    } finally {
-        // Hide loading indicator
-        document.getElementById('loadingIndicator').style.display = 'none';
+    // } finally {
+    //     // Hide loading indicator
+    //     document.getElementById('loadingIndicator').style.display = 'none';
     }
 });

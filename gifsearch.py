@@ -6,6 +6,18 @@ import requests
 apikey = os.environ.get('googlecloudvision')  # click to set to your apikey
 ckey = "app"  # set the client_key for the integration and use the same value for all API calls
 
+def passthru(endpoint, parameters):
+    # Construct the URL with pos if provided
+    url = f"https://tenor.googleapis.com/v2/{endpoint}?{parameters}&key={apikey}&client_key={ckey}"
+    
+    # API request to Tenor
+    r = requests.get(url)
+    
+    # Load API result
+    result = json.loads(r.content)
+
+    return result
+
 def fetch_gifs(search_term,limit, pos=None):
     # Construct the URL with pos if provided
     url = f"https://tenor.googleapis.com/v2/search?q={search_term}&key={apikey}&client_key={ckey}&limit={limit}"

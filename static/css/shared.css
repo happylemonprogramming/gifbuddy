@@ -5,7 +5,7 @@ html, body {
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #2C2F33;
+    background-color: #101010;
     color: #FFFFFF;
     display: flex;
     justify-content: center;
@@ -17,7 +17,31 @@ body {
     overflow-y: auto;
 }
 
+/* .container {
+    width: auto;
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+} */
+
 .container {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 600px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* .container {
     width: 100%;
     max-width: 600px;
     margin: 0 auto;
@@ -25,12 +49,16 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
+} */
 
 h1 {
     text-align: center;
     color: #FFFFFF;
     /* padding: 50px 0 0 0; */
+}
+
+#secret-header {
+    cursor: pointer;
 }
 
 .button-container {
@@ -79,36 +107,6 @@ h1 {
     }
 }
 
-.action-container {
-    display: flex;
-    justify-content: space-around; /* Evenly space the buttons */
-    align-items: center;
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    max-width: 600px; /* Limit the width if needed */
-}
-
-.action-button {
-    padding: 10px 10px;
-    font-size: 16px;
-    color: #FFFFFF;
-    background-color: transparent; /* No color until hover */
-    border: transparent;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
-}
-
-.action-button:hover {
-    background-color: #5E35B1; /* Color on hover */
-    color: #FFFFFF;
-}
-
-.action-button:focus {
-    outline: none; /* Optional: remove focus outline */
-}
-
 #results {
     width: 100%;
     max-width: 600px;
@@ -122,35 +120,6 @@ h1 {
     width: 100%;
     height: auto;
     border-radius: 4px;
-}
-
-.upload-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.upload-form input[type="text"] {
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 4px;
-    border: none;
-    background-color: #23272A;
-    color: #FFFFFF;
-}
-
-.upload-form button {
-    padding: 10px;
-    border-radius: 4px;
-    font-size: 16px;
-    border: none;
-    background-color: #5E35B1;
-    color: white;
-    cursor: pointer;
-}
-
-.upload-form button:hover {
-    background-color: #4527A0;
 }
 
 /* Spinner CSS */
@@ -182,6 +151,7 @@ h1 {
     100% { transform: rotate(360deg); }
 }
 
+/* Notification */
 .notification {
     position: fixed;
     top: 50px;
@@ -195,7 +165,7 @@ h1 {
     transition: opacity 0.3s ease, transform 0.3s ease;
     transform: translateY(20px);
     pointer-events: none;
-    z-index: 2000;
+    z-index: 4000;
 }
 
 .notification.show {
@@ -203,6 +173,82 @@ h1 {
     transform: translateY(0);
 }
 
-#secret-header {
+/* Navigation Menu */
+.nav-container {
+    padding: 8px;
+    position: absolute;
+    top: 0;
+    left: 5px;
+    z-index: 1020; /* Ensure the container stays on top */
+}
+
+.hamburger {
+    display: block;
     cursor: pointer;
+    background: none;
+    border: none;
+    z-index: 1020;
+    position: relative; /* Add this to ensure it stays above the menu */
+}
+
+.hamburger-line {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    background-color: #3b3b3b;
+    transition: all 0.3s ease-in-out;
+}
+
+.action-container {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    min-width: 250px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 90%;
+    padding-top: 4rem;
+    border-radius: 4px;
+    background-color: rgb(0, 0, 0);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1010;
+}
+
+.action-container.active {
+    display: flex;
+}
+
+.action-button {
+    padding: 1rem 2rem;
+    border: none;
+    font-size: 16px;
+    background-color: transparent;
+    color: white;
+    cursor: pointer;
+    text-align: left;
+    /* border-radius: 4px; */
+    height: 50px;
+    width: 100%;
+}
+
+.action-button:hover {
+    background-color: #5E35B1;
+}
+
+.hamburger.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active .hamburger-line:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.active .hamburger-line:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+#uploadButton {
+    border-radius: 0 0 4px 4px;
 }

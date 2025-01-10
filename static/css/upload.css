@@ -64,11 +64,43 @@
     margin-left: 10px;
 } */
 
+/* From Shared */
+/* .upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+
+.upload-form button {
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 16px;
+    border: none;
+    background-color: #5E35B1;
+    color: white;
+    cursor: pointer;
+}
+
+.upload-form button:hover {
+    background-color: #4527A0;
+} */
+
 .upload-form {
     display: flex;
     width: 100%;
     flex-direction: column;
     gap: 10px;
+}
+
+.upload-form input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: none;
+    background-color: #23272A;
+    color: #FFFFFF;
 }
 
 .upload-form input[type="file"] {

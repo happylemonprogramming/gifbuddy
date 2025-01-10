@@ -110,6 +110,11 @@ def nostr():
     return render_template("nostr.html")
 
 # Upload Page
+@app.route("/collection")
+def collection():
+    return render_template("collection.html")
+
+# Upload Page
 @app.route("/upload")
 def upload():
     return render_template("upload.html")
@@ -303,6 +308,7 @@ def meme_create():
         )
 
     except ValueError as e:
+        logging.info(f"error: {str(e)}")
         return jsonify({"error": str(e)}), 400
     except Exception as e:
         logging.error(f"memecreate error: {str(e)}")
@@ -654,6 +660,21 @@ def gif_metadata():
     except Exception as e:
         logging.info(f'Metadata Failure Time: {round(time.time()-start, 1)}')
         return jsonify({"error": str(e)}), 500
+
+@app.route("/buddyblastr", methods=['POST'])
+def buddyblastr():
+    data = request.get_json()
+    event = data.get('event')
+
+    endpoint = "https://blastr-nb.lemonknowsall.workers.dev/event"
+    headers = {"Content-Type": "application/json"}
+    payload = ['EVENT', event]
+
+    response = requests.post(endpoint, headers=headers, json=payload)
+
+    logging.info(f"Status Code: {response.status_code}")
+    logging.info(f"Response JSON: {response.text}")
+    return response.text, response.status_code
 
 # Get URL from Nostr.Build Upload, then Complete NIP94 endpoint
 @app.route("/uploading", methods=['POST'])

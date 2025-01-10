@@ -7,8 +7,8 @@ const editor = document.getElementById('editor');
 const memeContainer = document.getElementById('meme-container');
 
 const backgroundImg = document.getElementById('background-img');
-backgroundImg.style.display = 'none';
-document.getElementById('loadingIndicator').style.display = 'block';
+// Set background initially
+backgroundImg.src = "https://image.nostr.build/f76f31486260140693c317185aca3404a15855e766ea785d12e79d33de9bf96a.jpg";
 
 backgroundImg.addEventListener('load', () => {
   document.getElementById('loadingIndicator').style.display = 'none';
@@ -41,7 +41,8 @@ function handleImagePreview() {
 
     if (!url) {
         // If the input is empty, reset everything
-        memeContainer.style.display = 'none'; // Clear invalid input
+        // memeContainer.style.display = 'none';
+        backgroundImg.src = "https://image.nostr.build/f76f31486260140693c317185aca3404a15855e766ea785d12e79d33de9bf96a.jpg";
         console.log('No URL input');
         return;
     }
@@ -773,7 +774,6 @@ aiInput.onkeypress = (e) => {
     searchStickers(searchInput.value);
   }
 };
-
 
 // Open/close modal functions
 function openAIModal() {

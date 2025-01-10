@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" href="{{url_for('static', filename='icons/icon_144x144.png')}}" type="image/png">
+    <link rel="icon" href="{{url_for('static', filename='icons/icon_192x192.png')}}" type="image/png">
+    <link rel="icon" href="{{url_for('static', filename='icons/icon_512x512.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/icon_144x144.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/icon_192x192.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/icon_512x512.png')}}" type="image/png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/meme.css') }}">
+    <title>GIF Buddy🫂</title>
+</head>
+<body>
+    <div class="action-container">
+        <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+        <button class="action-button" id="searchButton" onclick="window.location.href='/'">Search</button>
+        <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
+    </div>    
+
+    <div id="notification" class="notification"></div>
+
+    <div class="container">
+        <h1 id="memeHeader">Meme GIFs 🐸</h1>
+        <form class="upload-form" id="memeForm">
+            <input type="text" id="captionInput" name="caption" placeholder="GIF Caption" required>
+            <input type="text" id="urlInput" name="prompt" placeholder="GIF or Image Url" required>
+            <button type="submit">Meme</button>
+        </form>
+    
+        <!-- Loading indicator (initially hidden) -->
+        <div id="loadingIndicator" style="display: none;">
+            <div class="spinner"></div>
+            <p>Generating...</p>
+        </div>
+    
+        <!-- Results container -->
+        <div id="results"></div>
+    </div>
+
+    <div class="button-container">
+        <button target="_blank" class="github-button" id="npub">
+            <img src="/static/ostrich.svg" alt="GitHub logo" class="github-logo">
+        </button>
+        <button id="zap-button" class="zap-button">
+            ⚡
+        </button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/meme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gestures.js') }}"></script>
+</body>
+</html>

@@ -7,7 +7,7 @@ from functools import wraps
 from typing import Callable
 
 # API Reference
-from gifsearch import fetch_gifs
+from gifsearch import fetch_gifs, passthru
 from lightningpay import lightning_quote, invoice_status
 from imgflip import search_memes, caption_image, get_memes
 from creategif import lumatexttovideo, getvideo, gifit, resize_gif_to_limit
@@ -168,6 +168,18 @@ def search():
         gifs['next'] = output.get('next', None)
 
     return jsonify(gifs)
+
+# Search GIFs API endpoint
+@api_service.route("/api/passthru", methods=['POST'])
+@require_api_key(api_cache)
+def passthru():
+    # Capture user data
+    data = request.get_json()  # Get the JSON data from the request body
+    endpoint = data.get('endpoint')  # Extract the search term
+    parameters = data.get('parameters')
+    output = passthru(endpoint, parameters)
+    
+    return jsonify(output)
 
 # Search NIP94 endpoint
 @api_service.route("/api/nostr_gifs", methods=['POST'])

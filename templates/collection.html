@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_144x144.png')}}" type="image/png">
+    <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_192x192.png')}}" type="image/png">
+    <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_512x512.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_144x144.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_192x192.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_512x512.png')}}" type="image/png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/collection.css') }}">
+    <title>GIF Buddy🫂</title>
+</head>
+<body>
+    <!-- <div class="action-container">
+        <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+        <button class="action-button" id="searchButton" onclick="window.location.href='/'">Search</button>
+        <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
+        <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collection</button>
+    </div>     -->
+
+    <nav class="nav-container">
+        <button class="hamburger">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        <div class="action-container">
+            <button class="action-button" id="searchButton" onclick="window.location.href='/gifsearch'">Search GIFs</button>
+            <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search Memes</button>
+            <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Create Meme</button>
+            <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collections</button>
+            <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+        </div>
+    </nav>
+
+    <div id="notification" class="notification"></div>
+    
+    <!-- Modal Structure -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <img id="modalImage" src="">
+            <div id="modalTextDiv">
+                <label for="modalText" id="modalTextLabel">Shortcode:</label>
+                <input id="modalText" placeholder="Shortcode"></input>
+                <button id="remove-button" class="modalButton">Remove</button>
+                <button id="save-button" class="modalButton">Save & Close</button>
+            </div>
+        </div>
+        <span class="modal-close">&times;</span>
+    </div>
+
+    <div class="container">
+        <h1 id="secret-header" >GIF Collection 💾</h1>
+
+        <!-- <div id="publish-box" class="search-box" style="display: none"> -->
+        <div id="publish-box" class="search-box">
+            <input type="text" id="collection-input" placeholder="Collection Name">
+            <button id="publish-button" class="disabled">Publish</button>
+        </div>
+
+        <span id="temp-text">Search to Add GIFs to Collection</span>
+        <div id="collection" style="display: none"></div>
+        
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Search GIFs for Collection" autofocus onclick="this.focus();">
+            <button id="search-button">Search</button>
+        </div>
+
+        <img id="instructions" src="https://image.nostr.build/05466f64631d22955fafdc35369eea4fa71ee59f2352400798203976357f6f4e.jpg"></img>
+        <div id="results"></div>
+        
+        <div id="next-container" style="display: none;">
+            <button id="load-more-button">Load More</button>
+            <button id="reset-button">Start Over</button>
+        </div>
+
+        <div class="powered-by" onclick="window.location.href='/nostr'">
+            Powered by Tenor
+        </div>
+    </div>
+
+    <button id="meme-gif-button" style="display: none;" onclick="window.location.href='/meme'">Meme GIF</button>
+
+    <div class="button-container">
+        <button target="_blank" class="github-button" id="npub">
+            <img src="/static/ostrich.svg" alt="GitHub logo" class="github-logo">
+        </button>
+        <button id="zap-button" class="zap-button">
+            ⚡
+        </button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/collection.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gestures.js') }}"></script>
+</body>
+</html>

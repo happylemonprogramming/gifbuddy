@@ -1,3 +1,8 @@
+const imageModal = document.getElementById('image-modal');
+const previewImage = document.getElementById('preview-image');
+const bottomText = document.getElementById('bottom-text');
+const shareMeme = document.getElementById('share-meme');
+
 function copyTextToClipboard(text) {
   try {
       // Create a temporary element to hold the text
@@ -26,46 +31,38 @@ function copyTextToClipboard(text) {
   }
 }
 
+// Function to check if a blob URL is an animated image type
+async function isAnimatedImage(blobUrl) {
+  try {
+      // Fetch the blob URL
+      const response = await fetch(blobUrl);
+      if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      // Get the blob
+      const blob = await response.blob();
+      
+      // List of animated image MIME types
+      const animatedTypes = [
+          'image/gif',
+          'image/webp',
+          'image/apng'
+      ];
+      
+      return animatedTypes.includes(blob.type);
+  } catch (error) {
+      console.error('Error checking blob type:', error);
+      return false;
+  }
+}
+
+// Updated click event listener
 document.getElementById('log-button').addEventListener('click', async () => {
-    const container = document.getElementById('meme-container');
-    const backgroundImg = document.getElementById('background-img');
-    const picker = document.getElementById('emoji-picker');
-    const imageUrl = document.getElementById('urlInput').value; // Get the image URL input value
-
-    if (!imageUrl) {
-        alert("Please enter an image URL.");
-        return;
-    }
-
-    picker.style.display = 'none';
-
-    if (backgroundImg.src.toLowerCase().includes('.gif') || backgroundImg.src.toLowerCase().includes('.webp')) {
-      console.log('Before createGIFMeme function', { 
-          containerWidth: container.offsetWidth, 
-          containerHeight: container.offsetHeight,
-          imageUrl: imageUrl
-        });
-        // Hide the background image temporarily
-        backgroundImg.style.display = 'none';
-
-        console.log('Capturing meme background');
-        console.log(imageUrl)
-        await createGIFMeme(container, imageUrl);
-
-        // Show the background image again after capture
-        backgroundImg.style.display = 'block';
-        
-    } else {
-        console.log('Not a GIF, using standard capture method');
-        await createMeme(container)
-    }
-});
-
-document.getElementById('link-button').addEventListener('click', async () => {
   const container = document.getElementById('meme-container');
   const backgroundImg = document.getElementById('background-img');
   const picker = document.getElementById('emoji-picker');
-  const imageUrl = document.getElementById('urlInput').value; // Get the image URL input value
+  const imageUrl = document.getElementById('urlInput').value;
 
   if (!imageUrl) {
       alert("Please enter an image URL.");
@@ -73,6 +70,48 @@ document.getElementById('link-button').addEventListener('click', async () => {
   }
 
   picker.style.display = 'none';
+
+  try {
+      // Check if the image is animated
+      const isAnimated = await isAnimatedImage(imageUrl);
+
+      if (isAnimated) {
+          console.log('Before createGIFMeme function', { 
+              containerWidth: container.offsetWidth, 
+              containerHeight: container.offsetHeight,
+              imageUrl: imageUrl
+          });
+          
+          backgroundImg.style.display = 'none';
+          bottomText.innerHTML = 'Tap and Hold to Copy!';
+
+          console.log('Capturing animated image background');
+          console.log(imageUrl);
+          await createGIFMeme(container, imageUrl);
+
+          backgroundImg.style.display = 'block';
+      } else {
+          console.log('Not an animated image, using standard capture method');
+          await createMeme(container);
+      }
+  } catch (error) {
+      console.error('Error processing image:', error);
+      alert('Error processing image');
+  }
+});
+
+document.getElementById('link-button').addEventListener('click', async () => {
+  const container = document.getElementById('meme-container');
+  const backgroundImg = document.getElementById('background-img');
+  // const picker = document.getElementById('emoji-picker');
+  const imageUrl = document.getElementById('urlInput').value; // Get the image URL input value
+
+  if (!imageUrl) {
+      alert("Please enter an image URL.");
+      return;
+  }
+
+  // picker.style.display = 'none';
 
   if (backgroundImg.src.toLowerCase().includes('.gif') || backgroundImg.src.toLowerCase().includes('.webp')) {
     // Hide the background image temporarily
@@ -91,6 +130,38 @@ document.getElementById('link-button').addEventListener('click', async () => {
 });
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Create meme functionality
+async function createMeme(container) {
+  // container.classList.add('capture-mode');
+    try {
+      const canvas = await html2canvas(container, {
+        scale: 2, // Adjust for performance
+        useCORS: true,
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+      });
+
+      // container.classList.remove('capture-mode');
+      
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          console.error("Failed to generate blob from canvas");
+          return;
+        }
+        
+        try {
+          // Open Modal
+          fallbackDownload(blob);
+        } catch (clipboardError) {
+          console.warn("Clipboard write failed, attempting alternative methods...");
+        }
+        
+      }, 'image/png');
+    } catch (error) {
+      alert("An unexpected error occurred during capture:", error.message);
+    }
+} 
 
 // Update createMeme function to send both image and URL to API
 async function createGIFMeme(container, imageUrl) {
@@ -167,40 +238,11 @@ async function createGIFMeme(container, imageUrl) {
               const memeBlob = await response.blob();
 
               try {
-                // Attempt to copy the blob to the clipboard
-                console.log('Attempting to copy blob to clipboard');
-                const clipboardItem = new ClipboardItem({ 'image/gif': memeBlob });
-                await navigator.clipboard.write([clipboardItem]);
-                showNotification("Copied!");
-                console.log('Blob successfully copied to clipboard');
-              } catch (clipboardError) {
-                console.warn("Clipboard write failed, attempting alternative methods...", clipboardError);
-      
-                try {
-                  // Try to use the Web Share API
-                  if (navigator.share) {
-                    console.log('Attempting to use Web Share API');
-                    const shareData = {
-                      files: [new File([memeBlob], 'memeamigo.gif', { type: 'image/gif' })],
-                      // title: 'MEME AMIGO!',
-                    };
-                    await navigator.share(shareData);
-                    console.log('Meme shared successfully!');
-                    fallbackDownload(memeBlob);
-                  } else {
-                    throw new Error('Web Share API not supported');
-                  }
-                } catch (shareError) {
-                  console.warn("Web Share API failed or unsupported, falling back to download...", shareError);
-                  try {
-                    // Fallback to download only
-                    console.log('Attempting fallback download', memeBlob)
-                    fallbackDownload(memeBlob);
-                  } catch (downloadError) {
-                    console.error("All methods failed:", downloadError.message);
-                  }
+                // Open Modal
+                fallbackDownload(memeBlob);
+                } catch (downloadError) {
+                  console.error("All methods failed:", downloadError.message);
                 }
-              }
 
           } catch (apiError) {
               console.error("Failed to send data to API:", apiError);
@@ -208,10 +250,86 @@ async function createGIFMeme(container, imageUrl) {
               alert(`Failed to send data to the server: ${apiError.message}`);
           }
       }, 'image/png');
+
   } catch (error) {
       console.error('Unexpected error during capture:', error);
       document.getElementById('loadingIndicator').style.display = 'none';
       alert(`An unexpected error occurred during capture: ${error.message}`);
+  }
+}
+
+async function blobCopy(blob) {
+  try {
+    const mimeType = blob.type; // Detect the MIME type of the blob
+
+    console.log('MIME type detected:', mimeType);
+
+    // Supported MIME types
+    const supportedMimeTypes = ['image/gif', 'image/webp', 'image/png', 'image/jpeg'];
+
+    if (!supportedMimeTypes.includes(mimeType)) {
+      showNotification('Unsupported file type');
+      console.error('Unsupported MIME type:', mimeType);
+      return;
+    }
+
+    // Prepare the ClipboardItem
+    const clipboardItem = new ClipboardItem({ [mimeType]: blob });
+
+    // Write the blob to the clipboard
+    await navigator.clipboard.write([clipboardItem]);
+    showNotification('Copied Image!');
+    console.log('Blob successfully copied to clipboard');
+  } catch (error) {
+    console.error('Failed to copy blob to clipboard:', error);
+    showNotification('Copy Failed, Try Long Press');
+  }
+}
+
+// Close image modal functionality
+document.getElementById('share-meme').addEventListener('click', () => {
+  memeBlob = previewImage.src
+  console.log(memeBlob)
+  shareImage(memeBlob)
+});
+
+async function shareImage(memeBlob) {
+  try {
+    // Fetch the blob to detect its type
+    const response = await fetch(memeBlob);
+    const blob = await response.blob();
+    const mimeType = blob.type; // Get the MIME type of the blob
+
+    console.log('MIME type detected:', mimeType);
+
+    let fileName = 'memeamigo';
+    let fileType = '';
+    if (mimeType === 'image/gif') {
+      fileName += '.gif';
+      fileType = 'image/gif';
+    } else if (mimeType === 'image/png') {
+      fileName += '.png';
+      fileType = 'image/png';
+    } else {
+      showNotification('Unsupported file type');
+      return;
+    }
+
+    // Prepare the file for sharing
+    const file = new File([blob], fileName, { type: fileType });
+
+    if (navigator.share) {
+      const shareData = {
+        files: [file],
+      };
+      await navigator.share(shareData);
+      console.log('Meme shared successfully!');
+    } else {
+      throw new Error('Web Share API not supported');
+    }
+  } catch (error) {
+    console.error('Error sharing image:', error);
+    showNotification('Failed to Share');
   }
 }
 
@@ -318,7 +436,6 @@ async function createGIFMemeUrl(container, imageUrl) {
                 console.log(data.url)
 
                 // Need to use local storage if using fallback modal
-                // localStorage.setItem('copiedText', data.url);
                 fallbackUrl(data.url);
 
                 document.getElementById('loadingIndicator').style.display = 'none';
@@ -337,92 +454,45 @@ async function createGIFMemeUrl(container, imageUrl) {
     }
 }
 
-// Create meme functionality
-async function createMeme(container) {
-    // container.classList.add('capture-mode');
-      try {
-        const canvas = await html2canvas(container, {
-          scale: 2, // Adjust for performance
-          useCORS: true,
-          width: container.offsetWidth,
-          height: container.offsetHeight,
-        });
-  
-        // container.classList.remove('capture-mode');
-        
-        canvas.toBlob(async (blob) => {
-          if (!blob) {
-            console.error("Failed to generate blob from canvas");
-            return;
-          }
-          
-          try {
-            // Attempt to copy the blob to the clipboard
-            const clipboardItem = new ClipboardItem({ 'image/png': blob });
-            await navigator.clipboard.write([clipboardItem]);
-            showNotification("Copied Image!");
-          } catch (clipboardError) {
-            console.warn("Clipboard write failed, attempting alternative methods...");
-  
-            try {
-              // Try to use the Web Share API
-              if (navigator.share) {
-                const shareData = {
-                  files: [new File([blob], 'memeamigo.png', { type: 'image/png' })],
-                  // title: 'MEME AMIGO!',
-                };
-                await navigator.share(shareData);
-                fallbackDownload(blob);
-                console.log('Meme shared successfully!');
-              } else {
-                throw new Error('Web Share API not supported');
-              }
-            } catch (shareError) {
-              console.warn("Web Share API failed or unsupported, falling back to download...");
-              try {
-                // Fallback to download
-                fallbackDownload(blob);
-              } catch (downloadError) {
-                console.error("All methods failed:", downloadError.message);
-              }
-            }
-          }
-        }, 'image/png');
-      } catch (error) {
-        alert("An unexpected error occurred during capture:", error.message);
-      }
-} 
-
 // Fallback download method
 function fallbackDownload(blob) {
-    const imageModal = document.getElementById('image-modal');
-    const previewImage = document.getElementById('preview-image');
-    // const bottomText = document.getElementById('bottom-text')
-    // bottomText.innerText = 'Tap and Hold to Copy!';
-
     // Display modal with generated image
     imageModal.style.display = 'flex';
+    shareMeme.style.display = 'flex';
     // Set the image source to the blob URL
     const url = URL.createObjectURL(blob);
     previewImage.src = url;
-}
+};
 
 // Fallback download method
 function fallbackUrl(url) {
-    const imageModal = document.getElementById('image-modal');
-    const previewImage = document.getElementById('preview-image');
-    const bottomText = document.getElementById('bottom-text')
-    bottomText.innerText = 'Click Meme to Copy!';
-
     // Display modal with generated image
     imageModal.style.display = 'flex';
     // Set the image source to the input URL
     previewImage.src = url;
-    previewImage.addEventListener('click', () => {
-      copyTextToClipboard(String(url));
-      showNotification('Copied URL!')
-    });
+    shareMeme.style.display = 'none';
 };
+
+previewImage.addEventListener('click', () => {
+  const url = previewImage.src;
+  if (url.startsWith('blob:')) {
+    // Handle blob copy
+    fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        blobCopy(blob);
+        showNotification('Copied Blob!');
+      })
+      .catch(err => {
+        console.error('Error copying blob:', err);
+        showNotification('Failed to copy Blob.');
+      });
+  } else {
+    // Handle normal web URL
+    copyTextToClipboard(String(url));
+    showNotification('Copied URL!');
+  }
+});
 
 // Close image modal functionality
 document.getElementById('close-image').addEventListener('click', () => {
@@ -430,69 +500,116 @@ document.getElementById('close-image').addEventListener('click', () => {
     imageModal.style.display = 'none';
 });
 
-// Upload from camera roll
-document.addEventListener('DOMContentLoaded', function() {
+// 2. Memory Management Improvements
+// Add cleanup for modals and blobs:
+function cleanupModal() {
+  if (previewImage.src.startsWith('blob:')) {
+    URL.revokeObjectURL(previewImage.src);
+  }
+  previewImage.src = '';
+  imageModal.style.display = 'none';
+}
+
+document.getElementById('close-image').addEventListener('click', cleanupModal);
+
+
+document.addEventListener('DOMContentLoaded', function () {
   const fileInput = document.getElementById('fileInput');
   const urlInput = document.getElementById('urlInput');
   const uploadBtn = document.getElementById('uploadImageBtn');
   const backgroundImg = document.getElementById('background-img');
   const memeContainer = document.getElementById('meme-container');
 
-  // Function to update container dimensions while respecting max-width
-  function updateContainerDimensions() {
-      if (backgroundImg.complete) {
-          const imgWidth = backgroundImg.width;
-          const imgHeight = backgroundImg.height;
-          const maxWidth = window.innerWidth > 768 ? 700 : 600;
-          
-          // Calculate scaled height while respecting max-width
-          let finalWidth = Math.min(imgWidth, maxWidth);
-          let finalHeight = (imgHeight * finalWidth) / imgWidth;
-          
-          // Only set height - width will be handled by CSS
-          memeContainer.style.height = finalHeight + 'px';
-      }
-  }
+  // Define allowed image types
+  const allowedMimeTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/heic',  // iPhone HEIC format
+    'image/heif',  // iPhone HEIF format
+    'image/jpg'
+  ];
 
-  // Function to convert blob to base64
-  function blobToBase64(blob) {
-      return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-      });
+  const allowedExtensions = [
+    'jpg',
+    'jpeg',
+    'png',
+    'heic',
+    'heif'
+  ];
+
+  // Function to check if file type is allowed
+  function isAllowedImageFile(file) {
+    // Check MIME type
+    const mimeTypeAllowed = allowedMimeTypes.includes(file.type.toLowerCase());
+    
+    // Check file extension
+    const fileName = file.name.toLowerCase();
+    const extension = fileName.split('.').pop();
+    const extensionAllowed = allowedExtensions.includes(extension);
+
+    return mimeTypeAllowed || extensionAllowed;
   }
 
   // Trigger file input when upload button is clicked
   uploadBtn.addEventListener('click', () => {
-      fileInput.click();
+    fileInput.click();
   });
 
   // Handle file selection
-  fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (file) {
-          if (!file.type.startsWith('image/')) {
-              alert('Please select an image file');
-              return;
-          }
-
-          try {
-              const base64Url = await blobToBase64(file);
-              backgroundImg.src = base64Url;
-              urlInput.value = base64Url;
-              backgroundImg.crossOrigin = "anonymous";
-              
-              backgroundImg.onload = () => {
-                  updateContainerDimensions();
-              };
-          } catch (error) {
-              console.error('Error processing image:', error);
-              alert('Error processing image');
-          }
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!isAllowedImageFile(file)) {
+        alert('Please select a valid image file (JPEG, PNG, or HEIC/HEIF)');
+        fileInput.value = ''; // Reset file input
+        return;
       }
+
+      try {
+        // Reset container dimensions
+        resetContainerDimensions();
+
+        // Create a temporary URL for the selected image file
+        const tempUrl = URL.createObjectURL(file);
+        backgroundImg.src = tempUrl;
+        urlInput.value = tempUrl;
+        backgroundImg.crossOrigin = "anonymous";
+
+        // Handle image load and dimension updates
+        backgroundImg.onload = () => {
+          updateContainerDimensions();
+          // URL.revokeObjectURL(tempUrl);
+        };
+      } catch (error) {
+        console.error('Error processing image:', error);
+        alert('Error processing image');
+        fileInput.value = ''; // Reset file input
+      }
+    }
   });
+
+  // Function to reset container dimensions
+  function resetContainerDimensions() {
+    memeContainer.style.width = '';
+    memeContainer.style.height = '';
+  }
+
+  // Function to update container dimensions while respecting max-width
+  function updateContainerDimensions() {
+    if (backgroundImg.complete) {
+      const imgWidth = backgroundImg.width;
+      const imgHeight = backgroundImg.height;
+      const maxWidth = window.innerWidth > 768 ? 700 : 600;
+
+      // Calculate scaled dimensions while respecting max-width
+      let finalWidth = Math.min(imgWidth, maxWidth);
+      let finalHeight = (imgHeight * finalWidth) / imgWidth;
+
+      // Set both width and height
+      memeContainer.style.width = finalWidth + 'px';
+      memeContainer.style.height = finalHeight + 'px';
+    }
+  }
 
   // Handle window resizing
   window.addEventListener('resize', updateContainerDimensions);

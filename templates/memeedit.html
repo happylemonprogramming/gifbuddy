@@ -16,11 +16,27 @@
   <title>Meme Amigo 🎉</title>
 </head>
 <body>
-  <div class="action-container">
+  <!-- <div class="action-container">
     <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
     <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search</button>
     <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
-  </div>    
+    <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collection</button>
+  </div>     -->
+
+  <nav class="nav-container">
+    <button class="hamburger">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+    </button>
+    <div class="action-container">
+        <button class="action-button" id="searchButton" onclick="window.location.href='/gifsearch'">Search GIFs</button>
+        <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search Memes</button>
+        <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Create Meme</button>
+        <!-- <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collections</button> -->
+        <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+    </div>
+</nav>
 
   <div id="notification" class="notification"></div>
 
@@ -33,8 +49,9 @@
 
   <div id="image-modal" class="modal" style="display: none;">
     <button id="close-image" class="close-modal">Close</button>
+    <div id="bottom-text" class="pro-tip">Tap to Copy!</div>
     <img id="preview-image" alt="Generated Meme">
-    <div id="bottom-text" class="pro-tip">Tap and Hold to Copy!</div>
+    <button id="share-meme" class="toolbar-button">Share</button>
   </div>
 
   <!-- Modal Structure -->
@@ -123,9 +140,10 @@
   <div id="editor" class="editor-container">
     <!-- <h1 id="memeHeader">Caption Meme 🐸</h1> -->
     <div class="input-container">
-      <label id="urlInputLabel" for="urlInput">URL:</label>
+      <!-- <label id="urlInputLabel" for="urlInput">URL:</label> -->
       <input type="text" id="urlInput" placeholder="Image Url" required>
-      <button class="toolbar-button" id="uploadImageBtn"><span class="emoji">📸</span></button>
+      <!-- <button class="toolbar-button" id="uploadImageBtn"><span class="emoji">📸</span></button> -->
+      <button class="toolbar-button" id="uploadImageBtn"></button>
       <input type="file" id="fileInput" accept="image/*" style="display: none">
     </div>
     <div id="meme-container">
@@ -135,14 +153,20 @@
 
     <div class="toolbar">
       <!-- <button class="toolbar-button" onclick="location.reload()"><span class="emoji">🔄</span></button> -->
-      <button class="toolbar-button" id="settings"><span class="emoji">⚙️</span></button>
+      <!-- <button class="toolbar-button" id="settings"><span class="emoji">⚙️</span></button> -->
       <!-- <button class="toolbar-button" id="paint" onclick="jsPaint()"><span class="emoji">🎨</span></button> -->
-      <button class="toolbar-button" id="add-emoji"><span class="emoji">😃</span></button>
+      <!-- <button class="toolbar-button" id="add-emoji"><span class="emoji">😃</span></button> -->
       <!-- <button class="toolbar-button" id="ai-generator"><span class="emoji">🤖</span></button> -->
-      <button class="toolbar-button" id="stickers"> Add Sticker</button>
-      <button class="toolbar-button" onclick="addTextBox()">Add Text</button>
+      <!-- <button class="toolbar-button" id="stickers"> Add Sticker</button>
+      <button class="toolbar-button" id="text-button" onclick="addTextBox()">Add Text</button>
       <button class="toolbar-button" id="log-button">Share Image</button>
-      <button class="toolbar-button" id="link-button">Copy Url</button>
+      <button class="toolbar-button" id="link-button">Copy Url</button> -->
+      <button class="toolbar-button" id="settings"></button>
+      <button class="toolbar-button" id="add-emoji"></button>
+      <button class="toolbar-button" id="stickers"></button>
+      <button class="toolbar-button" id="text-button" onclick="addTextBox()"></button>
+      <button class="toolbar-button" id="log-button"></button>
+      <button class="toolbar-button" id="link-button"></button>
     </div>
     
     <!-- Emoji picker container -->

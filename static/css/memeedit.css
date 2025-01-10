@@ -11,14 +11,20 @@
 
 .input-container {
   margin-top: 10px;
+  margin-bottom: 5px;
   display: flex;
   align-items: center;
   gap: 8px; /* Adjust spacing between elements */
+  background-color: #8054d6;
+  border-radius: 4px;
 }
 
 #urlInput {
   flex: 1; /* Allows the input to expand and take available space */
   padding: 8px;
+  background-color: #8054d6;
+  color: black;
+  font-size: 18px;
 }
 
 #uploadImageBtn {
@@ -28,7 +34,7 @@
 }
 
 #urlInputLabel {
-  margin-bottom: 5px;
+  /* margin-bottom: 5px; */
   font-size: 16px;
   color: #ffffff;
 }
@@ -38,7 +44,7 @@
     width: 100%;
     /* max-width: 600px; */
     padding: 10px;
-    margin-bottom: 5px;
+    /* margin-bottom: 5px; */
     font-size: 16px;
     border-radius: 4px;
     border: none;
@@ -243,7 +249,7 @@
   transform: translateX(-50%);
 }
 
-#meme-container {
+/* #meme-container {
   position: relative;
   width: 100%;
   max-width: 700px;
@@ -253,7 +259,58 @@
   overflow: hidden;
 }
 
-@media (max-width: 768px) {
+#background-img {
+  width: 100%;
+  height: auto;
+  background: transparent;
+  object-fit: contain;
+} */
+
+/* #meme-container {
+  position: relative;
+  width: auto;
+  max-width: 700px;
+  max-height: 75vh;
+  margin: 0 auto;
+  background: transparent;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+#background-img {
+  width: auto;
+  max-width: 100vw;
+  height: 100%;
+  max-height: 75vh;
+  background: transparent;
+  object-fit: contain;
+} */
+
+#meme-container {
+  position: relative;
+  width: auto;
+  max-width: 700px;
+  max-height: 75vh;
+  margin: 0 auto;
+  background: transparent;
+  overflow: hidden;
+  display: flex;
+  justify-content: center; /* Center the image horizontally */
+  align-items: center; /* Center the image vertically */
+}
+
+#background-img {
+  width: auto;
+  height: auto;
+  max-width: 100vw;
+  max-height: 100%;
+  background: transparent;
+  object-fit: contain; /* Preserve aspect ratio within container */
+}
+
+
+/* @media (max-width: 768px) {
   .editor-container {
       max-width: 600px;
   }
@@ -261,7 +318,7 @@
   #meme-container {
       max-width: 600px;
   }
-}
+} */
 
 #watermark {
   position: absolute;
@@ -276,14 +333,6 @@
   pointer-events: none; /* Ensure watermark is not clickable or selectable */
 }
 
-#background-img {
-  width: 100%;
-  /* height: 100%; */
-  height: auto;
-  background: transparent;
-  object-fit: contain;
-}
-
 .draggable.text-box {
   background-color: transparent;
   background-blend-mode: normal;  /* This can help with transparency */
@@ -295,6 +344,9 @@
     display: flex;
     justify-content: space-around; /* Evenly space the buttons */
     align-items: center;
+    border-radius: 4px;
+    background-color: #8054d6;
+    padding: 5px;
     /* position: absolute;
     top: 10px;
     left: 10px; */
@@ -318,19 +370,66 @@
   font-size: 14px;
   padding: 10px;
   white-space: normal; /* Allows text wrapping */
-  font-weight: bold;
+  /* font-weight: bold; */
   width: 70px;
   height: 48px;
+  /* display: flex; */
   color: #FFFFFF;
+  align-items: center;
   background-color: transparent; /* No color until hover */
   border: transparent;
+  /* border: 1px solid #5E35B1; */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center; /* This ensures the image is centered */
   cursor: pointer;
   border-radius: 4px;
   transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover transition */
 }
 
+#share-meme {
+  font-size: 24px;
+  width: 80px;
+  height: 55px;
+  padding: 5px;
+  background-color: #5E35B1;
+}
+
+#uploadImageBtn, #add-emoji, #settings {
+  border: none;
+}
+
+#uploadImageBtn {
+  background-image: url('buttons/Camera.png');
+}
+
+#stickers {
+  background-image: url('buttons/Sticker.png');
+}
+
+#text-button {
+  background-image: url('buttons/Text.png');
+}
+
+#log-button {
+  background-image: url('buttons/Share.png');
+}
+
+#link-button {
+  background-image: url('buttons/Link.png');
+}
+
+#settings {
+  background-image: url('buttons/Settings.png');
+}
+
+#add-emoji {
+  background-image: url('buttons/Emoji.png');
+}
+
 .toolbar-button:hover, .camera-button:hover {
     background-color: #5E35B1; /* Color on hover */
+    border: 1px solid #5E35B1;
     color: #FFFFFF;
 }
 
@@ -348,7 +447,7 @@
   width: 100vw;
   height: 100vh;
   background: rgba(0, 0, 0, 0.9);
-  z-index: 1000;
+  z-index: 2000;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -395,7 +494,33 @@
   padding: 10px;
 } */
 
+/* #image-modal {
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+#image-modal img {
+  max-width: 90%;
+  max-height: 90%;
+  margin-top: 50px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background: white;
+  padding: 10px;
+}
+
+.pro-tip {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  margin-top: auto;
+} */
+
 #image-modal {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
   justify-content: center;
   align-items: center;
   height: 100vh; /* Full viewport height */
@@ -403,22 +528,21 @@
 
 #image-modal img {
   max-width: 90%;
-  max-height: 90%;
-  margin-top: 50px;
+  max-height: 80%;
+  margin: 5px;
   border-radius: 8px;
   background: white;
   padding: 10px;
 }
 
 .pro-tip {
-  position: fixed;
-  top: 10px;
   font-size: 18px;
   font-weight: bold;
   color: #ffffff;
   text-align: center;
-  margin-top: auto;
+  margin: 5px;
 }
+
 
 /* Settings Modal */
 #settings-content {
@@ -500,7 +624,7 @@
 }
 
 /* Emoji Size */
-.toolbar-button .emoji {
+.emoji {
   display: inline-block;
   transform: scale(2);
   line-height: 1;
@@ -568,7 +692,7 @@
 
 .search-container button {
   padding: 8px 16px;
-  background-color: #4CAF50;
+  background-color: #5E35B1;
   color: white;
   border: none;
   border-radius: 4px;

@@ -15,12 +15,27 @@
     <title>GIF Buddy🫂</title>
 </head>
 <body>
-    <div class="action-container">
+    <!-- <div class="action-container">
         <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
         <button class="action-button" id="searchButton" onclick="window.location.href='/'">Search</button>
-        <!-- <button class="action-button" id="createButton" onclick="window.location.href='/create'">Create</button> -->
         <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
-    </div>    
+        <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collection</button>
+    </div>     -->
+
+    <nav class="nav-container">
+        <button class="hamburger">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        <div class="action-container">
+            <button class="action-button" id="searchButton" onclick="window.location.href='/gifsearch'">Search GIFs</button>
+            <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search Memes</button>
+            <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Create Meme</button>
+            <!-- <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collections</button> -->
+            <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+        </div>
+    </nav>
 
     <div id="notification" class="notification"></div>
     
@@ -28,11 +43,12 @@
         <h1 id="secret-header" onclick="window.location.href='/memesearch'">GIF Buddy 🤙</h1>
         <div id="counter">GIFs Set Free: <span id="counter-value"></span></div>
         <div class="search-box">
-            <input type="text" id="search-input" placeholder="GIF It Your Best Shot" autofocus onclick="this.focus();">
+            <input type="text" id="search-input" placeholder="Search GIFs" autofocus onclick="this.focus();">
             <button id="search-button">Search</button>
         </div>
 
-        <img id="instructions" src="https://image.nostr.build/bbbacf56584a0515b1aff811d8eb1bb5b339e0ad0a10320e151f11e6773227de.gif"></img>
+        <img id="instructions" src="https://image.nostr.build/96d60ede21622499894bb5a20a3d8a6ebd2e3438f71395332e0fb3190a7ce78d.gif"></img>
+        <!-- <img id="instructions" src="https://image.nostr.build/bbbacf56584a0515b1aff811d8eb1bb5b339e0ad0a10320e151f11e6773227de.gif"></img> -->
         <div id="results"></div>
         
         <div id="next-container" style="display: none;">

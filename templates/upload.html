@@ -15,17 +15,32 @@
     <title>GIF Buddy🫂</title>
 </head>
 <body>
-    <div class="action-container">
+    <!-- <div class="action-container">
         <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
         <button class="action-button" id="searchButton" onclick="window.location.href='/'">Search</button>
-        <!-- <button class="action-button" id="createButton" onclick="window.location.href='/create'">Create</button> -->
         <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
-    </div>    
+        <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collection</button>
+    </div>     -->
+
+    <nav class="nav-container">
+        <button class="hamburger">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        <div class="action-container">
+            <button class="action-button" id="searchButton" onclick="window.location.href='/gifsearch'">Search GIFs</button>
+            <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search Memes</button>
+            <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Create Meme</button>
+            <!-- <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collections</button> -->
+            <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+        </div>
+    </nav>
 
     <div id="notification" class="notification"></div>
 
     <div class="container">
-        <h1 id="uploadHeader">Upload Media📤</h1>
+        <h1 id="uploadHeader">Upload Media 📤</h1>
         <form class="upload-form" id="uploadForm">
             <div class="drop-zone" id="dropZone">
                 <input type="file" id="fileUpload" style ="display: none" accept=".gif,.mp4,.png,.jpg,.jpeg" required>
@@ -38,12 +53,17 @@
                     <span class="remove-file" title="Remove file">×</span>
                 </div>
             </div>
-            <input type="text" id="caption" placeholder="Search Term, Caption or Description" required>
+            <input type="text" id="caption" placeholder="Caption, Description, or Search Term" required>
             <button type="submit">Upload</button>
         </form>
+        <p style="color: gray; font-size: 14px; font-style: italic;">
+            <a href="https://github.com/nostr-protocol/nips/blob/master/94.md" target="_blank" style="color: gray; text-decoration: none;">
+                What is NIP-94?
+            </a>
+        </p>
 
-        <!-- Loading indicator (initially hidden)
-        <div id="loadingIndicator" style="display: none;">
+        <!-- Loading indicator (initially hidden) -->
+        <!-- <div id="loadingIndicator" style="display: none;">
             <div class="spinner"></div>
             <p>Uploading GIF...</p>
         </div> -->

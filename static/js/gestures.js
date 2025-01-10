@@ -26,6 +26,29 @@ zapper.addEventListener('click', async () => {
     }
 });
 
+const hamburger = document.querySelector('.hamburger');
+const actionContainer = document.querySelector('.action-container');
+
+hamburger.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent document click from immediately closing the menu
+    hamburger.classList.toggle('active');
+    actionContainer.classList.toggle('active');
+});
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+    // Check if the click was outside both the hamburger and the menu
+    if (!hamburger.contains(e.target) && !actionContainer.contains(e.target)) {
+        hamburger.classList.remove('active');
+        actionContainer.classList.remove('active');
+    }
+});
+
+// Prevent clicks inside the menu from closing it
+actionContainer.addEventListener('click', (e) => {
+    e.stopPropagation();
+});
+
 // // Swipe gestures
 // document.addEventListener("DOMContentLoaded", function () {
 //     let startX = 0, startY = 0;

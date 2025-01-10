@@ -5,7 +5,7 @@
     transform: translateX(-50%);
 } */
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
     .container {
         position: absolute;
         top: 5%;
@@ -13,13 +13,20 @@
         transform: translateX(-50%);
         width: calc(100% - 40px);
         max-width: 600px;
-        
         z-index: 1000;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
     }
+} */
+
+#instructions {
+    max-width: 600px;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    max-height: calc(100vh - 315px);
 }
 
 #meme-gif-button {
@@ -49,19 +56,14 @@
 
 #search-input {
     flex-grow: 1;
+    flex-shrink: 1;  /* already default but good to be explicit */
+    min-width: 0;    /* this is the key addition */
     padding: 10px;
     font-size: 16px;
     border: none;
     background-color: #23272A;
     color: #FFFFFF;
     border-radius: 4px 0 0 4px;
-}
-
-#instructions {
-    max-width: 600px;
-    width: 100%;
-    height: auto;
-    border-radius: 4px;
 }
 
 #search-button, #trending-button {
@@ -72,11 +74,13 @@
     border: none;
     cursor: pointer;
     border-radius: 4px;
+    margin-right: 3px;
+    width: auto;
 }
 
-#trending-button {
+/* #trending-button {
     margin-bottom: 10px;
-}
+} */
 
 #search-button:hover, #trending-button:hover {
     background-color: #4527A0;
