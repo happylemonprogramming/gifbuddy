@@ -236,7 +236,7 @@ def stickers():
 
         if search_term.lower() == "spiral":
             event_id = "9daabaab1bc27c8b6c517823df72c8f9ed4308e47413ec2f9acd4ebfa75ff6f8"
-            event = getevent(id=event_id)
+            event = asyncio.run(getevent(id=event_id))
             tags = event['tags']
             stickers = []
             for tag in tags:
