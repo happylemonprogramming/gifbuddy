@@ -237,11 +237,19 @@ def stickers():
         if search_term.lower() == "spiral":
             event_id = "9daabaab1bc27c8b6c517823df72c8f9ed4308e47413ec2f9acd4ebfa75ff6f8"
             event = asyncio.run(getevent(id=event_id))
-            tags = event['tags']
+            print(event)
+            tags = event[0]['tags']
+            print(tags)
             stickers = []
             for tag in tags:
                 if tag[0] == "emoji":
+                    print(tag[1])
                     stickers.append({'url': tag[2], 'description': tag[1]})
+
+            response = {
+                'stickers': stickers,
+                'next_pos': None
+            }
 
         else:
             limit = int(request.args.get('limit', 100))
@@ -268,10 +276,10 @@ def stickers():
                         'description': item.get('content_description', '')
                     })
 
-        response = {
-            'stickers': stickers,
-            'next_pos': result.get('next', None)
-        }
+            response = {
+                'stickers': stickers,
+                'next_pos': result.get('next', None)
+            }
 
         return jsonify(response)
 
