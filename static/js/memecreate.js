@@ -481,7 +481,7 @@ previewImage.addEventListener('click', () => {
       .then(response => response.blob())
       .then(blob => {
         blobCopy(blob);
-        showNotification('Copied Blob!');
+        // showNotification('Copied Blob!');
       })
       .catch(err => {
         console.error('Error copying blob:', err);

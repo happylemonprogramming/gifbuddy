@@ -19,6 +19,7 @@ from nip98 import urlgenerator, fallbackurlgenerator
 from meme import create_meme_from_media
 from nostrAddressDatabase import get_from_dynamodb
 from lsbSteganography import lsbdecode
+from getevent import getevent
 from api import api_service
 from memegifs import AnimatedImageProcessor, Path
 # from searchAlgo import nostr_gifs
@@ -233,29 +234,39 @@ def stickers():
         if not search_term:
             return jsonify({'error': 'Search term is required'}), 400
 
-        limit = int(request.args.get('limit', 100))
-        pos = request.args.get('pos', None)
+        if search_term.lower() == "spiral":
+            event_id = "9daabaab1bc27c8b6c517823df72c8f9ed4308e47413ec2f9acd4ebfa75ff6f8"
+            event = getevent(id=event_id)
+            tags = event['tags']
+            stickers = []
+            for tag in tags:
+                if tag[0] == "emoji":
+                    stickers.append({'url': tag[2], 'description': tag[1]})
 
-        result = fetch_stickers(search_term, limit, pos)
+        else:
+            limit = int(request.args.get('limit', 100))
+            pos = request.args.get('pos', None)
 
-        stickers = []
-        for item in result.get('results', []):
-            media_formats = item.get('media_formats', {})
-            url = None
-            
-            # Try to get webp_transparent format first, then fall back to other formats
-            if 'webp_transparent' in media_formats:
-                url = media_formats['webp_transparent']['url']
-            elif 'tinywebp_transparent' in media_formats:
-                url = media_formats['tinywebp_transparent']['url']
-            elif 'gif_transparent' in media_formats:
-                url = media_formats['gif_transparent']['url']
-            
-            if url:
-                stickers.append({
-                    'url': url,
-                    'description': item.get('content_description', '')
-                })
+            result = fetch_stickers(search_term, limit, pos)
+
+            stickers = []
+            for item in result.get('results', []):
+                media_formats = item.get('media_formats', {})
+                url = None
+                
+                # Try to get webp_transparent format first, then fall back to other formats
+                if 'webp_transparent' in media_formats:
+                    url = media_formats['webp_transparent']['url']
+                elif 'tinywebp_transparent' in media_formats:
+                    url = media_formats['tinywebp_transparent']['url']
+                elif 'gif_transparent' in media_formats:
+                    url = media_formats['gif_transparent']['url']
+                
+                if url:
+                    stickers.append({
+                        'url': url,
+                        'description': item.get('content_description', '')
+                    })
 
         response = {
             'stickers': stickers,
