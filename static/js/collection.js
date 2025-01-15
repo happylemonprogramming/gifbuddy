@@ -133,7 +133,12 @@ resultsDiv.addEventListener('click', (e) => {
         // Store the image data using the dataset values we attached
         collectionData.images.set(uniqueId, {
             gif: img.dataset.gifUrl,
-            thumb: img.dataset.thumb
+            thumb: img.dataset.thumb,
+            alt: img.alt,
+            size: img.dataset.gifSize,
+            dims: img.dataset.gifDims,
+            image: img.dataset.image,
+            summary: img.dataset.summary
         });
         
         // Add to collection display
@@ -310,7 +315,12 @@ function prepareSubmissionData() {
     for (const [title, data] of collectionData.images) {
         formattedImages[title] = {
             gif: data.gif,
-            thumb: data.thumb
+            thumb: data.thumb,
+            alt: data.alt,
+            size: data.size,
+            dims: data.dims,
+            image: data.image,
+            summary: data.summary
         };
     }
     
@@ -326,7 +336,7 @@ collectionInput.addEventListener('input', (e) => {
 });
 
 // Function to generate collection tags
-function collectionTags(collection) {
+async function collectionTags(collection) {
     const title = Object.keys(collection)[0];
 
     const tags = [
@@ -335,13 +345,96 @@ function collectionTags(collection) {
     ];
     const shortcodes = Object.keys(collection[title]);
 
-    shortcodes.forEach(shortcode => {
+    // Use for...of to properly await asynchronous operations
+    for (const shortcode of shortcodes) {
         const gif = collection[title][shortcode]['gif'];
-        const reaction = ["emoji", shortcode, gif];
+        const thumb = collection[title][shortcode]['thumb'];
+        const alt = collection[title][shortcode]['alt'];
+        const size = collection[title][shortcode]['size'];
+        const dims = collection[title][shortcode]['dims'];
+        const image = collection[title][shortcode]['image'];
+        const summary = collection[title][shortcode]['summary']; 
+        
+        console.log('LOOK HERE')
+        console.log(collection[title][shortcode])
+
+        // Await the SHA-256 hash
+        const x = await getSHA256Hash(gif);
+
+        // Construct the reaction array with the defined constants
+        const reaction = [
+            "imeta",
+            `url ${gif}`,
+            "m image/gif",
+            `dim ${dims}`,
+            `size ${size}`,
+            `alt ${alt}`,
+            `summary ${summary}`,
+            `x ${x}`,
+            `thumb ${thumb}`,
+            `image ${image}`,
+            `shortcode ${shortcode}`
+        ];
+
+        console.log(reaction)
+
         tags.push(reaction);
-    });
+    }
 
     return tags;
+}
+
+async function getSHA256Hash(url) {
+    // Fetch the file from the URL
+    const response = await fetch(url);
+    
+    // Check if the request was successful
+    if (!response.ok) {
+      throw new Error('Failed to fetch the file');
+    }
+  
+    // Get the file as an ArrayBuffer
+    const fileBuffer = await response.arrayBuffer();
+  
+    // Use SubtleCrypto API to compute the SHA-256 hash
+    const hashBuffer = await crypto.subtle.digest('SHA-256', fileBuffer);
+  
+    // Convert the hash ArrayBuffer to a hexadecimal string
+    const hashArray = Array.from(new Uint8Array(hashBuffer)); // Create an array of bytes
+    const hexString = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join(''); // Convert bytes to hex
+  
+    return hexString;
+}
+
+// Function to remove all images
+function removeAllImages() {
+    // Remove all images from collectionData storage
+    collectionData.images.clear();  // Clears all images in the collectionData
+
+    // Remove all images from display
+    const imageElements = document.querySelectorAll('.image-class');  // Replace with the appropriate class or selector for your images
+    imageElements.forEach(image => {
+        image.remove();
+    });
+
+    // Hide modal (if modal is open)
+    modal.style.display = "none";
+
+    // Hide publish box if no images remain
+    if (collectionData.images.size === 0) {
+        // publishBox.style.display = 'none';
+        publishButton.classList.add('disabled');
+        publishButton.classList.remove('enabled');
+        tempText.style.display = 'flex';
+        collectionDiv.style.display = 'none';
+    }
+
+    collectionInput.value = ''
+    searchInput.value = ''
+    resultsDiv.innerHTML = '';
+    instructions.style.display = 'block';
+
+    console.log('Updated collection:', Object.fromEntries(collectionData.images));
 }
 
 // Event listener for publish button
@@ -349,18 +442,19 @@ publishButton.addEventListener('click', async () => {
     if (collectionData.images.size === 0) {
         alert('Collection Empty')
     } else {
+        document.getElementById('loadingIndicator').style.display = 'block';
         const finalData = prepareSubmissionData();
         console.log('Publishing collection:', finalData);
     
         if (window.nostr) {
             try {
                 // Generate tags using the collectionTags function
-                const tags = collectionTags(finalData);
+                const tags = await collectionTags(finalData);
     
                 // Prepare the event object
                 const event = {
                     created_at: Math.floor(Date.now() / 1000),
-                    kind: 30030, // Specific kind value
+                    kind: 30169, // Specific kind value
                     tags: tags, // Generated tags
                     content: "" // Empty string as content
                 };
@@ -384,6 +478,8 @@ publishButton.addEventListener('click', async () => {
     
                 const result = await response.json();
                 console.log('Response from server:', result);
+                removeAllImages()
+                document.getElementById('loadingIndicator').style.display = 'none';
                 showNotification('Published!')
     
             } catch (error) {

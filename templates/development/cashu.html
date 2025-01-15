@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cashu Wallet</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nostr-tools/1.17.0/nostr.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .wallet-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .balance {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0052a3;
+        }
+        .transaction-list {
+            margin-top: 20px;
+        }
+        .transaction {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="notification" class="notification"></div>
+
+    <div class="wallet-card">
+        <h1>Cashu Wallet</h1>
+        <div id="connection-status">Checking Nostr extension...</div>
+        <div class="balance">Balance: <span id="balance">0</span> sats</div>
+        <div>
+            <button class="button" id="sendButton">Send</button>
+            <button class="button" id="receiveButton">Receive</button>
+            <button class="button" id="refreshButton">Refresh Balance</button>
+        </div>
+    </div>
+
+    <div class="wallet-card">
+        <h2>Transaction History</h2>
+        <div id="transactions" class="transaction-list"></div>
+    </div>
+
+    <script>
+        // NIP-44 Encryption Implementation
+        class NIP44 {
+            static calcPaddedLen(unpadded_len) {
+                const nextPower = 1 << (Math.floor(Math.log2(unpadded_len - 1))) + 1;
+                const chunk = nextPower <= 256 ? 32 : nextPower / 8;
+                return unpadded_len <= 32 ? 32 : chunk * (Math.floor((unpadded_len - 1) / chunk) + 1);
+            }
+
+            static async pad(plaintext) {
+                const encoder = new TextEncoder();
+                const unpadded = encoder.encode(plaintext);
+                const unpadded_len = unpadded.length;
+                
+                if (unpadded_len < 1 || unpadded_len > 65535) {
+                    throw new Error('invalid plaintext length');
+                }
+
+                const prefix = new Uint8Array([unpadded_len >> 8, unpadded_len & 0xff]);
+                const padded_len = this.calcPaddedLen(unpadded_len);
+                const suffix = new Uint8Array(padded_len - unpadded_len).fill(0);
+                
+                return this.concat(prefix, unpadded, suffix);
+            }
+
+            static concat(...arrays) {
+                const totalLength = arrays.reduce((acc, arr) => acc + arr.length, 0);
+                const result = new Uint8Array(totalLength);
+                let offset = 0;
+                for (const arr of arrays) {
+                    result.set(arr, offset);
+                    offset += arr.length;
+                }
+                return result;
+            }
+
+            static async encrypt(plaintext, conversationKey, nonce) {
+                try {
+                    const messageKeys = await this.getMessageKeys(conversationKey, nonce);
+                    const padded = await this.pad(plaintext);
+                    
+                    // Use WebCrypto for ChaCha20
+                    const encoder = new TextEncoder();
+                    const ciphertext = await window.crypto.subtle.encrypt(
+                        {
+                            name: "CHACHA20",
+                            nonce: messageKeys.chachaNonce
+                        },
+                        messageKeys.chachaKey,
+                        padded
+                    );
+
+                    const mac = await this.hmacAAD(messageKeys.hmacKey, new Uint8Array(ciphertext), nonce);
+                    
+                    // Combine version (2), nonce, ciphertext, and mac
+                    const combined = this.concat(
+                        new Uint8Array([2]),
+                        nonce,
+                        new Uint8Array(ciphertext),
+                        mac
+                    );
+                    
+                    return btoa(String.fromCharCode.apply(null, combined));
+                } catch (error) {
+                    console.error('Encryption error:', error);
+                    throw error;
+                }
+            }
+
+            static async getConversationKey(privateKeyA, publicKeyB) {
+                // Use nostr-tools for ECDH
+                const sharedPoint = window.NostrTools.getSharedSecret(privateKeyA, publicKeyB);
+                const encoder = new TextEncoder();
+                const salt = encoder.encode('nip44-v2');
+                
+                // HKDF extract
+                const key = await window.crypto.subtle.importKey(
+                    'raw',
+                    sharedPoint,
+                    { name: 'HKDF' },
+                    false,
+                    ['deriveBits']
+                );
+                
+                return new Uint8Array(
+                    await window.crypto.subtle.deriveBits(
+                        {
+                            name: 'HKDF',
+                            salt: salt,
+                            info: new Uint8Array(0),
+                            hash: 'SHA-256'
+                        },
+                        key,
+                        256
+                    )
+                );
+            }
+
+            static async getMessageKeys(conversationKey, nonce) {
+                if (conversationKey.length !== 32) throw new Error('invalid conversation_key length');
+                if (nonce.length !== 32) throw new Error('invalid nonce length');
+
+                const encoder = new TextEncoder();
+                const key = await window.crypto.subtle.importKey(
+                    'raw',
+                    conversationKey,
+                    { name: 'HKDF' },
+                    false,
+                    ['deriveBits']
+                );
+
+                const keys = new Uint8Array(
+                    await window.crypto.subtle.deriveBits(
+                        {
+                            name: 'HKDF',
+                            salt: new Uint8Array(0),
+                            info: nonce,
+                            hash: 'SHA-256'
+                        },
+                        key,
+                        608 // 76 bytes * 8
+                    )
+                );
+
+                return {
+                    chachaKey: keys.slice(0, 32),
+                    chachaNonce: keys.slice(32, 44),
+                    hmacKey: keys.slice(44, 76)
+                };
+            }
+
+            static async hmacAAD(key, message, aad) {
+                if (aad.length !== 32) throw new Error('AAD must be 32 bytes');
+                
+                const hmacKey = await window.crypto.subtle.importKey(
+                    'raw',
+                    key,
+                    { name: 'HMAC', hash: 'SHA-256' },
+                    false,
+                    ['sign']
+                );
+
+                const combined = this.concat(aad, message);
+                return new Uint8Array(await window.crypto.subtle.sign('HMAC', hmacKey, combined));
+            }
+        }
+
+
+    // Add new proof management and balance calculation functionality
+    class ProofManager {
+        constructor() {
+            this.unspentProofs = new Map(); // Map of proof ID to proof object
+            this.spentProofs = new Set();    // Set of spent proof IDs
+        }
+
+        addProof(proof) {
+            if (!this.spentProofs.has(proof.id)) {
+                this.unspentProofs.set(proof.id, proof);
+            }
+        }
+
+        spendProof(proofId) {
+            if (this.unspentProofs.has(proofId)) {
+                const proof = this.unspentProofs.get(proofId);
+                this.unspentProofs.delete(proofId);
+                this.spentProofs.add(proofId);
+                return proof;
+            }
+            return null;
+        }
+
+        calculateBalance() {
+            let total = 0;
+            for (const proof of this.unspentProofs.values()) {
+                total += proof.amount;
+            }
+            return total;
+        }
+
+        getUnspentProofs() {
+            return Array.from(this.unspentProofs.values());
+        }
+
+        getSpentProofIds() {
+            return Array.from(this.spentProofs);
+        }
+    }
+
+    // Update wallet state to include ProofManager
+    const wallet = {
+        pubkey: null,
+        mints: ['mint.minibits.cash/Bitcoin'],
+        relays: ['wss://relay.damus.io/'],
+        balance: 0,
+        proofManager: new ProofManager()
+    };
+
+    async function fetchTokenEvents() {
+        try {
+            // Create a pool of relays from wallet.relays
+            const relayPool = {};
+            for (const relayUrl of wallet.relays) {
+                try {
+                    const relay = window.NostrTools.relayInit(relayUrl);
+                    await relay.connect();
+                    relayPool[relayUrl] = relay;
+                } catch (error) {
+                    console.error(`Failed to connect to relay ${relayUrl}:`, error);
+                }
+            }
+
+            if (Object.keys(relayPool).length === 0) {
+                throw new Error('No relays connected');
+            }
+
+            // Create filter for token events
+            const filter = {
+                kinds: [7375],  // Token events
+                authors: [wallet.pubkey],
+                since: 0,  // Get all historical events
+                until: Math.floor(Date.now() / 1000)
+            };
+
+            // Create a promise that will resolve with all events
+            const events = await new Promise((resolve, reject) => {
+                const allEvents = new Map(); // Use Map to deduplicate events by id
+                const timeoutId = setTimeout(() => {
+                    // Close all relay connections after timeout
+                    Object.values(relayPool).forEach(relay => relay.close());
+                    resolve(Array.from(allEvents.values()));
+                }, 5000); // 5 second timeout
+
+                // Subscribe to each relay
+                Object.entries(relayPool).forEach(([url, relay]) => {
+                    let sub;
+                    try {
+                        sub = relay.sub([filter]);
+
+                        sub.on('event', event => {
+                            // Verify event signature
+                            if (window.NostrTools.verifySignature(event)) {
+                                allEvents.set(event.id, event);
+                            }
+                        });
+
+                        sub.on('eose', () => {
+                            sub.unsub();
+                            relay.close();
+
+                            // Check if all relays are done
+                            if (Object.values(relayPool).every(r => r.status === 0)) {
+                                clearTimeout(timeoutId);
+                                resolve(Array.from(allEvents.values()));
+                            }
+                        });
+                    } catch (error) {
+                        console.error(`Error with relay ${url}:`, error);
+                        relay.close();
+                    }
+                });
+            });
+
+            // Sort events by timestamp
+            const sortedEvents = events.sort((a, b) => a.created_at - b.created_at);
+
+            // Process deletion events (NIP-09)
+            const deletionFilter = {
+                kinds: [5], // Deletion events
+                authors: [wallet.pubkey],
+                since: 0,
+                until: Math.floor(Date.now() / 1000)
+            };
+
+            const deletionEvents = await new Promise((resolve, reject) => {
+                const deletions = new Set();
+                const timeoutId = setTimeout(() => {
+                    Object.values(relayPool).forEach(relay => relay.close());
+                    resolve(deletions);
+                }, 5000);
+
+                Object.entries(relayPool).forEach(([url, relay]) => {
+                    let sub;
+                    try {
+                        sub = relay.sub([deletionFilter]);
+
+                        sub.on('event', event => {
+                            if (window.NostrTools.verifySignature(event)) {
+                                event.tags
+                                    .filter(tag => tag[0] === 'e')
+                                    .forEach(tag => deletions.add(tag[1]));
+                            }
+                        });
+
+                        sub.on('eose', () => {
+                            sub.unsub();
+                            relay.close();
+
+                            if (Object.values(relayPool).every(r => r.status === 0)) {
+                                clearTimeout(timeoutId);
+                                resolve(deletions);
+                            }
+                        });
+                    } catch (error) {
+                        console.error(`Error fetching deletions from ${url}:`, error);
+                        relay.close();
+                    }
+                });
+            });
+
+            // Filter out deleted events
+            const validEvents = sortedEvents.filter(event => !deletionEvents.has(event.id));
+
+            // Process and validate the events
+            const processedEvents = validEvents.map(event => {
+                try {
+                    // Check if event has required tags
+                    const hasWalletTag = event.tags.some(tag => 
+                        tag[0] === 'a' && 
+                        tag[1].startsWith(`37375:${wallet.pubkey}:`)
+                    );
+
+                    if (!hasWalletTag) {
+                        console.warn('Event missing wallet tag:', event);
+                        return null;
+                    }
+
+                    return event;
+                } catch (error) {
+                    console.error('Error processing event:', error);
+                    return null;
+                }
+            }).filter(Boolean); // Remove null events
+
+            console.log(`Fetched ${processedEvents.length} valid token events`);
+            return processedEvents;
+
+        } catch (error) {
+            console.error('Error fetching token events:', error);
+            throw error;
+        }
+    }
+
+    // Function to help with event subscription cleanup
+    function cleanupSubscription(sub, relay) {
+        if (sub) {
+            try {
+                sub.unsub();
+            } catch (error) {
+                console.error('Error unsubscribing:', error);
+            }
+        }
+        if (relay) {
+            try {
+                relay.close();
+            } catch (error) {
+                console.error('Error closing relay:', error);
+            }
+        }
+    }
+
+    async function loadWalletState() {
+        try {
+            // 1. Fetch all kind:7375 token events
+            const tokenEvents = await fetchTokenEvents();
+
+            if (tokenEvents.length === 0) {
+                console.log('No token events found');
+                wallet.balance = 0;
+                document.getElementById('balance').textContent = '0';
+                showNotification('No tokens found');
+                return;
+            }
+            
+            // 2. Process each token event
+            for (const event of tokenEvents) {
+                try {
+                    // Decrypt the token event content
+                    const decryptedContent = await decryptEventContent(event.content);
+                    const proofs = JSON.parse(decryptedContent).proofs;
+                    
+                    // Add each proof to the proof manager
+                    for (const proof of proofs) {
+                        wallet.proofManager.addProof(proof);
+                    }
+                } catch (error) {
+                    console.error('Error processing token event:', error);
+                }
+            }
+
+            // 3. Fetch all kind:7376 spending history events
+            const spendingEvents = await fetchSpendingHistoryEvents();
+            
+            // 4. Process spending history to mark proofs as spent
+            for (const event of spendingEvents) {
+                try {
+                    const decryptedContent = await decryptEventContent(event.content);
+                    const content = JSON.parse(decryptedContent);
+                    
+                    if (content.direction === 'out') {
+                        // Mark proofs as spent
+                        for (const spentProofId of content.spentProofs || []) {
+                            wallet.proofManager.spendProof(spentProofId);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error processing spending event:', error);
+                }
+            }
+
+            // 5. Calculate and update balance
+            wallet.balance = wallet.proofManager.calculateBalance();
+            document.getElementById('balance').textContent = wallet.balance;
+            
+            // 6. Update UI with transaction history
+            await updateTransactionHistory(spendingEvents);
+            
+            showNotification('Wallet state loaded!');
+        } catch (error) {
+            console.error('Error loading wallet state:', error);
+            showNotification('Error loading wallet state');
+        }
+    }
+
+    async function updateTransactionHistory(events) {
+        const transactionsDiv = document.getElementById('transactions');
+        const sortedEvents = events.sort((a, b) => b.created_at - a.created_at);
+        
+        const transactionHTML = await Promise.all(sortedEvents.map(async (event) => {
+            try {
+                const decryptedContent = await decryptEventContent(event.content);
+                const content = JSON.parse(decryptedContent);
+                
+                return `
+                    <div class="transaction">
+                        <div class="${content.direction === 'in' ? 'received' : 'sent'}">
+                            ${content.direction === 'in' ? '↓' : '↑'} 
+                            ${content.amount} sats
+                        </div>
+                        <div class="timestamp">
+                            ${new Date(event.created_at * 1000).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error processing transaction:', error);
+                return '';
+            }
+        }));
+
+        transactionsDiv.innerHTML = transactionHTML.join('');
+    }
+
+    async function publishSpendingEvent(spentProofs, amount, direction = 'out') {
+        try {
+            const eventContent = {
+                direction,
+                amount,
+                spentProofs: spentProofs.map(proof => proof.id)
+            };
+
+            const encryptedContent = await encryptWalletContent(eventContent);
+
+            const event = {
+                kind: 7376,
+                created_at: Math.floor(Date.now() / 1000),
+                tags: [
+                    ['a', `37375:${wallet.pubkey}:my-wallet`]
+                ],
+                content: encryptedContent
+            };
+
+            const signedEvent = await window.nostr.signEvent(event);
+            // Here you would publish to your relay
+            console.log('Signed spending event:', signedEvent);
+            
+            showNotification('Spending event published!');
+            return signedEvent;
+        } catch (error) {
+            console.error('Error publishing spending event:', error);
+            showNotification('Error publishing spending event');
+            throw error;
+        }
+    }
+
+    // Update send functionality to handle proofs
+    document.getElementById('sendButton').addEventListener('click', async () => {
+        if (!wallet.pubkey) {
+            showNotification('Please connect your Nostr extension first');
+            return;
+        }
+
+        // For demo purposes, let's simulate sending 10 sats
+        const amountToSend = 10;
+        const availableProofs = wallet.proofManager.getUnspentProofs();
+        
+        // Simple proof selection algorithm
+        const selectedProofs = [];
+        let selectedAmount = 0;
+        
+        for (const proof of availableProofs) {
+            if (selectedAmount >= amountToSend) break;
+            selectedProofs.push(proof);
+            selectedAmount += proof.amount;
+        }
+
+        if (selectedAmount < amountToSend) {
+            showNotification('Insufficient funds!');
+            return;
+        }
+
+        try {
+            // Mark proofs as spent
+            for (const proof of selectedProofs) {
+                wallet.proofManager.spendProof(proof.id);
+            }
+
+            // Publish spending event
+            await publishSpendingEvent(selectedProofs, amountToSend);
+
+            // If change is needed, create new token event
+            const changeAmount = selectedAmount - amountToSend;
+            if (changeAmount > 0) {
+                // Create and publish new token event with change
+                const changeProof = {
+                    id: crypto.randomUUID(),
+                    amount: changeAmount,
+                    secret: crypto.getRandomValues(new Uint8Array(32)),
+                    C: await generateCommitment() // You'd need to implement this
+                };
+
+                await publishTokenEvent([changeProof]);
+                wallet.proofManager.addProof(changeProof);
+            }
+
+            // Update balance
+            wallet.balance = wallet.proofManager.calculateBalance();
+            document.getElementById('balance').textContent = wallet.balance;
+
+            showNotification(`Sent ${amountToSend} sats!`);
+        } catch (error) {
+            console.error('Error sending tokens:', error);
+            showNotification('Error sending tokens');
+        }
+    });
+
+        // // Wallet state
+        // const wallet = {
+        //     pubkey: null,
+        //     mints: ['https://mint1.example.com'],
+        //     relays: ['wss://relay.example.com'],
+        //     balance: 0,
+        //     tokens: []
+        // };
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        async function checkNostrExtension() {
+            if (window.nostr) {
+                try {
+                    const pubkey = await window.nostr.getPublicKey();
+                    wallet.pubkey = pubkey;
+                    document.getElementById('connection-status').textContent = 
+                        `Connected with pubkey: ${pubkey.slice(0, 8)}...`;
+                    return true;
+                } catch (error) {
+                    console.error('Error getting public key:', error);
+                    document.getElementById('connection-status').textContent = 
+                        'Error connecting to Nostr extension';
+                    return false;
+                }
+            } else {
+                document.getElementById('connection-status').textContent = 
+                    'Please install a Nostr extension';
+                return false;
+            }
+        }
+
+        async function encryptWalletContent(content) {
+            try {
+                // Generate random nonce
+                const nonce = crypto.getRandomValues(new Uint8Array(32));
+                
+                // Get conversation key using our pubkey
+                const conversationKey = await NIP44.getConversationKey(
+                    await window.nostr.getPublicKey(),
+                    await window.nostr.getPublicKey()
+                );
+
+                // Encrypt the content
+                return await NIP44.encrypt(
+                    JSON.stringify(content),
+                    conversationKey,
+                    nonce
+                );
+            } catch (error) {
+                console.error('Encryption error:', error);
+                throw error;
+            }
+        }
+
+        async function publishWalletEvent() {
+            try {
+                const encryptedContent = await encryptWalletContent({
+                    balance: wallet.balance.toString(),
+                    lastUpdated: Date.now()
+                });
+
+                const event = {
+                    kind: 37375,
+                    created_at: Math.floor(Date.now() / 1000),
+                    tags: [
+                        ['d', 'my-wallet'],
+                        ['mint', wallet.mints[0]],
+                        ['relay', wallet.relays[0]],
+                        ['unit', 'sat'],
+                        ['name', 'My Cashu Wallet']
+                    ],
+                    content: encryptedContent
+                };
+
+                const signedEvent = await window.nostr.signEvent(event);
+                console.log('Signed wallet event:', signedEvent);
+                
+                showNotification('Wallet event published!');
+                return signedEvent;
+            } catch (error) {
+                console.error('Error publishing wallet event:', error);
+                showNotification('Error publishing wallet event');
+                throw error;
+            }
+        }
+
+        async function publishTokenEvent(proofs) {
+            try {
+                const encryptedContent = await encryptWalletContent({
+                    mint: wallet.mints[0],
+                    proofs: proofs
+                });
+
+                const event = {
+                    kind: 7375,
+                    created_at: Math.floor(Date.now() / 1000),
+                    tags: [
+                        ['a', `37375:${wallet.pubkey}:my-wallet`]
+                    ],
+                    content: encryptedContent
+                };
+
+                const signedEvent = await window.nostr.signEvent(event);
+                console.log('Signed token event:', signedEvent);
+                
+                showNotification('Token event published!');
+                return signedEvent;
+            } catch (error) {
+                console.error('Error publishing token event:', error);
+                showNotification('Error publishing token event');
+                throw error;
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('sendButton').addEventListener('click', async () => {
+            if (!wallet.pubkey) {
+                showNotification('Please connect your Nostr extension first');
+                return;
+            }
+            // Implement send logic
+            alert('Send functionality not implemented');
+        });
+
+        document.getElementById('receiveButton').addEventListener('click', async () => {
+            if (!wallet.pubkey) {
+                showNotification('Please connect your Nostr extension first');
+                return;
+            }
+            // Implement receive logic
+            alert('Receive functionality not implemented');
+        });
+
+        document.getElementById('refreshButton').addEventListener('click', async () => {
+            if (!wallet.pubkey) {
+                showNotification('Please connect your Nostr extension first');
+                return;
+            }
+            await loadWalletState();
+        });
+
+        // Initialize the wallet
+        async function initialize() {
+            const hasNostr = await checkNostrExtension();
+            if (hasNostr) {
+                await loadWalletState();
+                await publishWalletEvent();
+            }
+        }
+
+        // Start the initialization when the page loads
+        initialize();
+    </script>
+</body>
+</html>

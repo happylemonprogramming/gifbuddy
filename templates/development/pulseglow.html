@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulsing Glow Effect</title>
+  <style>
+    body {
+        background-color: black;
+    }
+    h1 {
+      font-size: 4rem;
+      color: #fff; /* Text color */
+      text-align: center;
+      margin-top: 20vh; /* Just to position the header nicely */
+      animation: pulseGlow 4s infinite ease-in-out; /* Adjusted animation speed to 4s for half speed */
+    }
+
+    /* Keyframe for the pulsing glow effect */
+    @keyframes pulseGlow {
+      0% {
+        text-shadow: 0 0 10px #5E35B1, 0 0 20px #5E35B1, 0 0 30px #5E35B1;
+      }
+      50% {
+        text-shadow: 0 0 20px #5E35B1, 0 0 30px #5E35B1, 0 0 40px #5E35B1;
+      }
+      100% {
+        text-shadow: 0 0 10px #5E35B1, 0 0 20px #5E35B1, 0 0 30px #5E35B1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Pulsing Glow Header</h1>
+
+</body>
+</html>

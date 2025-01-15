@@ -31,6 +31,7 @@
         </button>
         <div class="action-container">
             <button class="action-button" id="searchButton" onclick="window.location.href='/gifsearch'">Search GIFs</button>
+            <button class="action-button" id="searchButton" onclick="window.location.href='/nostr'">Search Nostr</button>
             <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search Memes</button>
             <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Create Meme</button>
             <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collections</button>
@@ -71,7 +72,7 @@
             <button id="search-button">Search</button>
         </div>
 
-        <img id="instructions" src="https://image.nostr.build/05466f64631d22955fafdc35369eea4fa71ee59f2352400798203976357f6f4e.jpg"></img>
+        <img id="instructions" src="https://image.nostr.build/584d8827a5280b32d1f2168b69069a8c863f1cc91c04bc5f1058e0294a14210e.jpg"></img>
         <div id="results"></div>
         
         <div id="next-container" style="display: none;">
@@ -93,10 +94,33 @@
         <button id="zap-button" class="zap-button">
             ⚡
         </button>
+        <button class="loginBtn" id="loginButton">Login</button>
+        <div class="dropdown-content" id="dropdownContent" style="display: none;">
+            <a id="favoritesButton" href="/favorites">My Collections</a>
+            <a id="logoutButton" onclick="handleLogout()">Log Out</a>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="loginModal" id="loginModal">
+        <div class="loginModal-content">
+            <h2 class="loginModal-title">Login with Public Key</h2>
+            <div class="input-group">
+                <input type="text" class="pubkeyInput" id="pubkeyInput" placeholder="Enter your public key">
+                <button class="loginBtn" id="loginSubmitButton">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading indicator (initially hidden) -->
+    <div id="loadingIndicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>Publishing...</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
     <script src="{{ url_for('static', filename='js/collection.js') }}"></script>
     <script src="{{ url_for('static', filename='js/gestures.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </body>
 </html>

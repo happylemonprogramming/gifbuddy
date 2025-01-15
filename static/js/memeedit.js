@@ -640,34 +640,6 @@ function getBase64FromBackgroundImage(backgroundImageStyle) {
   return urlMatch[1];
 }
 
-// Function to call the remove background API
-async function removeBG(base64Image) {
-  try {
-    const response = await fetch('/removebg', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        image_url: base64Image
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to remove background');
-    }
-
-    return await response.text();
-  } catch (error) {
-    console.error('Error removing background:', error);
-    throw error;
-  }
-}
-
-function jsPaint() {
-  const memeTemplate = urlInput.value; // Assuming urlInput is an input element
-  window.location.href = `https://jspaint.app/#load:${memeTemplate}`;
-}
 
 // Get modal elements
 const stickerModal = document.getElementById('sticker-modal');
@@ -760,112 +732,67 @@ function addStickerToMeme(stickerUrl) {
   closeStickerModal();
 }
 
-// Get AI modal elements
-const aiModal = document.getElementById('ai-modal');
-const aiGenerator = document.getElementById('ai-generator');
-const closeAIBtn = document.getElementById('close-ai');
-const aiInput = document.getElementById('ai-input');
-const aiButton = document.getElementById('ai-button');
+// Drawing on Canvas
+// const canvas = document.getElementById('drawing-canvas');
+// const context = canvas.getContext('2d');
+// const img = document.getElementById('background-img');
+// const drawToggle = document.getElementById('draw-toggle');
 
-// Open modal
-aiGenerator.onclick = openAIModal;
-aiInput.onkeypress = (e) => {
-  if (e.key === 'Enter') {
-    searchStickers(searchInput.value);
-  }
-};
+// let isDrawing = false;
+// let isDrawMode = false;
 
-// Open/close modal functions
-function openAIModal() {
-  aiModal.style.display = 'block';
-}
+// // Set up canvas size to match image
+// function setupCanvas() {
+//     canvas.width = img.width;
+//     canvas.height = img.height;
+// }
 
-function closeAIModal() {
-  aiModal.style.display = 'none';
-}
+// // Wait for image to load before setting up canvas
+// img.onload = setupCanvas;
 
-// Close modal when clicking the close button
-closeAIBtn.onclick = closeAIModal;
+// // Drawing event listeners
+// canvas.addEventListener('mousedown', startDrawing);
+// canvas.addEventListener('mousemove', draw);
+// canvas.addEventListener('mouseup', stopDrawing);
+// canvas.addEventListener('mouseout', stopDrawing);
 
-// Close modal when clicking outside
-window.onclick = function(event) {
-  if (event.target === aiModal) {
-    closeAIModal();
-  }
-};
-
-// Primary AI function to fetch image
-async function aiCreate(prompt) {
-  try {
-    const response = await fetch(`https://image-generator.lemonknowsall.workers.dev/?prompt=${encodeURIComponent(prompt)}`, {
-      method: 'GET',
-      mode: 'cors', // Explicitly set CORS mode
-    });
-    
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    
-    const blob = await response.blob();
-    const imageUrl = URL.createObjectURL(blob);
-    console.log('Generated image URL:', imageUrl);
-    urlInput.value = imageUrl
-    
-  } catch (error) {
-    console.error('Error fetching image:', error);
-    resultsContainer.innerHTML = '<p>Error generating image. Please try again.</p>';
-  }
-}
-
-// Fetch image, close modal, preview image
-aiButton.onclick = async () => {
-  aiButton.disabled = true;  // Disable button while processing
-  try {
-    document.getElementById('loadingIndicator').style.display = 'block';
-    await aiCreate(aiInput.value);
-    closeAIModal();
-    handleImagePreview(); // Trigger preview validation for programmatic value
-  } catch (error) {
-    document.getElementById('loadingIndicator').style.display = 'none';
-    aiButton.disabled = false;  // Re-enable button
-    console.error('Error:', error);
-  } finally {
-    document.getElementById('loadingIndicator').style.display = 'none';
-    aiButton.disabled = false;  // Re-enable button
-  }
-}
-
-// // Swipe gesture to reset page
-// document.addEventListener("DOMContentLoaded", function () {
-//     let startX = 0, startY = 0;
-
-//     // Start of touch event to get initial coordinates
-//     document.addEventListener("touchstart", function (e) {
-//         startX = e.touches[0].clientX;
-//         startY = e.touches[0].clientY;
-//     });
-
-//     // End of touch event to detect swipe direction
-//     document.addEventListener("touchend", function (e) {
-//         const endX = e.changedTouches[0].clientX;
-//         const endY = e.changedTouches[0].clientY;
-
-//         const diffX = endX - startX;
-//         const diffY = endY - startY;
-//         const swipeThreshold = 50; // Minimum distance for a swipe to be registered
-
-//         // Determine if the swipe is horizontal or vertical
-//         if (Math.abs(diffX) < Math.abs(diffY)) {
-//             // Vertical swipe
-//             if (diffY > swipeThreshold) {
-//               // Swipe Down - Refresh the page
-//               console.log("Swipe Down to Refresh")
-//               window.location.reload()
-//               showNotification("Pull Down to Restart!")
-//           }
-//         }
-//     });
+// // Toggle draw mode
+// drawToggle.addEventListener('click', () => {
+//     isDrawMode = !isDrawMode;
+//     canvas.style.cursor = isDrawMode ? 'crosshair' : 'default';
+//     drawToggle.style.backgroundColor = isDrawMode ? '#ddd' : '';
 // });
+
+// function startDrawing(e) {
+//     if (!isDrawMode) return;
+//     isDrawing = true;
+//     draw(e); // Draw a point at the starting position
+// }
+
+// function draw(e) {
+//     if (!isDrawing || !isDrawMode) return;
+    
+//     const rect = canvas.getBoundingClientRect();
+//     const x = e.clientX - rect.left;
+//     const y = e.clientY - rect.top;
+    
+//     context.lineWidth = 2;
+//     context.lineCap = 'round';
+//     context.lineTo(x, y);
+//     context.stroke();
+//     context.beginPath();
+//     context.moveTo(x, y);
+// }
+
+// function stopDrawing() {
+//     isDrawing = false;
+//     context.beginPath(); // Start a new path when we stop drawing
+// }
+
+// function jsPaint() {
+//   const memeTemplate = urlInput.value; // Assuming urlInput is an input element
+//   window.location.href = `https://jspaint.app/#load:${memeTemplate}`;
+// }
 
 // // Shake to Undo
 // let shakeThreshold = 15; // Adjust based on sensitivity needs

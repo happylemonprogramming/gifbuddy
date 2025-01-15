@@ -19,7 +19,7 @@ from nip98 import urlgenerator, fallbackurlgenerator
 from meme import create_meme_from_media
 from nostrAddressDatabase import get_from_dynamodb
 from lsbSteganography import lsbdecode
-from getevent import getevent
+from getevent import getevent, PublicKey, extract_titles_and_thumbs, extract_titles_and_gifs
 from api import api_service
 from memegifs import AnimatedImageProcessor, Path
 # from searchAlgo import nostr_gifs
@@ -110,10 +110,15 @@ def gifsearch():
 def nostr():
     return render_template("nostr.html")
 
-# Upload Page
+# Collection Page
 @app.route("/collection")
 def collection():
     return render_template("collection.html")
+
+# Favorties Page
+@app.route("/favorites")
+def favorites():
+    return render_template("favorites.html")
 
 # Upload Page
 @app.route("/upload")
@@ -547,8 +552,48 @@ def search():
     search = data.get('q')  # Extract the search term
     pos = data.get('pos')
     logging.info(f'Search term: {search}, Position: {pos}')  # Debugging
-    output = fetch_gifs(search,limit=30,pos=pos)
     gifs = {}
+
+    if search.lower() == "nostr":
+        search = "ostrich"
+        # event_id = "411590f2820c164c979a8e17b513b110f017dbbfe4fe66b4258cdaf9392f0d30"
+        # eventlist = asyncio.run(getevent(id=event_id))
+        # for tag in eventlist[0]['tags']:
+        #     if tag[0] == 'imeta':
+        #         # Parse the tag
+        #         tag_dict = {entry.split()[0]: " ".join(entry.split()[1:]) for entry in tag[1:]}
+                
+        #         # Extract information
+        #         gif_url = tag_dict.get('url', '')
+        #         gif_size = int(tag_dict.get('size', 0))
+        #         gif_dims = tuple(map(int, tag_dict.get('dim', '0,0').split(',')))
+        #         thumb = tag_dict.get('thumb', '')
+        #         preview = gif_url  # Assuming the GIF URL is used for preview
+        #         alt = tag_dict.get('alt', '')
+        #         image = tag_dict.get('image', '')
+        #         summary = tag_dict.get('summary', '')
+        #         shortcode = tag_dict.get('shortcode', '')
+
+        #         # Use shortcode as basename
+        #         basename = shortcode
+
+        #         # Save to gifs dictionary
+        #         gifs[basename] = {
+        #             'gifUrl': gif_url,
+        #             'gifSize': gif_size,
+        #             'gifDims': gif_dims,
+        #             'thumb': thumb,
+        #             'preview': preview,
+        #             'alt': alt,
+        #             'image': image,
+        #             'summary': summary
+        #         }
+
+        # # Include the next position token in the response
+        # gifs['next'] = None
+
+    # else:
+    output = fetch_gifs(search,limit=30,pos=pos)
 
     for result in output['results']:
         gif = result['media_formats']['gif']
@@ -924,6 +969,21 @@ def deliver(filename):
         return send_from_directory(output_folder, filename, as_attachment=False)
     except FileNotFoundError:
         return jsonify({"error": "File not found"}), 404
+    
+@app.route("/favorite", methods=["GET"])
+def favorite():
+    pubkey = request.args.get('pubkey')
+    pubkeyhex = PublicKey.from_bech32(pubkey).to_hex()
+    eventlist = asyncio.run(getevent(kind=30169, author=pubkeyhex))
+    # logging.info(eventlist[0])
+    # output = extract_titles_and_thumbs(eventlist)
+    # logging.info(output[0])
+    try:
+        # return jsonify(output)
+        return jsonify(eventlist)
+    except FileNotFoundError:
+        return jsonify({"error": "something went wrong"}), 404
+    
 # _____________________________________________________________________________________
 # Premium endpoints
 from premium import removeBG, image_url_to_base64

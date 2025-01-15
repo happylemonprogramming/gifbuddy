@@ -29,6 +29,8 @@ async def getevent(id=None, kind=1, pubkey=None, event=None, since=None, author=
         f = Filter().kind(Kind(kind)).author(PublicKey.from_hex(author))
     elif kind == 1063: # Gif search
         f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"]).author(PublicKey.from_bech32(author)).since(Timestamp.from_secs(start)).until(Timestamp.from_secs(end))
+    elif kind == 30169: # Favorites search
+        f = Filter().kind(Kind(30169)).author(PublicKey.from_hex(author))
 
     else:
         raise Exception("Unrecognized request for event retreival")
@@ -80,6 +82,57 @@ def gifcounter():
     # logging.info(f"Total events fetched: {len(super_list)}")
     return len(super_list), super_list
 
+# Function to extract titles and sort URLs
+def extract_titles_and_gifs(data):
+    result = []
+    
+    for entry in data:
+        title = None
+        gif_urls = []
+        
+        # Extract title and URLs from 'tags'
+        for tag in entry['tags']:
+            if tag[0] == 'title':
+                title = tag[1]
+            for item in tag:
+                if item.startswith('url'):
+                    # Extract the URL after the 'thumb' prefix
+                    gif_url = item.split(' ')[1]
+                    gif_urls.append(gif_url)
+        
+        result.append({
+            'title': title,
+            'gif_urls': gif_urls
+        })
+    
+    return result
+
+# Function to extract titles and thumb URLs
+def extract_titles_and_thumbs(data):
+    result = []
+
+    for entry in data:
+        title = None
+        thumb_urls = []
+        
+        # Extract title and thumb URLs from the tags
+        for tag in entry['tags']:
+            if tag[0] == 'title':
+                title = tag[1]
+            for item in tag:
+                if item.startswith('thumb'):
+                    # Extract the URL after the 'thumb' prefix
+                    thumb_url = item.split(' ')[1]
+                    thumb_urls.append(thumb_url)
+        
+        # Append the result
+        result.append({
+            'title': title,
+            'thumb_urls': thumb_urls
+        })
+    
+    return result
+
 
 if __name__ == "__main__":
     # Review nip94 events
@@ -88,9 +141,9 @@ if __name__ == "__main__":
     # print(len(eventlist))
 
     # Get specific event
-    event_id = '3589d9a28644890fd3904d11854669327a2c19f4123760dd68bbaccd9502fc9e'
-    eventlist = asyncio.run(getevent(id=event_id))
-    print(eventlist)
+    # event_id = "79c96ab3dc70a8bb9e713072ed32e26498e67c565db4cce8e821032db58326f0"
+    # eventlist = asyncio.run(getevent(id=event_id))
+    # print(eventlist)
 
     # Count all nip94 events since gifbuddy launch
     # print(gifcounter()[0])
@@ -100,6 +153,15 @@ if __name__ == "__main__":
     # pubkey = PublicKey.from_hex(pubkeyhex).to_bech32()
     # print(pubkey)
 
-    # pubkey = 'npub1hee433872q2gen90cqh2ypwcq9z7y5ugn23etrd2l2rrwpruss8qwmrsv6'
-    # pubkeyhex = PublicKey.from_bech32(pubkey).to_hex()
-    # print(pubkeyhex)
+    pubkey = 'npub1vnrs6rgkklr9kmpah685e3l9u35rlycpgndq99txfl7va80h7zsqxtppzd'
+    pubkeyhex = PublicKey.from_bech32(pubkey).to_hex()
+    since = Timestamp.from_secs(1724961480)
+    
+    eventlist = asyncio.run(getevent(kind=30169, author="64c70d0d16b7c65b6c3dbe8f4cc7e5e4683f930144da0295664ffcce9df7f0a0"))
+    print(eventlist[0])
+
+    # Get the output
+    # output = extract_titles_and_gifs(eventlist)
+    # print(output)
+    # for entry in output:
+    #     print(entry)

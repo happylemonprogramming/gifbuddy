@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_144x144.png')}}" type="image/png">
+    <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_192x192.png')}}" type="image/png">
+    <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_512x512.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_144x144.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_192x192.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_512x512.png')}}" type="image/png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/favorites.css') }}">
+    <title>GIF Buddy🫂</title>
+</head>
+<body>
+    <!-- <div class="action-container">
+        <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+        <button class="action-button" id="searchButton" onclick="window.location.href='/'">Search</button>
+        <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
+        <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collection</button>
+    </div>     -->
+
+    <nav class="nav-container">
+        <button class="hamburger">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        <div class="action-container">
+            <button class="action-button" id="searchButton" onclick="window.location.href='/gifsearch'">Search GIFs</button>
+            <button class="action-button" id="searchButton" onclick="window.location.href='/nostr'">Search Nostr</button>
+            <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search Memes</button>
+            <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Create Meme</button>
+            <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collections</button>
+            <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+        </div>
+    </nav>
+
+    <div id="notification" class="notification"></div>
+    
+    <!-- Modal Structure -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <img id="modalImage" src="">
+            <div id="modalTextDiv">
+                <label for="modalText" id="modalTextLabel">Shortcode:</label>
+                <input id="modalText" placeholder="Shortcode"></input>
+                <button id="remove-button" class="modalButton">Remove</button>
+                <button id="save-button" class="modalButton">Close</button>
+            </div>
+        </div>
+        <span class="modal-close">&times;</span>
+    </div>
+
+    <div class="container">
+        <h1 id="secret-header" >GIF Favorites ❤️</h1>
+
+        <!-- <span id="temp-text">Search to Add GIFs to Collection</span>
+        <h3 id="favorites-header" ></h3> -->
+        <img id="instructions" style="display: none;" src="https://image.nostr.build/d6ba4cf2ae4b6a5bb067e42a23d5196c8a57b574dfc6bd74fd592ecc11c51590.jpg"></img>
+        <span id="temp-text" style="display: none;">Create a Collection to See Favorites</span>
+        <button class="goto" id="gotoCollectionButton" onclick="window.location.href='/collection'" style="display: none;">Go to Collections</button>
+        <div id="favorites"></div>
+        
+    </div>
+
+    <button id="meme-gif-button" style="display: none;" onclick="window.location.href='/meme'">Meme GIF</button>
+
+    <div class="button-container">
+        <button target="_blank" class="github-button" id="npub">
+            <img src="/static/ostrich.svg" alt="GitHub logo" class="github-logo">
+        </button>
+        <button id="zap-button" class="zap-button">
+            ⚡
+        </button>
+        <button class="loginBtn" id="loginButton">Login</button>
+        <div class="dropdown-content" id="dropdownContent" style="display: none;">
+            <a id="favoritesButton" href="/favorites">My Collections</a>
+            <a id="logoutButton" onclick="handleLogout()">Log Out</a>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="loginModal" id="loginModal">
+        <div class="loginModal-content">
+            <h2 class="loginModal-title">Login with Public Key</h2>
+            <div class="input-group">
+                <input type="text" class="pubkeyInput" id="pubkeyInput" placeholder="Enter your public key" required>
+                <button class="loginBtn" id="loginSubmitButton">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading indicator (initially hidden) -->
+    <div id="loadingIndicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/favorites.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gestures.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>

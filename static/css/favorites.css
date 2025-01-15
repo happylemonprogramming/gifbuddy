@@ -1,0 +1,170 @@
+#favorites {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between categories */
+    width: 100%; /* Ensure full width of the parent container */
+    box-sizing: border-box;
+    margin-bottom: 40px;
+}
+
+.category {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between the title and the images */
+    width: 100%; /* Make the category span the full container width */
+}
+
+.category h4 {
+    text-align: left; /* Align the title to the left */
+    margin: 0; /* Remove default margin */
+    padding: 0 10px; /* Add some padding for spacing */
+    font-size: 1.2rem;
+}
+
+.images-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
+    gap: 10px; /* Space between images */
+    width: 100%; /* Ensure it spans the entire container */
+    box-sizing: border-box; /* Include padding and borders in width */
+}
+
+.images-container img {
+    width: 100%; /* Let the image stretch to the column width */
+    aspect-ratio: 1 / 1; /* Make the images perfectly square */
+    object-fit: cover; /* Ensure the image fits within the square without distortion */
+    border-radius: 8px; /* Optional: Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Optional: Add shadow for aesthetics */
+}
+
+
+
+/* Modal background overlay */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black background */
+}
+
+/* Modal content box */
+.modal-content {
+    position: relative;
+    margin: 10% auto; /* Center the modal vertically and horizontally */
+    padding: 20px;
+    background-color: #222; /* Dark background for the modal */
+    border-radius: 10px;
+    width: 80%; /* Adjust the width of the modal */
+    max-width: 400px; /* Limit the maximum width */
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* Modal image */
+.modal-content img {
+    max-width: 100%; /* Ensure the image fits within the modal */
+    max-height: 400px; /* Limit the image height */
+    border-radius: 8px; /* Rounded corners for the image */
+    margin-bottom: 10px;
+}
+
+/* Textbox beneath the image */
+#modalTextLabel, #modalTextDiv {
+    text-align:left;
+}
+
+#modalText {
+    width: 100%; /* Full width inside the modal */
+    /* height: 100px; */
+    height: auto;
+    white-space: nowrap;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    resize: none; /* Prevent resizing */
+    background-color: #333;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+/* Close button */
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: #fff;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.modal-close:hover {
+    color: rgb(165, 0, 0);
+}
+
+img[title] {
+    position: relative;
+}
+
+img[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    top: -25px; /* Position above the image */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.modalButton {
+border-radius: 4px;
+padding: 10px;
+width: 47%;
+margin: 1%;
+cursor: pointer;
+font-size: 16px;
+display: inline-block;
+text-align: center;
+box-sizing: border-box;
+}
+
+#gotoCollectionButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #5E35B1;
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-right: 3px;
+    width: auto;
+}
+
+#gotoCollectionButton:hover {
+background-color: #4527A0;
+/* border: 1px solid #4527A0; */
+}
+
+#temp-text {
+    font-size: 20px;
+    color: #878787;
+    text-align: center;
+    /* height: 95px; */
+    margin: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
