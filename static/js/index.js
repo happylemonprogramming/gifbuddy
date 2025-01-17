@@ -117,6 +117,7 @@ async function searchGifs(pos) {
                 img.src = preview;
                 img.alt = alt;
                 img.className = 'gif';
+                img.loading = 'lazy'; // Enable lazy loading
                 img.addEventListener('click', () => {
                     copyToClipboard(gifUrl);
                     // localStorage.setItem('meme_url', gifUrl);

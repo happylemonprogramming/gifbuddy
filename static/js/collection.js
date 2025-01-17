@@ -80,6 +80,7 @@ async function searchGifs(pos) {
                 img.src = preview;
                 img.alt = alt;
                 img.className = 'gif';
+                img.loading = 'lazy'; // Enable lazy loading
                 
                 // Store the gifData directly on the image element
                 img.dataset.gifUrl = gifUrl;
