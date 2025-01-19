@@ -1,6 +1,6 @@
 import asyncio, os, json, ast
 from datetime import timedelta
-from nostr_sdk import Keys, Client, Kind, Tag, NostrSigner, Metadata, TagKind, HttpData, HttpMethod, EventId, EventBuilder, Filter, EventSource, init_logger, LogLevel
+from nostr_sdk import Keys, Client, Kind, Event, Tag, NostrSigner, Metadata, TagKind, HttpData, HttpMethod, EventId, EventBuilder, Filter, EventSource, init_logger, LogLevel
 # init_logger(LogLevel.WARN)
 
 def hex_to_note(target_eventID):
@@ -8,15 +8,18 @@ def hex_to_note(target_eventID):
     return note
 
 # Publish content to nostr
-async def nostrpost(private_key, content, kind=None, reply_to=None, url=None, payload=None, tags=[]):
+async def nostrpost(private_key, content, kind=None, reply_to=None, url=None, payload=None, tags=[], relays=["wss://relay.damus.io", "wss://relay.primal.net"]):
     # Initialize with Keys signer
     keys = Keys.parse(private_key)
     signer = NostrSigner.keys(keys)
     client = Client(signer)
 
     # Add relays and connect
-    await client.add_relay("wss://relay.damus.io")
-    await client.add_relay("wss://relay.primal.net")
+    for relay in relays:
+        await client.add_relay(relay)
+        
+    # await client.add_relay("wss://relay.damus.io")
+    # await client.add_relay("wss://relay.primal.net")
     # await client.add_relay("wss://relay.nostr.band")
     # await client.add_relay("wss://nostr.fmt.wiz.biz")
     await client.connect()

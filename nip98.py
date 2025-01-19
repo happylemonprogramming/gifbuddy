@@ -136,9 +136,9 @@ def decentralizeGifUrl(file_url, summary, alt, MIME, image=None, preview=None):
     try:
         event94 = nip94(tags, alt, summary, image, preview)
         logging.info(f'NIP94 Event Published: {event94}')
-        blastr_event = getevent(id=event94)
-        blastoff = blastr(blastr_event[0])
-        logging.info(f"Blastr Response: {blastoff}")
+        # blastr_event = getevent(id=event94)
+        # blastoff = blastr(blastr_event[0])
+        # logging.info(f"Blastr Response: {blastoff}")
 
     except:
         logging.info('NIP94 Failed')

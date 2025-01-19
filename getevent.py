@@ -7,15 +7,20 @@ init_logger(LogLevel.WARN)
 private_key = os.environ["nostrdvmprivatekey"]
 
 # Get event list
-async def getevent(id=None, kind=1, pubkey=None, event=None, since=None, author=None, start=1724961480, end=int(time.time())):
+async def getevent(id=None, kind=1, pubkey=None, event=None, since=None, author=None, start=1724961480, end=int(time.time()), relays=["wss://relay.damus.io", "wss://relay.primal.net"]):
     # Initialize client without signer
     client = Client()
 
     # Add relays and connect
-    await client.add_relay("wss://relay.damus.io")
-    await client.add_relay("wss://relay.primal.net")
+    for relay in relays:
+        await client.add_relay(relay)
+
+    # await client.add_relay("wss://relay.damus.io")
+    # await client.add_relay("wss://relay.primal.net")
+    # await client.add_relay("wss://relay.gifbuddy.lol")
     # await client.add_relay("wss://relay.nostr.band")
     # await client.add_relay("wss://nostr.fmt.wiz.biz")
+    
     await client.connect()
 
     # Get events from relays

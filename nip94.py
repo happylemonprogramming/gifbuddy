@@ -101,7 +101,7 @@ def nip94(tags, alt, summary, image, thumb):
         pass
         
     logging.info('Attempting to Post NIP94 Event')
-    event_id = asyncio.run(nostrpost(private_key=private_key,content=f"{summary} {alt}", kind=kind, tags=tags))
+    event_id = asyncio.run(nostrpost(private_key=private_key,content=f"{summary} {alt}", kind=kind, tags=tags, relays=["wss://relay.gifbuddy.lol"]))
 
     return event_id
 
