@@ -14,14 +14,16 @@ async def update_database(db_name, mime_type="image/gif"):
     # await client.add_relay("wss://relay.primal.net")
     await client.add_relay("wss://relay.gifbuddy.lol")
     await client.connect()
-
+    print("Relay Connected")
     dbopts = NegentropyOptions().direction(NegentropyDirection.DOWN)
-
+    print("Filtering...")
     if mime_type=="image/gif":
         f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), [mime_type]).author(PublicKey.from_bech32(pubkey))
     else:
         f = Filter().kind(Kind(1063)).author(PublicKey.from_bech32(pubkey)).hashtag('memeamigo')
+    print("Filter Complete")
     await client.reconcile(f, dbopts)
+    print("Database Reconciled")
 
 
 async def get_gifs_from_database(db_name, search_term):
@@ -60,7 +62,7 @@ def getrelays():
         return "Request failed with status code:", response.status_code
 
 # Get event list
-async def getgifs(search_term):
+async def get_metadata(search_term, mime_type):
     # Initialize client without signer
     client = Client()
 
@@ -71,7 +73,11 @@ async def getgifs(search_term):
     await client.connect()
 
     # Get events from relays
-    f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"])
+    if mime_type=="image/gif":
+        f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), [mime_type]).author(PublicKey.from_bech32('npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'))
+    else:
+        f = Filter().kind(Kind(1063)).author(PublicKey.from_bech32('npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p')).hashtag('memeamigo')
+    # f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"])
 
     source = EventSource.relays(timeout=timedelta(seconds=30))
     events = await client.get_events_of([f], source)
@@ -165,4 +171,7 @@ if __name__ == "__main__":
     
     # print(memes, len(memes))
 
-    print(asyncio.run(getevent('98dbe2dc3dede1fad7f5cd7f1bede624cbd6242e6ed782370c659b84e05b7f01')))
+    # print(asyncio.run(getevent('98dbe2dc3dede1fad7f5cd7f1bede624cbd6242e6ed782370c659b84e05b7f01')))
+
+    eventlist = asyncio.run(get_metadata("", "image/gifs"))
+    print(len(eventlist))

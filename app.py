@@ -13,7 +13,7 @@ from creategif import lumatexttovideo, getvideo, gifit, resize_gif_to_limit
 
 # Custom Programs
 from nostrgifsearch import get_gifs_from_database, remove_duplicates_by_hash
-from nostrgifsearch import update_database, get_gifs_from_database
+from nostrgifsearch import update_database, get_gifs_from_database, get_metadata
 from decentralizeGifUpload import delete_path, decentralizeGifUpload
 from nip98 import urlgenerator, fallbackurlgenerator
 from meme import create_meme_from_media
@@ -56,8 +56,9 @@ def update_counter():
         # Get GIF data
         try:
             # Variant with local database
-            asyncio.run(update_database("gifs"))
-            output = asyncio.run(get_gifs_from_database("gifs", "")) # Empty to return all
+            # asyncio.run(update_database("gifs"))
+            # output = asyncio.run(get_gifs_from_database("gifs", "")) # Empty to return all
+            output = asyncio.run(get_metadata("", mime_type="image/gif"))
             cached_counter["count"] = str(len(output))
             logging.info(f"Gif Counter: {cached_counter["count"]}")
         except Exception as e:
@@ -66,8 +67,9 @@ def update_counter():
         # Get Meme data
         try:
             # Variant with local database
-            asyncio.run(update_database("memes", "memes"))
-            output = asyncio.run(get_gifs_from_database("memes", "")) # Empty to return all
+            # asyncio.run(update_database("memes", "memes"))
+            # output = asyncio.run(get_gifs_from_database("memes", "")) # Empty to return all
+            output = asyncio.run(get_metadata("", mime_type="image/png"))
             cached_memecounter["count"] = str(len(output))
             logging.info(f"Meme Counter: {cached_memecounter["count"]}")
         except Exception as e:
