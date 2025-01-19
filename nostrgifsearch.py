@@ -10,8 +10,9 @@ async def update_database(db_name, mime_type="image/gif"):
     client = ClientBuilder().database(database).build()
     pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
 
-    await client.add_relay("wss://relay.damus.io")
-    await client.add_relay("wss://relay.primal.net")
+    # await client.add_relay("wss://relay.damus.io")
+    # await client.add_relay("wss://relay.primal.net")
+    await client.add_relay("wss://relay.gifbuddy.lol")
     await client.connect()
 
     dbopts = NegentropyOptions().direction(NegentropyDirection.DOWN)
@@ -64,8 +65,9 @@ async def getgifs(search_term):
     client = Client()
 
     # Add relays and connect
-    await client.add_relay("wss://relay.damus.io")
-    await client.add_relay("wss://relay.primal.net")
+    # await client.add_relay("wss://relay.damus.io")
+    # await client.add_relay("wss://relay.primal.net")
+    await client.add_relay("wss://relay.gifbuddy.lol")
     await client.connect()
 
     # Get events from relays
@@ -110,8 +112,9 @@ async def getevent(hex):
     client = Client()
 
     # Add relays and connect
-    await client.add_relay("wss://relay.damus.io")
-    await client.add_relay("wss://relay.primal.net")
+    # await client.add_relay("wss://relay.damus.io")
+    # await client.add_relay("wss://relay.primal.net")
+    await client.add_relay("wss://relay.gifbuddy.lol")
     await client.connect()
 
     # Get events from relays

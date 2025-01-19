@@ -141,9 +141,9 @@ def extract_titles_and_thumbs(data):
 
 if __name__ == "__main__":
     # Review nip94 events
-    # pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
-    # eventlist = asyncio.run(getevent(kind=1063, author=pubkey))
-    # print(len(eventlist))
+    pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
+    eventlist = asyncio.run(getevent(kind=1063, author=pubkey, relays=["wss://relay.gifbuddy.lol"]))
+    print(len(eventlist))
 
     # Get specific event
     # event_id = "79c96ab3dc70a8bb9e713072ed32e26498e67c565db4cce8e821032db58326f0"
@@ -158,12 +158,12 @@ if __name__ == "__main__":
     # pubkey = PublicKey.from_hex(pubkeyhex).to_bech32()
     # print(pubkey)
 
-    pubkey = 'npub1vnrs6rgkklr9kmpah685e3l9u35rlycpgndq99txfl7va80h7zsqxtppzd'
-    pubkeyhex = PublicKey.from_bech32(pubkey).to_hex()
-    since = Timestamp.from_secs(1724961480)
+    # pubkey = 'npub1vnrs6rgkklr9kmpah685e3l9u35rlycpgndq99txfl7va80h7zsqxtppzd'
+    # pubkeyhex = PublicKey.from_bech32(pubkey).to_hex()
+    # since = Timestamp.from_secs(1724961480)
     
-    eventlist = asyncio.run(getevent(kind=30169, author="64c70d0d16b7c65b6c3dbe8f4cc7e5e4683f930144da0295664ffcce9df7f0a0"))
-    print(eventlist[0])
+    # eventlist = asyncio.run(getevent(kind=30169, author="64c70d0d16b7c65b6c3dbe8f4cc7e5e4683f930144da0295664ffcce9df7f0a0"))
+    # print(eventlist[0])
 
     # Get the output
     # output = extract_titles_and_gifs(eventlist)
