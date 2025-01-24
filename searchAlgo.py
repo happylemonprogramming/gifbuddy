@@ -4,6 +4,7 @@ import faiss
 import time
 import asyncio, time
 from nostrgifsearch import get_gifs_from_database, remove_duplicates_by_hash
+from rebroadcast import search_messages
 
 class GifSearch:
     def __init__(self):
@@ -64,7 +65,8 @@ class GifSearch:
 def nostr_gifs(query, limit):
     # Get unique gif set
     start = time.time()
-    output = asyncio.run(get_gifs_from_database("gifs", ""))
+    # output = asyncio.run(get_gifs_from_database("gifs", "")) # NOTE: Issue with gifbuddy relay
+    output = search_messages("gif_events", "")
     print(f"Get Gifs Time: {round(time.time()-start,2)} seconds")
     unique_output = remove_duplicates_by_hash(output)
     print(f"Unique Gif Count: {len(unique_output)}")

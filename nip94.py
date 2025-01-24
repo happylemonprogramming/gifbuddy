@@ -5,28 +5,47 @@ from PIL import Image
 from io import BytesIO
 
 def capture_image(gif_path):
-    # Load the GIF
-    gif = Image.open(gif_path)
+    # Print the gif path to check it's being passed correctly
+    print(f"Received GIF path: {gif_path}")
 
-    # Specify the frame to save; here we save the first frame
-    frame_number = 0
-    gif.seek(frame_number)
+    try:
+        # Load the GIF
+        gif = Image.open(gif_path)
+        print("GIF opened successfully.")
 
-    # Get the folder path (excluding the basename)
-    folder_path = os.path.dirname(gif_path)
+        # Specify the frame to save; here we save the first frame
+        frame_number = 0
+        gif.seek(frame_number)
+        print(f"Seeking to frame {frame_number}.")
+
+        # Convert to RGB if the image is in 'P' mode (palette-based)
+        if gif.mode == 'P':
+            gif = gif.convert('RGB')
+            print("Converted GIF to RGB mode.")
+
+        # Get the folder path (excluding the basename)
+        folder_path = os.path.dirname(gif_path)
+        print(f"Folder path: {folder_path}")
+        
+        # Get the basename without the extension
+        basename = os.path.basename(gif_path)[0:-4]
+        print(f"Base name without extension: {basename}")
+        
+        # Specify the new frame path in the same folder
+        frame_path = os.path.join(folder_path, f"{basename}.jpg")
+        print(f"Saving frame as: {frame_path}")
+
+        # Save the frame as a .jpg image
+        gif.save(frame_path, "JPEG")
+        print(f"Frame saved as {frame_path}")
+
+        logging.info(f"Frame saved as {frame_path}")
+
+        return frame_path
     
-    # Get the basename without the extension
-    basename = os.path.basename(gif_path)[0:-4]
-    
-    # Specify the new frame path in the same folder
-    frame_path = os.path.join(folder_path, f"{basename}.jpg")
-
-    # Save the frame as a .jpg image
-    gif.save(frame_path, "JPEG")
-
-    logging.info(f"Frame saved as {frame_path}")
-
-    return frame_path
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        logging.error(f"Error capturing image from GIF: {e}")
 
 def compute_sha256(url):
     # Send a GET request to the URL to fetch the content
@@ -101,6 +120,7 @@ def nip94(tags, alt, summary, image, thumb):
         pass
         
     logging.info('Attempting to Post NIP94 Event')
+    print('Attempting to Post NIP94 Event')
     event_id = asyncio.run(nostrpost(private_key=private_key,content=f"{summary} {alt}", kind=kind, tags=tags, relays=["wss://relay.gifbuddy.lol"]))
 
     return event_id

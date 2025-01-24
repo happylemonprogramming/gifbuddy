@@ -22,6 +22,7 @@ def backgroundProcessing(filepath, tags, caption, alt, preview):
     return event94
 
 def decentralizeGifUpload(filepath, caption, alt, MIME):
+    print("Generating gif url...")
     url, tags = urlgenerator(filepath, caption, alt, MIME)
     for tag in tags:
         if tag[0] == 'thumb':
@@ -35,20 +36,26 @@ def decentralizeGifUpload(filepath, caption, alt, MIME):
         
         # subprocess.Popen([virtualenv_python, "decentralizeGifUpload.py", filepath, str(tags), caption, alt, preview])
         if MIME == "image/gif" or MIME == "video/mp4":
+            print("Capturing image...")
             image_path = capture_image(filepath)
+            print("Generating image url...")
             image_url = urlgenerator(image_path, caption, alt, "image/jpeg")
         else:
             image_url = url
             preview = url
 
+        print("Starting nip94...")
         event94 = nip94(tags, alt, caption, image_url, preview)
+        print("Deleting path...")
         delete_path(image_path)
 
         logging.info(f'NIP94 Event Published: {event94}')
+        print(f'NIP94 Event Published: {event94}')
         return event94
 
     except:
         logging.info('NIP94 Failed')
+        print('NIP94 Failed')
 
     return url
 
@@ -69,4 +76,7 @@ if __name__ == "__main__":
 
     mime_type, _ = mimetypes.guess_type(filepath)
     decentralizeGifUpload(filepath, caption, alt, mime_type)
-    delete_path(filepath)
+    try:
+        delete_path(filepath)
+    except:
+        print("Delete attempt failed")

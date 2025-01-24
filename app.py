@@ -12,8 +12,9 @@ from imgflip import search_memes, caption_image, get_memes
 from creategif import lumatexttovideo, getvideo, gifit, resize_gif_to_limit
 
 # Custom Programs
-from nostrgifsearch import get_gifs_from_database, remove_duplicates_by_hash
-from nostrgifsearch import update_database, get_gifs_from_database, get_metadata
+# from nostrgifsearch import get_gifs_from_database, update_database
+from rebroadcast import store_messages, search_messages
+from nostrgifsearch import get_metadata, remove_duplicates_by_hash
 from decentralizeGifUpload import delete_path, decentralizeGifUpload
 from nip98 import urlgenerator, fallbackurlgenerator
 from meme import create_meme_from_media
@@ -55,10 +56,13 @@ def update_counter():
     while True:
         # Get GIF data
         try:
-            # Variant with local database
+            # Variant with LMDB database
             # asyncio.run(update_database("gifs"))
             # output = asyncio.run(get_gifs_from_database("gifs", "")) # Empty to return all
+            
+            # Variant with SQLITE database
             output = asyncio.run(get_metadata("", mime_type="image/gif"))
+            store_messages("gif_events", output)
             cached_counter["count"] = str(len(output))
             logging.info(f"Gif Counter: {cached_counter["count"]}")
         except Exception as e:
@@ -69,7 +73,10 @@ def update_counter():
             # Variant with local database
             # asyncio.run(update_database("memes", "memes"))
             # output = asyncio.run(get_gifs_from_database("memes", "")) # Empty to return all
+            
+            # Variant with SQLITE database
             output = asyncio.run(get_metadata("", mime_type="image/png"))
+            store_messages("meme_events", output)
             cached_memecounter["count"] = str(len(output))
             logging.info(f"Meme Counter: {cached_memecounter["count"]}")
         except Exception as e:
@@ -641,7 +648,11 @@ def nip94():
     pos = data.get('pos')
     logging.info(f'Search term: {search}, Position: {pos}')  # Debugging
 
-    output = asyncio.run(get_gifs_from_database("gifs", search))
+    # output = asyncio.run(get_gifs_from_database("gifs", search))
+    # output = asyncio.run(get_metadata(search, mime_type="image/gif"))
+    gif_output = search_messages("gif_events", search)
+    meme_output = search_messages("meme_events", search)
+    output = gif_output+meme_output
     unique_output = remove_duplicates_by_hash(output)
     logging.info(f"Result Count for {search}: {str(len(output))}")
 

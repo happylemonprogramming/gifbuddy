@@ -6,3 +6,4 @@ gifbuddy.csr
 *.gif
 *.srt
 .env
+testing/
