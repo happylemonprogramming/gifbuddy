@@ -81,6 +81,14 @@ def update_counter():
             logging.info(f"Meme Counter: {cached_memecounter["count"]}")
         except Exception as e:
             logging.info(f"Error updating counter: {e}")
+
+        # Get Upload data
+        try:
+            # Variant with SQLITE database
+            output = asyncio.run(get_metadata("", mime_type="upload"))
+            store_messages("upload_events", output)
+        except Exception as e:
+            logging.info(f"Error caching uploads: {e}")
         
         time.sleep(120)  # Wait for 2 minutes before updating again
 
@@ -652,7 +660,8 @@ def nip94():
     # output = asyncio.run(get_metadata(search, mime_type="image/gif"))
     gif_output = search_messages("gif_events", search)
     meme_output = search_messages("meme_events", search)
-    output = gif_output+meme_output
+    upload_output = search_messages("upload_events", search)
+    output = gif_output+meme_output+upload_output
     unique_output = remove_duplicates_by_hash(output)
     logging.info(f"Result Count for {search}: {str(len(output))}")
 
@@ -779,7 +788,10 @@ def uploading():
         #     return jsonify({'message': 'File uploaded successfully!', 'url': url,'filename': file.filename, 'caption': caption, 'alt': alt}), 200
 
         try:
-            subprocess.Popen(["python", "decentralizeGifUpload.py", filepath, caption, alt])
+            if 'DYNO' in os.environ:
+                subprocess.Popen(["python", "decentralizeGifUpload.py", filepath, caption, alt])
+            else:
+                subprocess.Popen([r"C:\Users\clayt\Documents\Programming\gifbuddy\buddy\scripts\python.exe", "decentralizeGifUpload.py", filepath, caption, alt])
             return jsonify({'message': 'File processing in background!'}), 200
         
         except Exception as e:

@@ -75,6 +75,8 @@ async def get_metadata(search_term, mime_type):
     # Get events from relays
     if mime_type=="image/gif":
         f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), [mime_type]).author(PublicKey.from_bech32('npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'))
+    elif mime_type=="upload":
+        f = Filter().kind(Kind(1063)).author(PublicKey.from_bech32('npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p')).hashtag('gifbuddyupload')
     else:
         f = Filter().kind(Kind(1063)).author(PublicKey.from_bech32('npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p')).hashtag('memeamigo')
     # f = Filter().kind(Kind(1063)).custom_tag(SingleLetterTag.lowercase(Alphabet.M), ["image/gif"])

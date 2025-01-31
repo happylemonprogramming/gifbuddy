@@ -45,6 +45,7 @@ def decentralizeGifUpload(filepath, caption, alt, MIME):
             preview = url
 
         print("Starting nip94...")
+        tags.append(["t", "gifbuddyupload"])
         event94 = nip94(tags, alt, caption, image_url, preview)
         print("Deleting path...")
         delete_path(image_path)

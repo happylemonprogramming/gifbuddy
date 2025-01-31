@@ -8,12 +8,12 @@ import sqlite3
 i=0
 
 # Publish content to nostr
-async def broadcast(event, private_key=None):
+async def broadcast(event, relay="wss://relay.gifbuddy.lol"):
     # Initialize client
     client = Client()
 
     # Add relays and connect
-    await client.add_relay("wss://relay.gifbuddy.lol")
+    await client.add_relay(relay)
     await client.connect()
 
     await client.send_event(Event.from_json(event))

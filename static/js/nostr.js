@@ -173,27 +173,77 @@ async function searchGifs(pos) {
             resultsDiv.innerHTML = ''; // Clear results only for the initial search
         }
 
-        // Iterate over the GIFs array and append them to the results div
+        // // Iterate over the GIFs array and append them to the results div
+        // gifs.forEach(({ thumb, url }) => {
+        //     const gifContainer = document.createElement('div');
+        //     gifContainer.className = 'gif-container';
+
+        //     const img = document.createElement('img');
+        //     console.log(thumb)
+        //     img.src = thumb;
+        //     img.alt = 'GIF'; // Generic alt text for now
+        //     img.className = 'gif';
+        //     // img.title = `Relevance Score: ${score.toFixed(4)}`; // Optional tooltip for score
+
+        //     img.addEventListener('click', () => {
+        //         copyToClipboard(url);
+        //         showNotification('URL copied to clipboard!');
+        //     });
+
+        //     gifContainer.appendChild(img);
+        //     resultsDiv.appendChild(gifContainer);
+        //     document.getElementById('loadingIndicator').style.display = 'none';
+        // });
+
         gifs.forEach(({ thumb, url }) => {
-            const gifContainer = document.createElement('div');
-            gifContainer.className = 'gif-container';
-
-            const img = document.createElement('img');
-            console.log(thumb)
-            img.src = thumb;
-            img.alt = 'GIF'; // Generic alt text for now
-            img.className = 'gif';
-            // img.title = `Relevance Score: ${score.toFixed(4)}`; // Optional tooltip for score
-
-            img.addEventListener('click', () => {
-                copyToClipboard(url);
-                showNotification('URL copied to clipboard!');
-            });
-
-            gifContainer.appendChild(img);
-            resultsDiv.appendChild(gifContainer);
-            document.getElementById('loadingIndicator').style.display = 'none';
+            const container = document.createElement('div');
+            container.className = 'gif-container';
+    
+            // Determine if the URL is an MP4
+            const isMP4 = url.toLowerCase().endsWith('.mp4');
+    
+            if (isMP4) {
+                // Create video element for MP4s
+                const video = document.createElement('video');
+                video.src = thumb;
+                video.className = 'gif'; // Keep same class for consistent styling
+                video.autoplay = true;
+                video.loop = true;
+                video.muted = true;
+                video.playsInline = true;
+                video.controls = false; // Hide video controls
+                
+                // Ensure video loads and plays
+                video.addEventListener('loadeddata', () => {
+                    video.play().catch(console.error);
+                });
+    
+                // Add click handler
+                video.addEventListener('click', () => {
+                    copyToClipboard(url);
+                    showNotification('URL copied to clipboard!');
+                });
+    
+                container.appendChild(video);
+            } else {
+                // Original image handling for GIFs
+                const img = document.createElement('img');
+                img.src = thumb;
+                img.alt = 'GIF';
+                img.className = 'gif';
+    
+                img.addEventListener('click', () => {
+                    copyToClipboard(url);
+                    showNotification('URL copied to clipboard!');
+                });
+    
+                container.appendChild(img);
+            }
+    
+            resultsDiv.appendChild(container);
         });
+        
+        document.getElementById('loadingIndicator').style.display = 'none';
 
         // Handle "Load More" button
         pos = null; // Currently, there's no pagination support in the new endpoint

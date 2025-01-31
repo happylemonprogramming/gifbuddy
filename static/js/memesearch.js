@@ -36,9 +36,9 @@ document.addEventListener("DOMContentLoaded", function () {
 async function sendMemeMetadata(memeData) {
     try {
         await axios.post('/mememetadata', memeData);
-        console.log('GIF metadata sent successfully.');
+        console.log('Meme metadata sent successfully.');
     } catch (error) {
-        console.error('Error sending GIF metadata:', error);
+        console.error('Error sending Meme metadata:', error);
     }
 }
 

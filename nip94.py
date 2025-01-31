@@ -4,44 +4,119 @@ import blurhash
 from PIL import Image
 from io import BytesIO
 
-def capture_image(gif_path):
-    # Print the gif path to check it's being passed correctly
-    print(f"Received GIF path: {gif_path}")
+import os
+import logging
+from PIL import Image
+import cv2
 
+def capture_image(file_path):
+    """
+    Captures the first frame from either a GIF or MP4 file and saves it as a JPG.
+    
+    Args:
+        file_path (str): Path to the input GIF or MP4 file
+        
+    Returns:
+        str: Path to the saved JPG file
+    """
+    print(f"Received file path: {file_path}")
+    
+    # Get file extension
+    file_extension = os.path.splitext(file_path)[1].lower()
+    
     try:
-        # Load the GIF
-        gif = Image.open(gif_path)
-        print("GIF opened successfully.")
-
-        # Specify the frame to save; here we save the first frame
-        frame_number = 0
-        gif.seek(frame_number)
-        print(f"Seeking to frame {frame_number}.")
-
-        # Convert to RGB if the image is in 'P' mode (palette-based)
-        if gif.mode == 'P':
-            gif = gif.convert('RGB')
-            print("Converted GIF to RGB mode.")
-
-        # Get the folder path (excluding the basename)
-        folder_path = os.path.dirname(gif_path)
-        print(f"Folder path: {folder_path}")
+        if file_extension == '.gif':
+            # Handle GIF files using PIL
+            image = Image.open(file_path)
+            print("GIF opened successfully.")
+            
+            # Get first frame
+            image.seek(0)
+            
+            # Convert to RGB if needed
+            if image.mode == 'P':
+                image = image.convert('RGB')
+                print("Converted GIF to RGB mode.")
+                
+        elif file_extension == '.mp4':
+            # Handle MP4 files using OpenCV
+            video = cv2.VideoCapture(file_path)
+            print("MP4 opened successfully.")
+            
+            # Read the first frame
+            success, frame = video.read()
+            if not success:
+                raise Exception("Failed to read MP4 file")
+                
+            # Convert from BGR to RGB
+            image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            print("Extracted first frame from MP4")
+            
+            # Release the video capture object
+            video.release()
+            
+        else:
+            raise ValueError(f"Unsupported file format: {file_extension}")
         
-        # Get the basename without the extension
-        basename = os.path.basename(gif_path)[0:-4]
-        print(f"Base name without extension: {basename}")
+        # Get the folder path and basename
+        folder_path = os.path.dirname(file_path)
+        basename = os.path.splitext(os.path.basename(file_path))[0]
         
-        # Specify the new frame path in the same folder
+        # Create output path
         frame_path = os.path.join(folder_path, f"{basename}.jpg")
         print(f"Saving frame as: {frame_path}")
-
-        # Save the frame as a .jpg image
-        gif.save(frame_path, "JPEG")
+        
+        # Save the frame
+        image.save(frame_path, "JPEG")
         print(f"Frame saved as {frame_path}")
-
+        
         logging.info(f"Frame saved as {frame_path}")
-
+        
         return frame_path
+        
+    except Exception as e:
+        error_msg = f"Error processing {file_path}: {str(e)}"
+        logging.error(error_msg)
+        raise Exception(error_msg)
+
+# def capture_image(gif_path):
+#     # Print the gif path to check it's being passed correctly
+#     print(f"Received GIF path: {gif_path}")
+
+#     try:
+#         # Load the GIF
+#         gif = Image.open(gif_path)
+#         print("GIF opened successfully.")
+
+#         # Specify the frame to save; here we save the first frame
+#         frame_number = 0
+#         gif.seek(frame_number)
+#         print(f"Seeking to frame {frame_number}.")
+
+#         # Convert to RGB if the image is in 'P' mode (palette-based)
+#         if gif.mode == 'P':
+#             gif = gif.convert('RGB')
+#             print("Converted GIF to RGB mode.")
+
+#         # Get the folder path (excluding the basename)
+#         folder_path = os.path.dirname(gif_path)
+#         print(f"Folder path: {folder_path}")
+        
+#         # Get the basename without the extension
+#         basename = os.path.basename(gif_path)[0:-4]
+#         print(f"Base name without extension: {basename}")
+        
+#         # Specify the new frame path in the same folder
+#         frame_path = os.path.join(folder_path, f"{basename}.jpg")
+#         print(f"Saving frame as: {frame_path}")
+
+#         # Save the frame as a .jpg image
+#         gif.save(frame_path, "JPEG")
+#         print(f"Frame saved as {frame_path}")
+
+#         logging.info(f"Frame saved as {frame_path}")
+
+#         return frame_path
     
     except Exception as e:
         print(f"Error occurred: {e}")
