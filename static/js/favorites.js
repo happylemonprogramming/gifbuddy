@@ -76,173 +76,6 @@ favortiesDiv.addEventListener("click", (e) => {
     }
 });
 
-// Function to fetch favorites and update the DOM
-// function fetchFavorites(pubkey) {
-//     loading.style.display = "block";
-//     if (pubkey.startsWith("npub")) {
-//         // Send the GET request to /favorites with the pubkey parameter
-//         fetch(`/favorite?pubkey=${pubkey}`)
-//             .then(response => {
-//                 if (!response.ok) {
-//                     loading.style.display = "block";
-//                     throw new Error('Network response was not ok');
-//                 }
-//                 return response.json(); // Parse the response as JSON
-//             })
-//             .then(data => {
-//                 // Ensure data is an array
-//                 if (!Array.isArray(data)) {
-//                     loading.style.display = "block";
-//                     console.error('Expected an array, but got:', data);
-//                     alert("Unexpected response from server")
-//                     return; // Early return if data is not an array
-//                 } else if (data.length === 0) {
-//                     instructions.style.display = "block";
-//                     tempText.style.display = "block";
-//                     gotoButton.style.display = "block";
-//                     alert('No saved GIFs!');
-//                 } else {
-//                     // Get the "favorites" div to insert the GIFs
-//                     const favoritesDiv = document.getElementById('favorites');
-//                     favoritesDiv.innerHTML = ''; // Clear the previous content, if any
-
-//                     // Loop through each item in the returned data
-//                     data.forEach(item => {
-//                         // Ensure the item has a title and thumb_urls array
-//                         if (!item.title || !Array.isArray(item.thumb_urls)) {
-//                             console.error('Invalid item format:', item);
-//                             return; // Skip this item if it's malformed
-//                         }
-
-//                         // Create a div to hold the title and GIFs for this category
-//                         const categoryDiv = document.createElement('div');
-//                         categoryDiv.classList.add('category'); // Add a class for styling
-
-//                         // Create and set the title for this category
-//                         const titleElement = document.createElement('h4');
-//                         titleElement.innerText = item.title; // Set the title
-//                         categoryDiv.appendChild(titleElement);
-
-//                         // Create the images-container div
-//                         const imagesContainer = document.createElement('div');
-//                         imagesContainer.classList.add('images-container'); // Add a class for styling
-
-//                         // Loop through each gif URL and create an <img> element
-//                         item.thumb_urls.forEach(gifUrl => {
-//                             const imgElement = document.createElement('img');
-//                             imgElement.src = gifUrl; // Set the source URL for the GIF
-//                             imgElement.alt = item.title; // Optionally set alt text for the image
-//                             imagesContainer.appendChild(imgElement); // Append the image to the container
-//                         });
-
-//                         // Append the images container to the category div
-//                         categoryDiv.appendChild(imagesContainer);
-
-//                         // Append the category div to the favorites section
-//                         favoritesDiv.appendChild(categoryDiv);
-//                         loading.style.display = "none";
-//                     });
-//                 }
-//             })
-//             .catch(error => {
-//                 console.error('Error fetching favorites:', error);
-//                 // Get the "favorites" div to insert the GIFs
-//                 const favoritesDiv = document.getElementById('favorites');
-//                 favoritesDiv.innerHTML = ''; // Clear the previous content, if any
-//                 loading.style.display = "none";
-//                 alert('Something went wrong')
-//             });
-//     } else {
-//         alert('Login must be in bech32 format (npub...)')
-//     }
-// }
-
-// // Function to fetch favorites and update the DOM
-// function fetchFavorites(pubkey) {
-//     loading.style.display = "block";
-
-//     if (pubkey.startsWith("npub")) {
-//         fetch(`/favorite?pubkey=${pubkey}`)
-//             .then(response => {
-//                 if (!response.ok) {
-//                     loading.style.display = "none";
-//                     throw new Error('Network response was not ok');
-//                 }
-//                 return response.json();
-//             })
-//             .then(data => {
-//                 // Ensure data is an array
-//                 if (!Array.isArray(data)) {
-//                     loading.style.display = "none";
-//                     console.error('Expected an array, but got:', data);
-//                     alert("Unexpected response from server");
-//                     return;
-//                 } else if (data.length === 0) {
-//                     instructions.style.display = "block";
-//                     tempText.style.display = "block";
-//                     gotoButton.style.display = "block";
-//                     alert('No saved GIFs!');
-//                 } else {
-//                     const favoritesDiv = document.getElementById('favorites');
-//                     favoritesDiv.innerHTML = ''; // Clear previous content
-
-//                     // Loop through the data
-//                     data.forEach(item => {
-//                         const tags = item.tags || [];
-
-//                         // Find title from tags
-//                         const titleTag = tags.find(tag => tag[0] === 'title');
-//                         const title = titleTag ? titleTag[1] : 'Untitled';
-
-//                         // Extract imeta tags for GIFs
-//                         const imetaTags = tags.filter(tag => tag[0] === 'imeta');
-//                         const thumbUrls = imetaTags.map(tag => {
-//                             const thumbIndex = tag.findIndex(entry => entry.startsWith('thumb '));
-//                             return thumbIndex !== -1 ? tag[thumbIndex].split(' ')[1] : null;
-//                         }).filter(url => url); // Remove null values
-
-//                         // Skip if no thumbnails are found
-//                         if (thumbUrls.length === 0) return;
-
-//                         // Create a div for this category
-//                         const categoryDiv = document.createElement('div');
-//                         categoryDiv.classList.add('category');
-
-//                         // Add title
-//                         const titleElement = document.createElement('h4');
-//                         titleElement.innerText = title;
-//                         categoryDiv.appendChild(titleElement);
-
-//                         // Add images
-//                         const imagesContainer = document.createElement('div');
-//                         imagesContainer.classList.add('images-container');
-
-//                         thumbUrls.forEach(gifUrl => {
-//                             const imgElement = document.createElement('img');
-//                             imgElement.src = gifUrl;
-//                             imgElement.alt = title;
-//                             imagesContainer.appendChild(imgElement);
-//                         });
-
-//                         categoryDiv.appendChild(imagesContainer);
-//                         favoritesDiv.appendChild(categoryDiv);
-//                     });
-
-//                     loading.style.display = "none";
-//                 }
-//             })
-//             .catch(error => {
-//                 console.error('Error fetching favorites:', error);
-//                 document.getElementById('favorites').innerHTML = ''; // Clear previous content
-//                 loading.style.display = "none";
-//                 alert('Something went wrong');
-//             });
-//     } else {
-//         alert('Login must be in bech32 format (npub...)');
-//     }
-// }
-
-// Function to fetch favorites and update the DOM
 function fetchFavorites(pubkey) {
     loading.style.display = "block";
 
@@ -294,12 +127,26 @@ function fetchFavorites(pubkey) {
                         const categoryDiv = document.createElement('div');
                         categoryDiv.classList.add('category');
 
+                        // Create a container for title and edit button
+                        const titleContainer = document.createElement('div');
+                        titleContainer.style.display = 'flex';
+                        titleContainer.style.alignItems = 'center';
+                        titleContainer.style.gap = '10px';
+
                         // Add title with copy functionality
                         const titleElement = document.createElement('h4');
                         titleElement.innerText = title;
                         titleElement.classList.add('title');
                         titleElement.onclick = () => copyJSON(item); // Attach click event
-                        categoryDiv.appendChild(titleElement);
+                        titleContainer.appendChild(titleElement);
+
+                        // Add edit button
+                        const editButton = document.createElement('button');
+                        editButton.innerText = 'Edit';
+                        editButton.onclick = () => handleEdit(item); // Attach click event
+                        titleContainer.appendChild(editButton);
+
+                        categoryDiv.appendChild(titleContainer);
 
                         // Add images
                         const imagesContainer = document.createElement('div');
@@ -330,6 +177,47 @@ function fetchFavorites(pubkey) {
     }
 }
 
+async function handleEdit(item) {
+    // Create a temporary collection object in the format expected by the collection page
+    const collectionData = {
+        images: new Map()
+    };
+
+    // Get all GIF elements in the category div (parent container)
+    const categoryDiv = event.target.closest('.category');
+    const imagesContainer = categoryDiv.querySelector('.images-container');
+    const images = imagesContainer.querySelectorAll('img');
+    
+    // Find the title from the category div
+    const title = categoryDiv.querySelector('.title').innerText;
+    
+    // Map each GIF to the collection format
+    images.forEach((img, index) => {
+        const uniqueId = `${title}-${index + 1}`;
+        collectionData.images.set(uniqueId, {
+            gif: img.src,
+            thumb: img.src, // Assuming the shown image is the thumbnail
+            alt: img.alt,
+            size: img.dataset.gifSize || '',
+            dims: img.dataset.gifDims || '',
+            image: img.dataset.image || '',
+            summary: img.dataset.summary || ''
+        });
+    });
+
+    // Convert Map to object for localStorage (since Maps can't be stored directly)
+    const collectionObj = {
+        title: title,
+        images: Object.fromEntries(collectionData.images)
+    };
+
+    // Store in localStorage for the collection page to access
+    localStorage.setItem('editCollection', JSON.stringify(collectionObj));
+    console.log(collectionObj)
+    // Redirect to the collection page
+    window.location.href = '/collection';
+}
+
 // Function to copy JSON to clipboard
 function copyJSON(data) {
     const jsonString = JSON.stringify(data, null, 2); // Convert the JSON dictionary to a string
@@ -351,63 +239,3 @@ if (storedPubkey === null) {
 } else {
     fetchFavorites(storedPubkey);
 }
-
-
-// // Function to fetch favorites and update the DOM
-// function fetchFavorites(pubkey) {
-//     // Send the GET request to /favorites with the pubkey parameter
-//     fetch(`/favorite?pubkey=${pubkey}`)
-//         .then(response => {
-//             if (!response.ok) {
-//                 throw new Error('Network response was not ok');
-//             }
-//             return response.json();  // Parse the response as JSON
-//         })
-//         .then(data => {
-//             // Ensure data is an array
-//             if (!Array.isArray(data)) {
-//                 console.error('Expected an array, but got:', data);
-//                 return; // Early return if data is not an array
-//             }
-
-//             // Get the "favorites" div to insert the GIFs
-//             const favoritesDiv = document.getElementById('favorites');
-//             favoritesDiv.innerHTML = ''; // Clear the previous content, if any
-
-//             // Loop through each item in the returned data
-//             data.forEach(item => {
-//                 // Ensure the item has a title and thumb_urls array
-//                 if (!item.title || !Array.isArray(item.thumb_urls)) {
-//                     console.error('Invalid item format:', item);
-//                     return; // Skip this item if it's malformed
-//                 }
-
-//                 // Create a div to hold the title and GIFs for this category
-//                 const categoryDiv = document.createElement('div');
-//                 categoryDiv.classList.add('category'); // Optionally add a class for styling
-
-//                 // Create and set the title for this category
-//                 const titleElement = document.createElement('h4');
-//                 titleElement.innerText = item.title;  // Set the title
-//                 categoryDiv.appendChild(titleElement);
-
-//                 // Loop through each gif URL and create an <img> element
-//                 item.thumb_urls.forEach(gifUrl => {
-//                     const imgElement = document.createElement('img');
-//                     imgElement.src = gifUrl;  // Set the source URL for the GIF
-//                     imgElement.alt = item.title; // Optionally set alt text for the image
-//                     categoryDiv.appendChild(imgElement);
-//                 });
-
-//                 // Append the category div to the favorites section
-//                 favoritesDiv.appendChild(categoryDiv);
-//             });
-//         })
-//         .catch(error => {
-//             console.error('Error fetching favorites:', error);
-//         });
-// }
-// // Example usage (pass your pubkey here)
-// const storedPubkey = localStorage.getItem('pubkey');
-// console.log(storedPubkey)
-// fetchFavorites(storedPubkey);

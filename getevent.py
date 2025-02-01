@@ -138,6 +138,31 @@ def extract_titles_and_thumbs(data):
     
     return result
 
+def filter_latest_events(event_list):
+    # Create a dictionary to store events by title with their timestamps
+    title_map = {}
+    
+    for event in event_list:
+        # Extract title from tags
+        title = None
+        for tag in event['tags']:
+            if tag[0] == 'title':
+                title = tag[1]
+                break
+        
+        if title is None:
+            continue  # Skip events without a title
+            
+        # If we haven't seen this title before, or if this event is newer
+        if (title not in title_map or 
+            event['created_at'] > title_map[title]['created_at']):
+            title_map[title] = event
+    
+    # Convert the map back to a list, sorted by created_at (newest first)
+    filtered_events = list(title_map.values())
+    filtered_events.sort(key=lambda x: x['created_at'], reverse=True)
+    
+    return filtered_events
 
 if __name__ == "__main__":
     # Review nip94 events

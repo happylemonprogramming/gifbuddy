@@ -40,6 +40,50 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+// Add this at the start of your collection page JavaScript
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if we have stored collection data
+    const storedCollection = localStorage.getItem('editCollection');
+    if (storedCollection) {
+        const collectionObj = JSON.parse(storedCollection);
+        
+        // Set the collection title if you have a title input
+        const collectionInput = document.getElementById('collection-input');
+        if (collectionInput) {
+            collectionInput.value = collectionObj.title;
+        }
+
+        // Convert the stored object back to the Map format your code expects
+        collectionData.images = new Map(Object.entries(collectionObj.images));
+        
+        // Display the images in your collection div
+        const collectionDiv = document.getElementById('collection');
+        for (const [title, data] of collectionData.images) {
+            const img = document.createElement('img');
+            img.src = data.thumb;
+            img.alt = data.alt;
+            img.title = title;
+            img.className = 'gif'; // Add any necessary classes
+            
+            // Add all the data attributes
+            img.dataset.gifUrl = data.gif;
+            img.dataset.thumb = data.thumb;
+            img.dataset.gifSize = data.size;
+            img.dataset.gifDims = data.dims;
+            img.dataset.image = data.image;
+            img.dataset.summary = data.summary;
+            
+            collectionDiv.appendChild(img);
+        }
+
+        // Clear the stored data after loading
+        localStorage.removeItem('editCollection');
+        publishButton.classList.add('enabled');
+        publishButton.classList.remove('disabled');
+        tempText.style.display = 'none';
+        collectionDiv.style.display = 'grid';    }
+});
+
 function showNotification(message) {
     const notification = document.getElementById('notification');
     notification.textContent = message;
@@ -440,8 +484,8 @@ function removeAllImages() {
 
 // Event listener for publish button
 publishButton.addEventListener('click', async () => {
-    if (collectionData.images.size === 0) {
-        alert('Collection Empty')
+    if (collectionData.images.size === 0 || collectionInput.value === "") { 
+        alert('Collection or Title Empty');
     } else {
         document.getElementById('loadingIndicator').style.display = 'block';
         const finalData = prepareSubmissionData();
@@ -489,6 +533,7 @@ publishButton.addEventListener('click', async () => {
             }
         } else {
             alert('Ensure you have the necessary browser extension.')
+            document.getElementById('loadingIndicator').style.display = 'none';
             console.error('window.nostr is not available. Ensure you have the necessary browser extension.');
         }
     }

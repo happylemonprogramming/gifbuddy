@@ -20,7 +20,7 @@ from nip98 import urlgenerator, fallbackurlgenerator
 from meme import create_meme_from_media
 from nostrAddressDatabase import get_from_dynamodb
 from lsbSteganography import lsbdecode
-from getevent import getevent, PublicKey, extract_titles_and_thumbs, extract_titles_and_gifs
+from getevent import getevent, PublicKey, filter_latest_events, extract_titles_and_thumbs, extract_titles_and_gifs
 from api import api_service
 from memegifs import AnimatedImageProcessor, Path
 # from searchAlgo import nostr_gifs
@@ -1000,12 +1000,13 @@ def favorite():
     pubkey = request.args.get('pubkey')
     pubkeyhex = PublicKey.from_bech32(pubkey).to_hex()
     eventlist = asyncio.run(getevent(kind=30169, author=pubkeyhex))
+    latest_events = filter_latest_events(eventlist)
     # logging.info(eventlist[0])
     # output = extract_titles_and_thumbs(eventlist)
     # logging.info(output[0])
     try:
         # return jsonify(output)
-        return jsonify(eventlist)
+        return jsonify(latest_events)
     except FileNotFoundError:
         return jsonify({"error": "something went wrong"}), 404
     
