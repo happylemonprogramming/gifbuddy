@@ -142,6 +142,7 @@ function fetchFavorites(pubkey) {
 
                         // Add edit button
                         const editButton = document.createElement('button');
+                        editButton.classList.add('editCollection');
                         editButton.innerText = 'Edit';
                         editButton.onclick = () => handleEdit(item); // Attach click event
                         titleContainer.appendChild(editButton);

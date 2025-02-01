@@ -37,8 +37,6 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Optional: Add shadow for aesthetics */
 }
 
-
-
 /* Modal background overlay */
 .modal {
     display: none; /* Hidden by default */
@@ -140,6 +138,24 @@ display: inline-block;
 text-align: center;
 box-sizing: border-box;
 }
+
+.editCollection {
+    padding: 5px 10px;
+    font-size: 16px;
+    background-color: #5E35B1;
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-right: 3px;
+    width: auto;
+}
+
+.editCollection:hover {
+    background-color: #4527A0;
+    color: #FFFFFF;
+    /* border: 1px solid #4527A0; */
+    }
 
 #gotoCollectionButton {
     padding: 10px 20px;
