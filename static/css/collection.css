@@ -29,7 +29,7 @@
     border-radius: 4px 0 0 4px;
 }
 
-#publish-button {
+#publish-button, #toggle-button {
     padding: 10px 20px;
     font-size: 16px;
     color: #FFFFFF;
@@ -38,15 +38,15 @@
     border-radius: 4px;
 }
 
-#publish-button.enabled {
+#publish-button.enabled, #toggle-button.enabled {
     background-color: #5E35B1;
     cursor: pointer;
     opacity: 1;
   }
   
-#publish-button.disabled {
+#publish-button.disabled, #toggle-button.disabled {
 background-color: grey;
-cursor: not-allowed;
+/* cursor: not-allowed; */
 opacity: 0.6;
 }
 
@@ -85,8 +85,8 @@ opacity: 0.6;
 }
 
 /* Modal image */
-.modal-content img {
-    max-width: 100%; /* Ensure the image fits within the modal */
+#modalImage, #modalVideo {
+    width: 100%; /* Ensure the image fits within the modal */
     max-height: 400px; /* Limit the image height */
     border-radius: 8px; /* Rounded corners for the image */
     margin-bottom: 10px;

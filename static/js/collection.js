@@ -18,12 +18,14 @@ const publishBox = document.getElementById('publish-box')
 
 const modal = document.getElementById("imageModal");
 const modalImage = document.getElementById("modalImage");
+const modalVideo = document.getElementById("modalVideo");
 const modalText = document.getElementById("modalText");
 const modalClose = document.querySelector(".modal-close");
 const modalSave = document.getElementById("save-button");
 const modalRemove = document.getElementById("remove-button");
 const tempText = document.getElementById("temp-text")
 const publishButton = document.getElementById('publish-button');
+const toggleButton = document.getElementById('toggle-button')
 
 // Text input field autofocus redundancy
 document.addEventListener("DOMContentLoaded", function () {
@@ -164,7 +166,7 @@ async function sendGifMetadata(gifData) {
 // Single event listener for search results clicks
 resultsDiv.addEventListener('click', (e) => {
     showNotification('Added!')
-    if (e.target.tagName === "IMG") {
+    if (e.target.tagName === "IMG" || e.target.tagName === "VIDEO") {
         const img = e.target;
         const searchTerm = searchInput.value.trim().replace(/\s+/g, '-');
         
@@ -196,40 +198,28 @@ resultsDiv.addEventListener('click', (e) => {
         
         console.log('Added image:', Object.fromEntries(collectionData.images));
     
-        const gifUrl = img.dataset.gifUrl;
-        const gifSize = img.dataset.gifSize;
-        const gifDims = img.dataset.gifDims;
-        const thumb = img.dataset.thumb;
-        const preview = img.src;
-        const alt = img.alt;
-        const image = img.dataset.image;
-        const summary = img.dataset.summary;
+        if (toggleButton.classList.contains('disabled')) {
+            const gifUrl = img.dataset.gifUrl;
+            const gifSize = img.dataset.gifSize;
+            const gifDims = img.dataset.gifDims;
+            const thumb = img.dataset.thumb;
+            const preview = img.src;
+            const alt = img.alt;
+            const image = img.dataset.image;
+            const summary = img.dataset.summary;
 
-        sendGifMetadata({
-            gifUrl,
-            gifSize,
-            gifDims,
-            thumb,
-            preview,
-            alt,
-            image,
-            summary,
-            searchTerm
-        });
-    }
-});
-
-// Allows user to initiate search by click or enter
-searchButton.addEventListener('click', async () => {
-    pos = null;  // Reset pos for a new search
-    pos = await searchGifs(pos);  // Initial search
-});
-searchInput.addEventListener('keypress', async function(e) {
-    if (e.key === 'Enter') {
-        pos = null;  // Reset pos for a new search
-        pos = await searchGifs(pos);  // Initial search
-        // Remove focus from the input field to close the keyboard
-        this.blur();  // 'this' now refers to the input element
+            sendGifMetadata({
+                gifUrl,
+                gifSize,
+                gifDims,
+                thumb,
+                preview,
+                alt,
+                image,
+                summary,
+                searchTerm
+            });
+        }
     }
 });
 
@@ -312,13 +302,24 @@ function getUniqueTitle(baseTitle) {
 }
 
 
-
 // Event listener for image clicks in the collection (for editing)
 collectionDiv.addEventListener("click", (e) => {
     if (e.target.tagName === "IMG") {
+        modalImage.style.display = "block";
+        modalVideo.style.display = "none";
         currentImage = e.target;
         modalImage.src = currentImage.src;
         modalImage.title = currentImage.title;
+        modalText.value = currentImage.title;
+        modal.style.display = "block";
+    } 
+
+    if (e.target.tagName === "VIDEO") {
+        modalVideo.style.display = "block";
+        modalImage.style.display = "none";
+        currentImage = e.target;
+        modalVideo.src = currentImage.src;
+        modalVideo.title = currentImage.title;
         modalText.value = currentImage.title;
         modal.style.display = "block";
     }
@@ -539,3 +540,160 @@ publishButton.addEventListener('click', async () => {
     }
 });
 
+// Primary GIF search function
+async function searchNostr(pos) {
+    const searchTerm = searchInput.value.trim();
+    if (!searchTerm) {
+        console.log('No search term, returning');
+        return;
+    }
+
+    try {
+        document.getElementById('loadingIndicator').style.display = 'block';
+        // Make a POST request to the NIP94 search endpoint
+        const response = await axios.post('/nip94', {
+            q: searchTerm,
+            pos: pos // Include position (if any) for pagination
+        });
+
+        console.log('Search response received:', response.data);
+
+        // Extract the GIFs array from the API response
+        const gifs = response.data;
+
+        // If the GIFs array is empty, alert the user
+        if (!gifs || gifs.length === 0) {
+            document.getElementById('loadingIndicator').style.display = 'none';
+            showNotification('Try something else');
+            searchInput.value = ''; // Clear the input field
+            setTimeout(() => {
+                searchInput.focus(); // Set focus on the input field
+            }, 2250); // Adjust the delay as needed
+            return;
+        }
+
+        // If it's the initial search, clear the results
+        if (pos == null) {
+            instructions.style.display = 'none';
+            resultsDiv.innerHTML = ''; // Clear results only for the initial search
+        }
+
+        // // Iterate over the GIFs array and append them to the results div
+        // gifs.forEach(({ thumb, url }) => {
+        //     const gifContainer = document.createElement('div');
+        //     gifContainer.className = 'gif-container';
+
+        //     const img = document.createElement('img');
+        //     console.log(thumb)
+        //     img.src = thumb;
+        //     img.alt = 'GIF'; // Generic alt text for now
+        //     img.className = 'gif';
+        //     // img.title = `Relevance Score: ${score.toFixed(4)}`; // Optional tooltip for score
+
+        //     img.addEventListener('click', () => {
+        //         copyToClipboard(url);
+        //         showNotification('URL copied to clipboard!');
+        //     });
+
+        //     gifContainer.appendChild(img);
+        //     resultsDiv.appendChild(gifContainer);
+        //     document.getElementById('loadingIndicator').style.display = 'none';
+        // });
+
+        gifs.forEach(({ thumb, url }) => {
+            const container = document.createElement('div');
+            container.className = 'gif-container';
+    
+            // Determine if the URL is an MP4
+            const isMP4 = url.toLowerCase().endsWith('.mp4');
+    
+            if (isMP4) {
+                // Create video element for MP4s
+                const video = document.createElement('video');
+                video.src = thumb;
+                video.className = 'gif'; // Keep same class for consistent styling
+                video.autoplay = true;
+                video.loop = true;
+                video.muted = true;
+                video.playsInline = true;
+                video.controls = false; // Hide video controls
+                
+                // Ensure video loads and plays
+                video.addEventListener('loadeddata', () => {
+                    video.play().catch(console.error);
+                });
+    
+                // Add click handler
+                video.addEventListener('click', () => {
+                    copyToClipboard(url);
+                    showNotification('URL copied to clipboard!');
+                });
+    
+                container.appendChild(video);
+            } else {
+                // Original image handling for GIFs
+                const img = document.createElement('img');
+                img.src = thumb;
+                img.alt = 'GIF';
+                img.className = 'gif';
+    
+                img.addEventListener('click', () => {
+                    copyToClipboard(url);
+                    showNotification('URL copied to clipboard!');
+                });
+    
+                container.appendChild(img);
+            }
+    
+            resultsDiv.appendChild(container);
+        });
+        
+        document.getElementById('loadingIndicator').style.display = 'none';
+
+        // Handle "Load More" button
+        pos = null; // Currently, there's no pagination support in the new endpoint
+        document.getElementById('next-container').style.display = 'flex'; // Show Start Over button
+
+        return pos; // Return the updated pos (always null here)
+
+    } catch (error) {
+        document.getElementById('loadingIndicator').style.display = 'none';
+        console.error('Error fetching GIFs:', error);
+        resultsDiv.innerHTML = 'An error occurred while fetching GIFs.';
+        return null; // Return null in case of error
+    }
+}
+
+// Allows user to initiate search by click or enter
+searchButton.addEventListener('click', async () => {
+    if (toggleButton.classList.contains('disabled')) {
+        pos = null;  // Reset pos for a new search
+        pos = await searchGifs(pos);  // Initial search
+    } else {
+        pos = null;  // Reset pos for a new search
+        pos = await searchNostr(pos);  // Initial search
+    }
+});
+
+searchInput.addEventListener('keypress', async function(e) {
+    if (e.key === 'Enter') {
+        if (toggleButton.classList.contains('disabled')) {
+            pos = null;  // Reset pos for a new search
+            pos = await searchGifs(pos);  // Initial search
+        } else {
+            pos = null;  // Reset pos for a new search
+            pos = await searchNostr(pos);  // Initial search
+        }
+        this.blur();  // 'this' now refers to the input element
+    }
+});
+
+toggleButton.addEventListener('click', () => {
+    if (toggleButton.classList.contains('disabled')) {
+        toggleButton.classList.remove('disabled');
+        toggleButton.classList.add('enabled');
+    } else {
+        toggleButton.classList.remove('enabled');
+        toggleButton.classList.add('disabled');
+    }
+});

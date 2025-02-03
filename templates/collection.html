@@ -44,7 +44,9 @@
     <!-- Modal Structure -->
     <div id="imageModal" class="modal">
         <div class="modal-content">
-            <img id="modalImage" src="">
+            <img id="modalImage" src=""></img>
+            <video id="modalVideo" src="" autoplay loop></video>
+
             <div id="modalTextDiv">
                 <label for="modalText" id="modalTextLabel">Shortcode:</label>
                 <input id="modalText" placeholder="Shortcode"></input>
@@ -70,6 +72,7 @@
         <div class="search-box">
             <input type="text" id="search-input" placeholder="Search GIFs for Collection" autofocus onclick="this.focus();">
             <button id="search-button">Search</button>
+            <button id="toggle-button" class="disabled">Nostr</button>
         </div>
 
         <img id="instructions" src="https://image.nostr.build/584d8827a5280b32d1f2168b69069a8c863f1cc91c04bc5f1058e0294a14210e.jpg"></img>
@@ -115,7 +118,7 @@
     <!-- Loading indicator (initially hidden) -->
     <div id="loadingIndicator" style="display: none;">
         <div class="spinner"></div>
-        <p>Publishing...</p>
+        <p>Loading...</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
