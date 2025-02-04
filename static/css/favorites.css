@@ -29,7 +29,7 @@
     box-sizing: border-box; /* Include padding and borders in width */
 }
 
-.images-container img {
+.images-container img, .images-container video {
     width: 100%; /* Let the image stretch to the column width */
     aspect-ratio: 1 / 1; /* Make the images perfectly square */
     object-fit: cover; /* Ensure the image fits within the square without distortion */

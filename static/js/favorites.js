@@ -66,7 +66,7 @@ async function copyToClipboard(text) {
 
 // Event listener for image clicks in the collection (for editing)
 favortiesDiv.addEventListener("click", (e) => {
-    if (e.target.tagName === "IMG") {
+    if (e.target.tagName === "IMG" || e.target.tagName === "VIDEO") {
         currentImage = e.target;
         copyToClipboard(currentImage.src)
         // modalImage.src = currentImage.src;
@@ -116,7 +116,7 @@ function fetchFavorites(pubkey) {
                         // Extract imeta tags for GIFs
                         const imetaTags = tags.filter(tag => tag[0] === 'imeta');
                         const thumbUrls = imetaTags.map(tag => {
-                            const thumbIndex = tag.findIndex(entry => entry.startsWith('thumb '));
+                            const thumbIndex = tag.findIndex(entry => entry.startsWith('url '));
                             return thumbIndex !== -1 ? tag[thumbIndex].split(' ')[1] : null;
                         }).filter(url => url); // Remove null values
 
@@ -153,12 +153,35 @@ function fetchFavorites(pubkey) {
                         const imagesContainer = document.createElement('div');
                         imagesContainer.classList.add('images-container');
 
-                        thumbUrls.forEach(gifUrl => {
-                            const imgElement = document.createElement('img');
-                            imgElement.src = gifUrl;
-                            imgElement.alt = title;
-                            imagesContainer.appendChild(imgElement);
+                        // thumbUrls.forEach(gifUrl => {
+                        //     const imgElement = document.createElement('img');
+                        //     imgElement.src = gifUrl;
+                        //     imgElement.alt = title;
+                        //     imagesContainer.appendChild(imgElement);
+                        // });
+
+                        thumbUrls.forEach(mediaUrl => {
+                            let mediaElement;
+                        
+                            if (mediaUrl.endsWith('.mp4')) {
+                                // Create a video element for MP4 files
+                                mediaElement = document.createElement('video');
+                                mediaElement.src = mediaUrl;
+                                mediaElement.controls = false; // Add controls for play/pause
+                                mediaElement.autoplay = true; // Optional: prevent autoplay
+                                mediaElement.loop = true; // Optional: prevent looping
+                                mediaElement.muted = true; // Optional: allow sound
+                                mediaElement.style.maxWidth = "100%"; // Ensure responsive scaling
+                            } else {
+                                // Create an image element for GIFs or other images
+                                mediaElement = document.createElement('img');
+                                mediaElement.src = mediaUrl;
+                                mediaElement.alt = title;
+                            }
+                        
+                            imagesContainer.appendChild(mediaElement);
                         });
+                        
 
                         categoryDiv.appendChild(imagesContainer);
                         favoritesDiv.appendChild(categoryDiv);
