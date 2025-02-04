@@ -677,14 +677,22 @@ def nip94():
     # return jsonify({"gifs": gifs})
 
     nostr_gifs = []
-    
+    print(unique_output)
+
     # Parse results for gif urls
     for gif in unique_output:
         thumb = next((tag[1] for tag in gif['tags'] if tag[0] == 'thumb'), None)
         url = next((tag[1] for tag in gif['tags'] if tag[0] == 'url'), None)
-        if thumb and url:
-            nostr_gifs.append({"thumb": thumb, "url": url})
-
+        alt = next((tag[1] for tag in gif['tags'] if tag[0] == 'alt'), None)
+        size = next((tag[1] for tag in gif['tags'] if tag[0] == 'size'), None)
+        dims = next((tag[1] for tag in gif['tags'] if tag[0] == 'dim'), None)
+        mime = next((tag[1] for tag in gif['tags'] if tag[0] == 'm'), None)
+        hash = next((tag[1] for tag in gif['tags'] if tag[0] == 'x'), None)
+        summary = next((tag[1] for tag in gif['tags'] if tag[0] == 'summary'), None)
+        image = next((tag[1] for tag in gif['tags'] if tag[0] == 'image'), None)
+        
+        nostr_gifs.append({"thumb": thumb, "url": url, "alt": alt, "gifSize": size, "gifDims": dims, "mimetype": mime, "hash": hash, "summary": summary, "image": image})
+    print(nostr_gifs)
     return nostr_gifs
 
 # # Algo Search NIP94 endpoint
