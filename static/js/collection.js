@@ -1,7 +1,7 @@
 // Variable & Element ID initialization
 let pos = null
 const searchInput = document.getElementById('search-input');
-const searchButton = document.getElementById('search-button');
+const searchButton = document.getElementById('search-stuff');
 const resultsDiv = document.getElementById('results');
 const collectionDiv = document.getElementById('collection');
 const zapButton = document.getElementById('zapButton');
@@ -583,7 +583,7 @@ async function searchNostr(pos) {
 
         if (pos == null) {
             instructions.style.display = 'none';
-            resultsDiv.innerHTML = ''; 
+            // resultsDiv.innerHTML = ''; 
         }
 
         gifs.forEach(({ thumb, url, gifSize, gifDims, image, summary, alt }) => {
@@ -643,10 +643,12 @@ async function searchNostr(pos) {
 
 // Allows user to initiate search by click or enter
 searchButton.addEventListener('click', async () => {
-    if (toggleButton.classList.contains('disabled')) {
+    resultsDiv.innerHTML = ''; 
+    if (toggleButton.classList.contains('enabled')) {
         pos = null;  // Reset pos for a new search
         pos = await searchGifs(pos);  // Initial search
     } else {
+        await getMemes();
         pos = null;  // Reset pos for a new search
         pos = await searchNostr(pos);  // Initial search
     }
@@ -654,10 +656,12 @@ searchButton.addEventListener('click', async () => {
 
 searchInput.addEventListener('keypress', async function(e) {
     if (e.key === 'Enter') {
-        if (toggleButton.classList.contains('disabled')) {
+        resultsDiv.innerHTML = ''; 
+        if (toggleButton.classList.contains('enabled')) {
             pos = null;  // Reset pos for a new search
             pos = await searchGifs(pos);  // Initial search
         } else {
+            await getMemes();
             pos = null;  // Reset pos for a new search
             pos = await searchNostr(pos);  // Initial search
         }
@@ -674,3 +678,89 @@ toggleButton.addEventListener('click', () => {
         toggleButton.classList.add('disabled');
     }
 });
+
+// Primary function to fetch meme templates
+async function getMemes() {
+    const searchTerm = searchInput.value.trim();
+    if (!searchTerm) {
+        console.log('No search term, returning');
+        return;
+    }
+
+    try {  
+        const response = await axios.post('/search_memes', {
+            q: searchTerm
+        });
+    
+        console.log('Search response received:', response.data);        
+
+        // Check if the response was successful
+        if (Array.isArray(response.data)) {
+            if (response.data.length === 0) {
+                instructions.src = 'https://image.nostr.build/bc17dfeab7d8b95f6011a32d010be09250802bdaee18c7ca79619ad8edf00c4a.png';
+            } else {
+                const memes = response.data;
+
+                // Hide instructions
+                instructions.style.display = 'none';
+
+                // Clear existing meme results
+                // resultsDiv.innerHTML = '';
+
+                // Loop through the memes and display them
+                memes.forEach(meme => {
+                    const { id, name, url, width, height, box_count, captions } = meme;
+
+                    // const memeContainer = document.createElement('div');
+                    // memeContainer.className = 'meme-container';
+
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = name;
+                    // Attach dataset attributes
+                    img.dataset.gifUrl = url;
+                    img.dataset.image = url;
+                    img.dataset.alt = name;
+                    // img.width = 300;  // Resize image if needed
+                    // img.height = 200; // Resize image if needed
+                    // img.className = 'meme-image';
+                    img.className = 'gif';
+                    img.addEventListener('click', () => {
+                        // On click, load the meme's details or use for captioning
+                        console.log(`Meme clicked: ${name}`);
+                        sendMemeMetadata({
+                            url: url,
+                            name: name,
+                            searchTerm: searchTerm
+                        });
+                    });
+
+                    // Append the image and its details
+                    // memeContainer.appendChild(img);
+
+                    // Append to the results div
+                    // resultsDiv.appendChild(memeContainer);
+                    resultsDiv.appendChild(img);
+
+                    document.getElementById('next-container').style.display = 'flex';
+                })
+            };
+        } else {
+            console.error('Failed to fetch memes:', response.data.error_message);
+            instructions.src = 'https://image.nostr.build/e8f8ed2e971b4c5be1ddf77200a692f13ac901f97558159100f5a6f46ee70aeb.png'
+        }
+    } catch (error) {
+        console.error('Error fetching memes:', error);
+        instructions.src = 'https://image.nostr.build/e8f8ed2e971b4c5be1ddf77200a692f13ac901f97558159100f5a6f46ee70aeb.png'
+    }
+}
+
+// Nostr.Build and NIP94 API POST request
+async function sendMemeMetadata(memeData) {
+    try {
+        await axios.post('/mememetadata', memeData);
+        console.log('Meme metadata sent successfully.');
+    } catch (error) {
+        console.error('Error sending Meme metadata:', error);
+    }
+}

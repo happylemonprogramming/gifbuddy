@@ -80,7 +80,6 @@ def store_messages(db_name: str, messages: list):
         cursor.execute("INSERT OR IGNORE INTO messages (content) VALUES (?)", (message,))
 
     # Commit and close the connection
-    print("Commiting & Closing Connection")
     conn.commit()
     conn.close()
 
