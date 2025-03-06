@@ -47,6 +47,11 @@
         <!-- <a href="https://nostr.com/npub1hee433872q2gen90cqh2ypwcq9z7y5ugn23etrd2l2rrwpruss8qwmrsv6" target="_blank" class="github-button" id="githubButton">
             <img src="/static/ostrich.svg" alt="GitHub logo" class="github-logo">
         </a> -->
+        <nutjar-button
+        npub="npub1qum8jya9yesa7jrvtptm3m2u4fhtvqn3dzhmypetghyjmc7lew9s0l5ehp"
+        relays="wss://nostr.mom,wss://relay.damus.io,wss://purplepag.es/,wss://relay.olas.app/,wss://relay.primal.net/"
+        mint="https://mint.minibits.cash/Bitcoin"
+        ></nutjar-button>
         <button target="_blank" class="github-button" id="npub">
             <img src="/static/ostrich.svg" alt="GitHub logo" class="github-logo">
         </button>
@@ -64,5 +69,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
     <script src="{{ url_for('static', filename='js/dev.js') }}"></script>
     <script src="{{ url_for('static', filename='js/gestures.js') }}"></script>
+    <script
+    type="module"
+    src="https://cdn.jsdelivr.net/npm/nutjar-ui@0.3.0"
+    ></script>
+    <script src="https://cashubuddy.pages.dev/bundle.js"></script>
+
 </body>
 </html>

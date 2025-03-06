@@ -115,18 +115,12 @@ document.querySelector('.remove-file')?.addEventListener('click', function() {
 // Gif and MP4 Upload function
 uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    // Show loading indicator
-    // document.getElementById('uploadHeader').style.display = 'none';
-    // document.getElementById('uploadForm').style.display = 'none';
-    // document.getElementById('loadingIndicator').style.display = 'block';
     
     const caption = document.getElementById('caption').value;
     const file = document.getElementById('fileUpload').files[0];
 
     if (!file) {
         alert('Please select a file to upload.');
-        // document.getElementById('loadingIndicator').style.display = 'none';
         return;
     }
 
@@ -143,50 +137,6 @@ uploadForm.addEventListener('submit', async (e) => {
         });
 
         showNotification('File sent for processing!');
-        // document.getElementById('loadingIndicator').style.display = 'none';
-
-
-        // console.log('File uploaded successfully:', response.data.url);
-
-        // const url = String(response.data.url);
-        // if (url) {
-        //     document.getElementById('uploadHeader').style.display = 'none';
-        //     document.getElementById('uploadForm').style.display = 'none';
-        //     document.getElementById('loadingIndicator').style.display = 'none';
-
-        //     // Create container for GIF and copy button
-        //     const container = document.createElement('div');
-        //     container.classList.add('gif-container');
-            
-        //     // Create GIF element
-        //     const gifElement = document.createElement('img');
-        //     gifElement.src = url;
-        //     gifElement.classList.add('gif');
-            
-        //     // Make GIF clickable
-        //     gifElement.style.cursor = 'pointer';
-        //     gifElement.title = 'Copy';
-            
-        //     // Add click handler
-        //     gifElement.addEventListener('click', async () => {
-        //         try {
-        //             await navigator.clipboard.writeText(url);
-        //             showNotification('Copied!');
-                    
-        //         } catch (err) {
-        //             console.error('Failed to copy:', err);
-        //             alert('Failed to Copy!');
-        //         }
-        //     });
-            
-        //     container.appendChild(gifElement);
-        //     resultsDiv.insertBefore(container, resultsDiv.firstChild);
-
-        //     showNotification('File uploaded successfully!');
-        // } else {
-        //     console.error('URL not found in response:', response.data);
-        //     alert('File uploaded, but URL not received.');
-        // }
 
         uploadForm.reset();
         e.stopPropagation();
@@ -200,8 +150,5 @@ uploadForm.addEventListener('submit', async (e) => {
             console.error('Error uploading file:', error);
             alert('An error occurred while uploading the file.');
         }
-    // } finally {
-    //     // Hide loading indicator
-    //     document.getElementById('loadingIndicator').style.display = 'none';
     }
 });

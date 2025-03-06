@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_144x144.png')}}" type="image/png">
+    <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_192x192.png')}}" type="image/png">
+    <link rel="icon" href="{{url_for('static', filename='icons/gifbuddy/icon_512x512.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_144x144.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_192x192.png')}}" type="image/png">
+    <link rel="apple-touch-icon" href="{{url_for('static', filename='icons/gifbuddy/icon_512x512.png')}}" type="image/png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/upload.css') }}">
+    <title>GIF Buddy🫂</title>
+</head>
+<body>
+    <nav class="nav-container">
+        <button class="hamburger">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+        <div class="action-container">
+            <button class="action-button" id="searchButton" onclick="window.location.href='/gifsearch'">Search GIFs</button>
+            <button class="action-button" id="searchButton" onclick="window.location.href='/nostr'">Search Nostr</button>
+            <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search Memes</button>
+            <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Create Meme</button>
+            <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collections</button>
+            <button class="action-button" id="decodeButton" onclick="window.location.href='/decode'">Decode</button>
+            <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
+        </div>
+    </nav>
+
+    <div id="notification" class="notification"></div>
+    
+    <div class="container">
+        <h1 id="secret-header">Decode Image</h1>
+        
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Enter Image URL" autofocus onclick="this.focus();">
+            <button id="search-button">Decode</button>
+        </div>
+
+        <div id="lsbdata" class="powered-by"></div>
+    </div>
+
+    <div class="button-container">
+        <button target="_blank" class="github-button" id="npub">
+            <img src="/static/ostrich.svg" alt="GitHub logo" class="github-logo">
+        </button>
+        <button id="zap-button" class="zap-button">
+            ⚡
+        </button>
+    </div>
+
+    <!-- Loading indicator (initially hidden) -->
+    <div id="loadingIndicator" style="display: none;">
+    <div class="spinner"></div>
+    <p>Generating...</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="{{ url_for('static', filename='js/decode.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/steganography.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gestures.js') }}"></script>
+
+</body>
+</html>

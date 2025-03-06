@@ -92,7 +92,16 @@ document.getElementById('log-button').addEventListener('click', async () => {
           backgroundImg.style.display = 'block';
       } else {
           console.log('Not an animated image, using standard capture method');
-          await createMeme(container);
+          await createSteganographicMeme(container);
+
+          // if (localStorage.getItem('secret')) {
+          //   console.log(localStorage.getItem('secret'))
+          //   await createSteganographicMeme(container);
+          //   localStorage.removeItem('secret');
+          // } else {
+          //   console.log('Normie meme')
+          //   await createMeme(container);
+          // }
       }
   } catch (error) {
       console.error('Error processing image:', error);
@@ -124,8 +133,17 @@ document.getElementById('link-button').addEventListener('click', async () => {
       backgroundImg.style.display = 'block';
       
   } else {
-      console.log('Not a GIF, using standard capture method');
-      await createMemeUrl(container)
+      console.log('Not an animated image, using standard capture method');
+      await createSteganographicMemeUrl(container);
+
+      // if (localStorage.getItem('secret')) {
+      //   console.log(localStorage.getItem('secret'))
+      //   await createSteganographicMemeUrl(container);
+      //   localStorage.removeItem('secret');
+      // } else {
+      //   console.log('Normie meme')
+      //   await createMemeUrl(container);
+      // }
   }
 });
 
@@ -385,7 +403,7 @@ async function createMemeUrl(container) {
                 document.getElementById('loadingIndicator').style.display = 'none';
                 alert("Failed to send data to the server.");
             }
-        }, 'image/jpeg');
+        }, 'image/png'); // was jpeg
     } catch (error) {
         document.getElementById('loadingIndicator').style.display = 'none';
         alert("An unexpected error occurred during capture:", error.message);
@@ -616,3 +634,204 @@ document.addEventListener('DOMContentLoaded', function () {
   backgroundImg.addEventListener('load', updateContainerDimensions);
   urlInput.addEventListener('change', updateContainerDimensions);
 });
+
+// Main function to create steganographic meme
+async function createSteganographicMeme(container) {
+  try {
+      // Create canvas from container
+      const canvas = await html2canvas(container, {
+          scale: 2,
+          useCORS: true,
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+      });
+
+      // Get secret message from localStorage
+      let secret = localStorage.getItem('secret');
+
+      // If we have a secret message, encode it
+      if (secret) {
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          
+          try {
+              // Encode the secret message
+              const encodedImageData = encodeImageData(imageData, secret);
+              // Put the encoded image data back
+              ctx.putImageData(encodedImageData, 0, 0);
+          } catch (encodingError) {
+              console.error("Failed to encode secret message:", encodingError);
+              // Continue without encoding if it fails
+          }
+      } else {
+        console.log('No secret message found in localStorage');
+      }
+
+      canvas.toBlob(async (blob) => {
+          if (!blob) {
+            console.error("Failed to generate blob from canvas");
+            return;
+          }
+          
+          try {
+            // Open Modal
+            fallbackDownload(blob);
+          } catch (clipboardError) {
+            console.warn("Clipboard write failed, attempting alternative methods...");
+          }
+          
+        }, 'image/png');
+
+  } catch (error) {
+      console.error("Error creating steganographic meme:", error);
+      alert("An error occurred while creating the image: " + error.message);
+  }
+}
+
+// async function createSteganographicMemeUrl(container) {
+//   try {
+//       const canvas = await html2canvas(container, {
+//           scale: 2,
+//           useCORS: true,
+//           width: container.offsetWidth,
+//           height: container.offsetHeight,
+//       });
+
+//       // Get secret message from localStorage
+//       let secret = localStorage.getItem('secret');
+
+//       // If we have a secret message, encode it
+//       if (secret) {
+//           const ctx = canvas.getContext('2d', { willReadFrequently: true });
+//           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          
+//           try {
+//               // Encode the secret message
+//               const encodedImageData = encodeImageData(imageData, secret);
+//               // Put the encoded image data back
+//               ctx.putImageData(encodedImageData, 0, 0);
+//           } catch (encodingError) {
+//               console.error("Failed to encode secret message:", encodingError);
+//               // Continue without encoding if it fails
+//           }
+//       } else {
+//         console.log('No secret message found in localStorage');
+//       }
+
+//       document.getElementById('loadingIndicator').style.display = 'block';
+
+//       canvas.toBlob(async (blob) => {
+//           if (!blob) {
+//               console.error("Failed to generate blob from canvas");
+//               return;
+//           }
+
+//           try {
+//               console.log("Blob created");
+
+//               const formData = new FormData();
+//               formData.append('meme', blob, 'meme.png'); // Changed extension to .png
+
+//               const response = await fetch('/memecreateurl', {
+//                   method: 'POST',
+//                   body: formData,
+//               });
+
+//               if (!response.ok) {
+//                   throw new Error(`API returned an error: ${response.status}`);
+//               }
+
+//               const data = await response.json();
+//               console.log("Meme URL created:", data.url);
+
+//               document.getElementById('loadingIndicator').style.display = 'none';
+//               fallbackUrl(data.url);
+
+//           } catch (apiError) {
+//               console.error("Failed to send data to API:", apiError.message);
+//               document.getElementById('loadingIndicator').style.display = 'none';
+//               alert("Failed to send data to the server.");
+//           }
+//       }, 'image/png'); // Changed to PNG format
+
+//   } catch (error) {
+//       document.getElementById('loadingIndicator').style.display = 'none';
+//       alert("An unexpected error occurred during capture: " + error.message);
+//   }
+// }
+
+async function createSteganographicMemeUrl(container) {
+  try {
+      const canvas = await html2canvas(container, {
+          scale: 2,
+          useCORS: true,
+          width: container.offsetWidth,
+          height: container.offsetHeight,
+      });
+
+      // Get secret message from localStorage
+      let secret = localStorage.getItem('secret');
+      
+      // Determine image format based on whether there's a secret
+      const imageFormat = secret ? 'image/png' : 'image/jpeg';
+      const fileExtension = secret ? 'png' : 'jpg';
+
+      // If we have a secret message, encode it
+      if (secret) {
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          
+          try {
+              // Encode the secret message
+              const encodedImageData = encodeImageData(imageData, secret);
+              // Put the encoded image data back
+              ctx.putImageData(encodedImageData, 0, 0);
+          } catch (encodingError) {
+              console.error("Failed to encode secret message:", encodingError);
+              // Continue without encoding if it fails
+          }
+      } else {
+        console.log('No secret message found in localStorage');
+      }
+
+      document.getElementById('loadingIndicator').style.display = 'block';
+
+      canvas.toBlob(async (blob) => {
+          if (!blob) {
+              console.error("Failed to generate blob from canvas");
+              return;
+          }
+
+          try {
+              console.log("Blob created");
+
+              const formData = new FormData();
+              formData.append('meme', blob, `meme.${fileExtension}`);
+
+              const response = await fetch('/memecreateurl', {
+                  method: 'POST',
+                  body: formData,
+              });
+
+              if (!response.ok) {
+                  throw new Error(`API returned an error: ${response.status}`);
+              }
+
+              const data = await response.json();
+              console.log("Meme URL created:", data.url);
+
+              document.getElementById('loadingIndicator').style.display = 'none';
+              fallbackUrl(data.url);
+
+          } catch (apiError) {
+              console.error("Failed to send data to API:", apiError.message);
+              document.getElementById('loadingIndicator').style.display = 'none';
+              alert("Failed to send data to the server.");
+          }
+      }, 'image/png'); // Use dynamic format based on secret presence (imageFormat)
+
+  } catch (error) {
+      document.getElementById('loadingIndicator').style.display = 'none';
+      alert("An unexpected error occurred during capture: " + error.message);
+  }
+}

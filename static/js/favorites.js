@@ -210,7 +210,7 @@ async function handleEdit(item) {
     // Get all GIF elements in the category div (parent container)
     const categoryDiv = event.target.closest('.category');
     const imagesContainer = categoryDiv.querySelector('.images-container');
-    const images = imagesContainer.querySelectorAll('img');
+    const images = imagesContainer.querySelectorAll('img, video');
     
     // Find the title from the category div
     const title = categoryDiv.querySelector('.title').innerText;
@@ -229,12 +229,14 @@ async function handleEdit(item) {
         });
     });
 
+    console.log(collectionData)
+
     // Convert Map to object for localStorage (since Maps can't be stored directly)
     const collectionObj = {
         title: title,
         images: Object.fromEntries(collectionData.images)
     };
-
+    console.log(collectionObj)
     // Store in localStorage for the collection page to access
     localStorage.setItem('editCollection', JSON.stringify(collectionObj));
     console.log(collectionObj)

@@ -1,5 +1,6 @@
 # Python libraries
 from flask import Flask, request, render_template, jsonify, send_file, send_from_directory, url_for
+from flask_cors import CORS
 import os, time, threading, sys, logging, subprocess, asyncio, io, requests, mimetypes, uuid
 from PIL import Image
 from pyzbar.pyzbar import decode
@@ -33,6 +34,7 @@ logging.basicConfig(
 
 # Flask setup
 app = Flask(__name__)
+CORS(app)  # Enables CORS for all routes
 app.register_blueprint(api_service)
 app.config["SECRET_KEY"] = os.environ.get('flasksecret')
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -48,6 +50,14 @@ cached_memecounter = {"count": "0"}
 
 # DVM public key
 pubkey = 'npub10sa7ya5uwmhv6mrwyunkwgkl4cxc45spsff9x3fp2wuspy7yze2qr5zx5p'
+
+# Setting Up Virtual Environment
+logging.info('Decentralizing Gif Upload')
+if 'DYNO' in os.environ:
+    virtualenv_python = 'python' #for Heroku
+else:
+    virtualenv_python = r"C:\Users\clayt\Documents\Programming\gifbuddy\buddy\Scripts\python.exe"
+
 
 # Recurring function for NIP94 event counting
 def update_counter():
@@ -110,7 +120,12 @@ def index():
 # Development environment
 @app.route("/dev")
 def dev():
-    return render_template("dev.html")
+    return render_template("development/dev.html")
+
+# Development environment
+@app.route("/decode")
+def decode():
+    return render_template("decode.html")
 
 # Development environment
 @app.route("/api")
@@ -221,6 +236,10 @@ def policy():
 @app.route("/termsofservice")
 def terms():
     return render_template("termsofservice.html")
+
+@app.route("/pdf")
+def imageToPDF():
+    return render_template("imageToPDF.html")
 
 # Trending Memes
 @app.route('/trending_memes', methods=['GET'])
@@ -396,102 +415,55 @@ def gif_create_url():
         logging.error(f"gifcreateurl error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+# Create Image Meme URL
+@app.route('/urlgenerator', methods=['POST'])
+def urlGenerator():
+    try:
+        # Get file from the request
+        file = request.files.get('file')
 
-# @app.route('/memecreate', methods=['POST'])
-# def meme_create():
-#     start = time.time()
-#     logging.info("memecreate: Received POST request")
-    
-#     # Get the transparent image and media URL from the request
-#     transparent_image_file = request.files.get('transparent_image')
-#     gif_url = request.form.get('gif_url')
+        # Validate inputs
+        if not file:
+            return jsonify({"error": "Missing file"}), 400
 
-#     # Validate inputs
-#     if not transparent_image_file or not gif_url:
-#         logging.info("memecreate: Missing transparent image or media URL")
-#         return jsonify({"error": "Missing transparent image or media URL"}), 400
+        logging.info("Creating Folder Path for File")
 
-#     try:
-#         # Open the transparent overlay image
-#         overlay = Image.open(transparent_image_file).convert("RGBA")
-#         logging.info("memecreate: Transparent image loaded successfully")
+        # Generate a unique folder name
+        unique_id = str(uuid.uuid4())
+        output_folder = os.path.join("./creations/", unique_id)
+        
+        # Create the folder
+        os.makedirs(output_folder, exist_ok=True)
+        output_path = f"{output_folder}/"
+        output_file_path = os.path.join(output_path, file.filename)
 
-#         # Fetch the media file from the URL
-#         response = requests.get(gif_url)
-#         if response.status_code != 200:
-#             logging.info(f"memecreate: Failed to fetch media from URL {gif_url}")
-#             return jsonify({"error": "Failed to fetch media"}), 400
+        # Save the file
+        with open(output_file_path, "wb") as f:
+            f.write(file.read())
 
-#         # Open the media from memory
-#         with Image.open(io.BytesIO(response.content)) as media:
-#             media_format = media.format
-#             if media_format not in ('GIF', 'WEBP'):
-#                 logging.error(f"Unsupported media format: {media_format}")
-#                 return jsonify({"error": f"File is not a supported format (GIF/Animated WEBP). Received: {media_format}"}), 400
+        # Detect MIME type
+        mime_type, _ = mimetypes.guess_type(output_file_path)
+        if not mime_type:
+            mime_type = file.content_type or "application/octet-stream"  # Fallback
 
-#             # Check if the WebP file is animated
-#             if media_format == "WEBP" and not getattr(media, "is_animated", False):
-#                 logging.error("Static WebP detected")
-#                 return jsonify({"error": f"File is not a supported format (GIF/Animated WEBP). Received: {media_format}"}), 400
+        logging.info(f"Detected MIME type: {mime_type}")
 
-#             frames = []
+        # Create URL
+        logging.info("Generating URL")
+        url, _ = urlgenerator(output_file_path, "memeamigo", "memeamigo", mime_type)
+        logging.info(f'memecreateurl: {url}')
+        delete_path(output_file_path)
 
-#             # Handle animated WebP or GIF
-#             if getattr(media, "is_animated", False):
-#                 logging.info(f"memecreate: Processing animated {media_format}")
-#                 for frame_num in range(media.n_frames):
-#                     media.seek(frame_num)
-#                     current_frame = media.copy().convert("RGBA")
-#                     current_frame = current_frame.resize(overlay.size)
+        # Return the Meme
+        return jsonify({
+            "status": "success",
+            "message": "Meme created successfully",
+            "url": url
+        }), 200
 
-#                     combined_frame = Image.new("RGBA", current_frame.size)
-#                     combined_frame.paste(current_frame, (0, 0), current_frame)
-#                     combined_frame.paste(overlay, (0, 0), overlay)
-#                     frames.append(combined_frame)
-
-#             output_buffer = io.BytesIO()
-#             output_format = "WEBP" if media_format == "WEBP" else "GIF"
-#             save_params = {
-#                 "format": output_format,
-#                 "save_all": True,
-#                 "append_images": frames[1:],
-#                 "duration": media.info.get("duration", 100),
-#                 "loop": media.info.get("loop", 0),
-#                 "optimize": True,
-#                 "quality": 75,
-#             }
-
-#             # Save the processed image
-#             try:
-#                 frames[0].save(output_buffer, **save_params)
-#             except Exception as save_error:
-#                 logging.error(f"Error saving {output_format}: {save_error}")
-#                 return jsonify({"error": f"Failed to save {output_format}"}), 500
-
-#             media_size_mb = output_buffer.tell() / (1024 * 1024)
-#             logging.info(f"memecreate: Final {output_format} size: {media_size_mb:.2f} MB")
-
-#             if media_size_mb > 21:
-#                 logging.info(f"memecreate: {output_format} exceeds size limit")
-#                 return jsonify({"error": f"Unable to reduce {output_format} size below 21MB"}), 400
-
-#             # Return the generated media directly in the response
-#             output_buffer.seek(0)
-#             logging.info(f"Total API Call Time: {round(time.time()-start,2)}")
-
-#             return send_file(
-#                 output_buffer,
-#                 mimetype=f'image/{output_format.lower()}',
-#                 as_attachment=False,
-#                 download_name=f"memeamigo.{output_format.lower()}"
-#             )
-
-#     except Image.UnidentifiedImageError:
-#         logging.error("Could not identify image")
-#         return jsonify({"error": "Invalid image file"}), 400
-#     except Exception as e:
-#         logging.error(f"memecreate error: {str(e)}")
-#         return jsonify({"error": str(e)}), 500
+    except Exception as e:
+        logging.error(f"Error creating meme URL: {str(e)}")
+        return jsonify({"error": "Failed to create meme"}), 500
 
 
 # Create Image Meme Url
@@ -723,7 +695,7 @@ def meme_metadata():
     summary = f"{summary} {searchTerm}"
 
     try:
-        subprocess.Popen(["python", "decentralizeGifUrl.py", memeUrl, summary, alt])
+        subprocess.Popen([virtualenv_python, "decentralizeGifUrl.py", memeUrl, summary, alt])
         logging.info(f'Metadata Process Time: {round(time.time()-start, 1)}')
         return jsonify({"message": "Task is being processed."}), 202
     
@@ -747,7 +719,7 @@ def gif_metadata():
     searchTerm = data.get('searchTerm')
     
     try:
-        subprocess.Popen(["python", "decentralizeGifUrl.py", gifUrl, summary, alt, image, preview])
+        subprocess.Popen([virtualenv_python, "decentralizeGifUrl.py", gifUrl, summary, alt, image, preview])
         logging.info(f'Metadata Process Time: {round(time.time()-start, 1)}')
         return jsonify({"message": "Task is being processed."}), 202
     
@@ -796,10 +768,7 @@ def uploading():
         #     return jsonify({'message': 'File uploaded successfully!', 'url': url,'filename': file.filename, 'caption': caption, 'alt': alt}), 200
 
         try:
-            if 'DYNO' in os.environ:
-                subprocess.Popen(["python", "decentralizeGifUpload.py", filepath, caption, alt])
-            else:
-                subprocess.Popen([r"C:\Users\clayt\Documents\Programming\gifbuddy\buddy\scripts\python.exe", "decentralizeGifUpload.py", filepath, caption, alt])
+            subprocess.Popen([virtualenv_python, "decentralizeGifUpload.py", filepath, caption, alt])
             return jsonify({'message': 'File processing in background!'}), 200
         
         except Exception as e:
@@ -901,35 +870,6 @@ def check_gif_status():
     else:
         return jsonify({"status": "processing"})  # Indicate that the process is still ongoing
 
-# Payments route
-@app.route("/invoice", methods=['GET'])
-def invoice():
-    try:
-        costPerGif = 0.50
-        invoice, _, invid = lightning_quote(costPerGif, "GIFBuddy Create")
-        logging.info(f'Posting lightning invoice ID: {invid}')
-        return jsonify({
-            "quote": invoice,
-            "amount": costPerGif,
-            "id": invid
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Payments status
-@app.route("/invoicestatus", methods=['GET'])
-def invoicestatus():
-    invid = request.args.get('id')
-    if not invid:
-        return jsonify({"error": "Missing invoice ID"}), 400
-    
-    try:
-        status = invoice_status(invid)
-        logging.info(f"Invoice Status: {status} {invid}")
-        return jsonify({"status": status})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 @app.route("/decode", methods=["POST"])
 def decode_image():
     try:
@@ -1020,7 +960,53 @@ def favorite():
     
 # _____________________________________________________________________________________
 # Premium endpoints
-from premium import removeBG, image_url_to_base64
+from premium import removeBG, image_url_to_base64, image_generator, textToImageStability
+from lightningpay import lightning_quote
+
+# Payments route
+@app.route("/invoice", methods=['GET'])
+def invoice():
+    try:
+        # Get amount from request query parameters
+        amount_sats = request.args.get('amount', type=int, default=200)  # Default to 200 sats if not provided
+        amount_btc = amount_sats / 100000000  # Convert satoshis to BTC
+
+        invoice, _, invid = lightning_quote(amount_btc, "Gif Buddy Premium AI")
+        logging.info(f'Posting lightning invoice ID: {invid} for {amount_sats} sats')
+
+        return jsonify({
+            "quote": invoice,
+            "amount": amount_btc,
+            "id": invid
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Payments status
+@app.route("/invoicestatus", methods=['GET'])
+def invoicestatus():
+    invid = request.args.get('id')
+    if not invid:
+        return jsonify({"error": "Missing invoice ID"}), 400
+    
+    try:
+        status = invoice_status(invid)
+        logging.info(f"Invoice Status: {status} {invid}")
+        return jsonify({"status": status})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# # Pay direct to Strike
+# @app.route("/lninvoice", methods=["GET"])
+# def get_ln_invoice():
+#     amount = float(200/100000000) # 200 sats or about $0.20 at $100,000
+#     description = "Gif Buddy Premium AI"
+#     lninv, conv_rate, invid = lightning_quote(amount, description)
+#     logging.info("Lightning Invoice:", lninv)
+#     return lninv, invid
+
+# AI Background Removal
 @app.route("/removebg", methods=["POST"])  # Changed to POST method
 def remove_background():
     data = request.get_json()
@@ -1042,6 +1028,27 @@ def remove_background():
         logging.info("Background removal completed")
 
         return removedbg_image_base64
+    
+    except Exception as e:
+        logging.error(f"Error removing background: {str(e)}")
+        return jsonify({"error": "Something went wrong"}), 500
+
+# AI Image Generator
+@app.route("/image_generator", methods=["GET"])
+def aiImageGenerator():
+    prompt = request.args.get('prompt')
+
+    # Validate inputs
+    if not prompt:
+        return jsonify({"error": "Missing prompt"}), 400
+    
+    try:            
+        logging.info("Processing image generation")
+        # image_url = image_generator(prompt) # Novita
+        image_url = textToImageStability(prompt) # Stability
+        logging.info("Image generation completed")
+
+        return jsonify({"image_url": image_url})  # Return JSON response
     
     except Exception as e:
         logging.error(f"Error removing background: {str(e)}")

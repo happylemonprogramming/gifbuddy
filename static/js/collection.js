@@ -23,12 +23,13 @@ const modalText = document.getElementById("modalText");
 const modalClose = document.querySelector(".modal-close");
 const modalSave = document.getElementById("save-button");
 const modalRemove = document.getElementById("remove-button");
-const tempText = document.getElementById("temp-text")
+// const tempText = document.getElementById("temp-text")
 const publishButton = document.getElementById('publish-button');
 const toggleButton = document.getElementById('toggle-button')
 
 // Text input field autofocus redundancy
 document.addEventListener("DOMContentLoaded", function () {
+    console.log(collectionData)
     const searchInput = document.getElementById("search-input");
     searchInput.focus();
     
@@ -48,7 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const storedCollection = localStorage.getItem('editCollection');
     if (storedCollection) {
         const collectionObj = JSON.parse(storedCollection);
-        
+        console.log(collectionObj)
+
+        // Set title explicitly
+        collectionData.collectionTitle = collectionObj.title;
+
         // Set the collection title if you have a title input
         const collectionInput = document.getElementById('collection-input');
         if (collectionInput) {
@@ -61,28 +66,48 @@ document.addEventListener('DOMContentLoaded', () => {
         // Display the images in your collection div
         const collectionDiv = document.getElementById('collection');
         for (const [title, data] of collectionData.images) {
-            const img = document.createElement('img');
-            img.src = data.thumb;
-            img.alt = data.alt;
-            img.title = title;
-            img.className = 'gif'; // Add any necessary classes
-            
-            // Add all the data attributes
-            img.dataset.gifUrl = data.gif;
-            img.dataset.thumb = data.thumb;
-            img.dataset.gifSize = data.size;
-            img.dataset.gifDims = data.dims;
-            img.dataset.image = data.image;
-            img.dataset.summary = data.summary;
-            
-            collectionDiv.appendChild(img);
+            let media;
+        
+            if (data.thumb.endsWith('.mp4')) {
+                media = document.createElement('video');
+                media.src = data.thumb;
+                media.controls = false; // Show video controls
+                media.autoplay = true; // Optional: prevent autoplay
+                media.loop = true; // Enable looping if needed
+                media.muted = true; // Muted by default
+                media.className = 'video'; // Add necessary classes
+                
+                // const source = document.createElement('source');
+                // source.src = data.thumb;
+                // source.type = 'video/mp4';
+                // media.appendChild(source);
+            } else {
+                media = document.createElement('img');
+                media.src = data.thumb;
+                media.alt = data.alt;
+                media.className = 'gif'; // Add necessary classes
+        
+                // Add data attributes specific to images
+                media.dataset.gifUrl = data.gif;
+                media.dataset.thumb = data.thumb;
+                media.dataset.gifSize = data.size;
+                media.dataset.gifDims = data.dims;
+            }
+        
+            // Add common attributes
+            media.title = title;
+            media.dataset.image = data.image;
+            media.dataset.summary = data.summary;
+        
+            collectionDiv.appendChild(media);
         }
+        
 
         // Clear the stored data after loading
         localStorage.removeItem('editCollection');
         publishButton.classList.add('enabled');
         publishButton.classList.remove('disabled');
-        tempText.style.display = 'none';
+        // tempText.style.display = 'none';
         collectionDiv.style.display = 'grid';    }
 });
 
@@ -206,7 +231,7 @@ resultsDiv.addEventListener('click', (e) => {
     // publishBox.style.display = 'block';
     publishButton.classList.add('enabled');
     publishButton.classList.remove('disabled');
-    tempText.style.display = 'none';
+    // tempText.style.display = 'none';
     collectionDiv.style.display = 'grid';
     collectionDiv.appendChild(collectionImg);
     
@@ -266,8 +291,8 @@ modalRemove.addEventListener("click", () => {
             // publishBox.style.display = 'none';
             publishButton.classList.add('disabled');
             publishButton.classList.remove('enabled');
-            tempText.style.display = 'flex';
-            collectionDiv.style.display = 'none';
+            // tempText.style.display = 'flex';
+            // collectionDiv.style.display = 'none';
         }
         console.log('Updated collection:', Object.fromEntries(collectionData.images));
     }
@@ -473,9 +498,9 @@ function removeAllImages() {
     collectionData.images.clear();  // Clears all images in the collectionData
 
     // Remove all images from display
-    const imageElements = document.querySelectorAll('.image-class');  // Replace with the appropriate class or selector for your images
-    imageElements.forEach(image => {
-        image.remove();
+    const imageElements = document.querySelectorAll('.gif, .video');  // Include both image and video classes
+    imageElements.forEach(media => {
+        media.remove();
     });
 
     // Hide modal (if modal is open)
@@ -486,8 +511,8 @@ function removeAllImages() {
         // publishBox.style.display = 'none';
         publishButton.classList.add('disabled');
         publishButton.classList.remove('enabled');
-        tempText.style.display = 'flex';
-        collectionDiv.style.display = 'none';
+        // tempText.style.display = 'flex';
+        // collectionDiv.style.display = 'none';
     }
 
     collectionInput.value = ''
@@ -764,3 +789,169 @@ async function sendMemeMetadata(memeData) {
         console.error('Error sending Meme metadata:', error);
     }
 }
+
+// // Upload direct function
+// // TODO: Files need to be hosted somewhere
+// document.getElementById('collectionUpload').addEventListener('click', () => {
+//     const input = document.createElement('input');
+//     input.type = 'file';
+//     input.accept = 'image/*,video/*';
+//     input.multiple = true;
+
+//     input.addEventListener('change', (event) => {
+//         const files = Array.from(event.target.files).slice(0, 50); // Limit to 50 files
+//         const MAX_SIZE = 21 * 1024 * 1024; // 21 MiB in bytes
+//         const rejectedFiles = [];
+
+//         files.forEach(file => {
+//             if (file.size > MAX_SIZE) {
+//                 rejectedFiles.push(file.name);
+//                 return; // Skip this file
+//             }
+
+//             const uniqueId = getUniqueTitle(file.name);
+//             const mediaUrl = URL.createObjectURL(file);
+//             let mediaElement;
+
+//             if (file.type.startsWith('video/')) {
+//                 mediaElement = document.createElement('video');
+//                 mediaElement.controls = true;
+//                 mediaElement.loop = true;
+//                 mediaElement.muted = true;
+//                 mediaElement.className = 'video';
+
+//                 const source = document.createElement('source');
+//                 source.src = mediaUrl;
+//                 source.type = file.type;
+//                 mediaElement.appendChild(source);
+//             } else {
+//                 mediaElement = document.createElement('img');
+//                 mediaElement.src = mediaUrl;
+//                 mediaElement.alt = file.name;
+//                 mediaElement.className = 'gif';
+//             }
+
+//             mediaElement.title = uniqueId;
+//             mediaElement.dataset.image = mediaUrl;
+//             mediaElement.dataset.summary = file.name;
+
+//             collectionData.images.set(uniqueId, {
+//                 gif: mediaUrl,
+//                 thumb: mediaUrl,
+//                 alt: file.name,
+//                 size: file.size,
+//                 dims: '',
+//                 image: mediaUrl,
+//                 summary: file.name
+//             });
+
+//             collectionDiv.appendChild(mediaElement);
+//         });
+
+//         if (rejectedFiles.length > 0) {
+//             alert(`The following files are too large (> 21 MiB) and were not uploaded:\n\n${rejectedFiles.join("\n")}`);
+//         }
+
+//         if (collectionData.images.size > 0) {
+//             publishButton.classList.add('enabled');
+//             publishButton.classList.remove('disabled');
+//             collectionDiv.style.display = 'grid';
+//         }
+//     });
+
+//     input.click();
+// });
+
+document.getElementById('collectionUpload').addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*,video/*';
+    input.multiple = true;
+
+    input.addEventListener('change', async (event) => {
+        document.getElementById('loadingIndicator').style.display = 'block';
+        const files = Array.from(event.target.files).slice(0, 50); // Limit to 50 files
+        const MAX_SIZE = 21 * 1024 * 1024; // 21 MiB in bytes
+        const rejectedFiles = [];
+        const uploadPromises = [];
+
+        files.forEach(file => {
+            if (file.size > MAX_SIZE) {
+                rejectedFiles.push(file.name);
+                return; // Skip this file
+            }
+
+            const uniqueId = getUniqueTitle(file.name);
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Upload file to the backend API
+            const uploadPromise = fetch('/urlgenerator', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.url) {
+                    let mediaElement;
+
+                    if (file.type.startsWith('video/')) {
+                        mediaElement = document.createElement('video');
+                        mediaElement.controls = true;
+                        mediaElement.loop = true;
+                        mediaElement.muted = true;
+                        mediaElement.className = 'video';
+
+                        const source = document.createElement('source');
+                        source.src = data.url; // Use hosted URL
+                        source.type = file.type;
+                        mediaElement.appendChild(source);
+                    } else {
+                        mediaElement = document.createElement('img');
+                        mediaElement.src = data.url; // Use hosted URL
+                        mediaElement.alt = file.name;
+                        mediaElement.className = 'gif';
+                    }
+
+                    mediaElement.title = uniqueId;
+                    mediaElement.dataset.image = data.url;
+                    mediaElement.dataset.summary = file.name;
+
+                    collectionData.images.set(uniqueId, {
+                        gif: data.url,
+                        thumb: data.url,
+                        alt: file.name,
+                        size: file.size,
+                        dims: '',
+                        image: data.url,
+                        summary: file.name
+                    });
+
+                    collectionDiv.appendChild(mediaElement);
+                } else {
+                    console.error(`Failed to upload ${file.name}:`, data.error);
+                }
+            })
+            .catch(error => {
+                console.error(`Error uploading ${file.name}:`, error);
+            });
+
+            uploadPromises.push(uploadPromise);
+        });
+
+        await Promise.all(uploadPromises);
+        document.getElementById('loadingIndicator').style.display = 'none';
+
+        if (rejectedFiles.length > 0) {
+            alert(`The following files are too large (> 21 MiB) and were not uploaded:\n\n${rejectedFiles.join("\n")}`);
+        }
+
+        if (collectionData.images.size > 0) {
+            publishButton.classList.add('enabled');
+            publishButton.classList.remove('disabled');
+            collectionDiv.style.display = 'grid';
+        }
+    });
+
+    input.click();
+});

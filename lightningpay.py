@@ -23,7 +23,7 @@ def lightning_invoice(amount, description):
     "correlationId": generate_invoice_id(),#</= 40 characters
     "description": description, #</= 200 characters
     "amount": {
-      "currency": "USD", # [BTC, USD, EUR, USDT, GBP]
+      "currency": "BTC", # [BTC, USD, EUR, USDT, GBP]
       "amount": amount #for testing purposes
     }
   })
@@ -87,4 +87,24 @@ def exchange_rate():
 
 
 if __name__ == '__main__':
-  exchange_rate()
+  import time
+
+  amount = float(200/100000000)
+  description = "Gif Buddy Premium AI"
+  lninv, conv_rate, invid = lightning_quote(amount, description)
+  print("Lightning Invoice:", lninv)
+  status = invoice_status(invid)
+
+  # Start time
+  start_time = time.time()
+  timeout = 60  # seconds
+
+  while status == "UNPAID":
+      if time.time() - start_time > timeout:
+          raise TimeoutError("Payment did not complete within 60 seconds")
+
+      time.sleep(2)  # Wait for 2 seconds before polling again
+      status = invoice_status(invid)
+      print(status)
+
+  print(status)

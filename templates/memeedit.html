@@ -12,17 +12,11 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/memeedit.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
   <title>Meme Amigo 🎉</title>
 </head>
 <body>
-  <!-- <div class="action-container">
-    <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
-    <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search</button>
-    <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Meme</button>
-    <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collection</button>
-  </div>     -->
-
   <nav class="nav-container">
     <button class="hamburger">
         <span class="hamburger-line"></span>
@@ -35,6 +29,7 @@
       <button class="action-button" id="searchButton" onclick="window.location.href='/memesearch'">Search Memes</button>
       <button class="action-button" id="memeButton" onclick="window.location.href='/meme'">Create Meme</button>
       <button class="action-button" id="collectionButton" onclick="window.location.href='/collection'">Collections</button>
+      <button class="action-button" id="decodeButton" onclick="window.location.href='/decode'">Decode</button>
       <button class="action-button" id="uploadButton" onclick="window.location.href='/upload'">Upload</button>
     </div>
 </nav>
@@ -48,6 +43,7 @@
     <button id="zap-button" class="zap-button">⚡</button>
   </div>
 
+  <!-- Share Image Modal -->
   <div id="image-modal" class="modal" style="display: none;">
     <button id="close-image" class="close-modal">Close</button>
     <div id="bottom-text" class="pro-tip">Tap to Copy!</div>
@@ -55,7 +51,7 @@
     <button id="share-meme" class="toolbar-button">Share</button>
   </div>
 
-  <!-- Modal Structure -->
+  <!-- Settings Modal -->
   <div id="settings-modal" class="modal">
     <div id="settings-content" class="modal-content">
       <button id="close-settings" class="close-modal">X</button>
@@ -97,13 +93,26 @@
       <label for="color">Text Color:</label>
       <input type="color" id="color" value="#FFFFFF">
 
+      <!-- Background Color Picker -->
+      <div class="setting-row">
+        <div>
+          <input type="checkbox" id="addHighlight" unchecked>
+          <label for="addHighlight">Add Highlight</label>
+        </div>
+        <div>
+          <label for="highlight">Highlight Color:</label>
+          <input type="color" id="highlight" value="#FFFFFF">
+        </div>
+      </div>
+
       <!-- Action Buttons -->
-      <!-- <button id="removebg-settings">Remove Background</button> -->
+      <button id="remove-textbox">Remove Text Box</button>
+      <!-- <button id="removebg-settings">Remove Background⚡</button> -->
       <button id="apply-settings">Apply & Close</button>
     </div>
   </div>
 
-  <!-- Add this modal structure after the existing modals -->
+  <!-- Sticker Modal -->
   <div id="sticker-modal" class="modal">
     <div id="sticker-content" class="modal-content">
       <button id="close-stickers" class="close-modal">X</button>
@@ -115,20 +124,55 @@
       </div>
       
       <div id="sticker-results" class="sticker-grid">
-        <!-- Sticker results will be populated here -->
+
       </div>
     </div>
   </div>
 
-  <!-- Add this modal structure after the existing modals -->
+  <!-- Embed Secret Modal for Cashu Tokens -->
+  <div id="secret-modal" class="modal">
+    <div id="secret-content" class="modal-content">
+      <button id="close-secret" class="close-modal">X</button>
+      <h4>Encode Meme Secret</h4>
+      <p id="secret-instructions">
+        Enter an amount (sats) to encode a Cashu token with a memo or leave amount blank to encode meme with message only<br>
+        <br>
+        Reveal image secrets on the <a href="/decode">Decode</a> page in the menu or tag <a href="https://njump.me/npub13p25qtngtldjyk5p7y457h3hxyq54lwennvkku42zg24h5gfjqvsgmpwxc">@stegosaurus</a> in your favorite Kind 1 client<br>
+        <br>
+        DISCLAIMER: this is in active development! Proceed carefully and at your own risk
+      </p>
+      <div class="secret-container">
+        <!-- <input type="text" id="secret-input" placeholder="Secret Message"> -->
+        <textarea id="secret-input" placeholder="Secret Message"></textarea>
+        <input type="number" id="secret-amount" min="0" placeholder="Amount">
+        <button id="secret-button">Encode</button>
+      </div>
+      
+      <div id="mint-invoice" class="qr-invoice" style="display: none;"></div>
+      <div id="copyText" class="powered-by" style="display: none;">Click to Copy!</div>
+      
+    </div>
+  </div>
+
+  <!-- Image Generator Modal -->
   <div id="ai-modal" class="modal">
     <div id="ai-content" class="modal-content">
       <button id="close-ai" class="close-modal">X</button>
       <h4>Generate Image</h4>
       <div class="search-container">
         <input type="text" id="ai-input" placeholder="Generate Image...">
-        <button id="ai-button">Create</button>
+        <button id="ai-button">Create⚡</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Lightning Invoice Modal for Premium Services -->
+  <div id="lightning-modal" class="modal">
+    <div id="lighting-content" class="modal-content">
+      <button id="close-lightning" class="close-modal">X</button>
+      <h4 id="LNcost">200 sats</h4>      
+      <div id="lightning-invoice" class="qr-invoice"></div>
+      <div id="clickToCopy" class="powered-by">Click to Copy!</div>
     </div>
   </div>
 
@@ -139,31 +183,21 @@
   </div>
 
   <div id="editor" class="editor-container">
-    <!-- <h1 id="memeHeader">Caption Meme 🐸</h1> -->
     <div class="input-container">
-      <!-- <label id="urlInputLabel" for="urlInput">URL:</label> -->
       <input type="text" id="urlInput" placeholder="Image Url" required>
-      <!-- <button class="toolbar-button" id="uploadImageBtn"><span class="emoji">📸</span></button> -->
+      <!-- <button class="toolbar-button" id="ai-generator"></button> -->
       <button class="toolbar-button" id="uploadImageBtn"></button>
       <input type="file" id="fileInput" accept="image/*" style="display: none">
     </div>
     <div id="meme-container">
         <img id="background-img" src="" alt="Meme background">
-        <!-- <canvas id="drawing-canvas" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas> -->
-        <!-- <div id="watermark">MEMEAMIGO.LOL</div> -->
     </div>
 
     <div class="toolbar">
       <!-- <button class="toolbar-button" onclick="location.reload()"><span class="emoji">🔄</span></button> -->
-      <!-- <button class="toolbar-button" id="settings"><span class="emoji">⚙️</span></button> -->
       <!-- <button class="toolbar-button" id="paint" onclick="jsPaint()"><span class="emoji">🎨</span></button> -->
-      <!-- <button class="toolbar-button" id="add-emoji"><span class="emoji">😃</span></button> -->
-      <!-- <button class="toolbar-button" id="ai-generator"><span class="emoji">🤖</span></button> -->
-      <!-- <button class="toolbar-button" id="stickers"> Add Sticker</button>
-      <button class="toolbar-button" id="text-button" onclick="addTextBox()">Add Text</button>
-      <button class="toolbar-button" id="log-button">Share Image</button>
-      <button class="toolbar-button" id="link-button">Copy Url</button> -->
       <button class="toolbar-button" id="settings"></button>
+      <button class="toolbar-button" id="hide-message"></button> 
       <button class="toolbar-button" id="add-emoji"></button>
       <!-- <button class="toolbar-button" id="draw-toggle">✏️</button> -->
       <button class="toolbar-button" id="stickers"></button>
@@ -180,10 +214,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js"></script>
+  <script src="https://cashubuddy.pages.dev/bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <script src="{{ url_for('static', filename='js/gestures.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/steganography.js') }}"></script>
   <script src="{{ url_for('static', filename='js/memeedit.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/secretNut.js') }}"></script>
   <script src="{{ url_for('static', filename='js/memecreate.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/premiumai.js') }}"></script>
 
 </body>
 </html>

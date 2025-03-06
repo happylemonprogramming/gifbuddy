@@ -3,7 +3,7 @@
   padding: 0 !important;
 } */
 
-* {
+*:not(.hamburger) {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -25,6 +25,11 @@
   background-color: #8054d6;
   color: black;
   font-size: 18px;
+}
+
+#urlInput::placeholder {
+  color: black; /* Change this to any color you want */
+  opacity: 1; /* Ensures full visibility in some browsers */
 }
 
 #uploadImageBtn {
@@ -97,30 +102,10 @@
   justify-content: center; /* Center horizontally */
 }
 
-/* .resize-handle {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: white;
-  border: 1px solid #666;
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.2s;
-} */
-
-/* .handle-n { top: -5px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
-.handle-s { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
-.handle-e { right: -5px; top: 50%; transform: translateY(-50%); cursor: e-resize; }
-.handle-w { left: -5px; top: 50%; transform: translateY(-50%); cursor: w-resize; }
-.handle-nw { top: -5px; left: -5px; cursor: nw-resize; }
-.handle-ne { top: -5px; right: -5px; cursor: ne-resize; }
-.handle-sw { bottom: -5px; left: -5px; cursor: sw-resize; }
-.handle-se { bottom: -5px; right: -5px; cursor: se-resize; } */
-
 .resize-handle {
   position: absolute;
-  width: 16px; /* Set square dimensions */
-  height: 16px;
+  width: 25px; /* Set square dimensions */
+  height: 25px;
   background: white;
   border: 1px solid #667;
   border-radius: 0; /* Remove border-radius for squares */
@@ -199,41 +184,6 @@
   line-height: 1;
 }
 
-/* .editor-container {
-    position: absolute;
-    top: 5%;
-    width: 100%;
-    max-width: 700px;
-    height: auto;
-    align-items: center;
-    margin: 0 auto;
-    padding: 0;
-    object-fit: contain;
-}
-
-#meme-container {
-  position: relative;
-  width: 100%;
-  max-width: 700px;
-  margin: 0 auto;
-  height: auto;
-  background: transparent;
-  overflow: hidden;
-}
-
-@media (max-width: 768px) {
-  .editor-container {
-      position: absolute;
-      top: 5%;
-      left: 50%;
-      transform: translateX(-50%);
-      max-width: 600px;
-  }
-
-  #meme-container {
-    max-width: 600px;
-  }
-} */
 
 .editor-container {
   position: absolute;
@@ -248,44 +198,6 @@
   left: 50%;
   transform: translateX(-50%);
 }
-
-/* #meme-container {
-  position: relative;
-  width: 100%;
-  max-width: 700px;
-  margin: 0 auto;
-  height: auto;
-  background: transparent;
-  overflow: hidden;
-}
-
-#background-img {
-  width: 100%;
-  height: auto;
-  background: transparent;
-  object-fit: contain;
-} */
-
-/* #meme-container {
-  position: relative;
-  width: auto;
-  max-width: 700px;
-  max-height: 75vh;
-  margin: 0 auto;
-  background: transparent;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-}
-
-#background-img {
-  width: auto;
-  max-width: 100vw;
-  height: 100%;
-  max-height: 75vh;
-  background: transparent;
-  object-fit: contain;
-} */
 
 #meme-container {
   position: relative;
@@ -308,17 +220,6 @@
   background: transparent;
   object-fit: contain; /* Preserve aspect ratio within container */
 }
-
-
-/* @media (max-width: 768px) {
-  .editor-container {
-      max-width: 600px;
-  }
-
-  #meme-container {
-      max-width: 600px;
-  }
-} */
 
 #watermark {
   position: absolute;
@@ -354,17 +255,6 @@
     margin-top: 5px;
     margin-bottom: 40px;
 }
-
-/* .toolbar-button {
-    padding: 10px 10px;
-    font-size: 16px;
-    color: #FFFFFF;
-    background-color: transparent;
-    border: transparent;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-} */
 
 .toolbar-button {
   font-size: 14px;
@@ -423,6 +313,14 @@
   background-image: url('buttons/Settings.png');
 }
 
+#hide-message {
+  background-image: url('buttons/Bitcoin.png');
+}
+
+#ai-generator {
+  background-image: url('buttons/AI.png');
+}
+
 #add-emoji {
   background-image: url('buttons/Emoji.png');
 }
@@ -460,63 +358,45 @@
   padding: 20px 30px;
   border-radius: 10px;
   width: 90%;
-  max-width: 400px;
+  /* max-width: 400px; */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-  position: relative;
+  /* position: relative; */
   animation: fadeIn 0.3s ease-out;
+  position: absolute;
+  top: 5%;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 600px;
+}
+
+#lightning-modal {
+  z-index: 3000;
 }
 
 .close-modal {
   position: absolute;
-  top: 5px;
-  right: 15px;
-  background: #f44336;
-  color: white;
-  border: none;
+  top: 0px;
+  right: 0px;
+  /* background: #f44336; */
+  /* color: white; */
+  color: #f44336;
+  background: transparent;
+  border:  1px solid #f44336;
   padding: 8px 12px;
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
-  border-radius: 5px;
+  /* border-radius: 5px; */
+  border-radius: 10px;
   transition: background 0.3s;
 }
 
 .close-modal:hover {
   background: #e53935;
+  color: white;
 }
-
-/* #image-modal img {
-  position: relative;
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 8px;
-  background: white;
-  padding: 10px;
-} */
-
-/* #image-modal {
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-#image-modal img {
-  max-width: 90%;
-  max-height: 90%;
-  margin-top: 50px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  background: white;
-  padding: 10px;
-}
-
-.pro-tip {
-  font-size: 18px;
-  font-weight: bold;
-  color: #ffffff;
-  text-align: center;
-  margin-top: auto;
-} */
 
 #image-modal {
   display: flex;
@@ -546,7 +426,7 @@
 
 /* Settings Modal */
 #settings-content {
-  max-width: 300px;
+  max-width: 400px;
 }
 
 .modal-content h4 {
@@ -609,12 +489,26 @@
   /* transition: background 0.3s; */
 }
 
+/* Apply Button */
+#remove-textbox {
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 15px;
+  font-weight: bold;
+  background: transparent;
+  border: 1px solid #ff0000;
+  color: rgb(255, 0, 0);
+  /* transition: background 0.3s; */
+}
+
 #apply-settings:hover {
   background: #4527A0;
 }
 
 /* Text Color Preview */
-#color {
+#color #highlight{
   width: 100%;
   height: 40px;
   border: none;
@@ -640,15 +534,6 @@
   .modal-content h4 {
     font-size: 1.2rem;
   }
-
-  /* .toolbar-button {
-    font-size: 14px;
-    padding: 8px 12px;
-    white-space: normal;
-    font-weight: bold;
-    width: 70px;
-    height: 48px;
-  } */
 }
 
 /* Fade-in animation */
@@ -676,21 +561,119 @@
   overflow-y: auto;
 }
 
-.search-container {
+.secret-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#secret-input {
+  min-height: 2em;       /* Starting height */
+  resize: vertical;      /* Allows user to resize vertically */
+  overflow-y: hidden;    /* Hides scrollbar */
+}
+
+#secret-amount {
+  flex: 1;      /* Takes up remaining space */
+}
+
+#secret-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  background-color: #151515;
+  color: white;
+  border-radius: 4px;
+}
+
+/* .qr-invoice {
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  height: 100%;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.qr-invoice > canvas {
+  display: block;
+} */
+
+.qr-invoice {
+  display: flex;          /* Make this a flex container */
+  justify-content: center; /* Center horizontally */
+  align-items: center;     /* Center vertically */
+  width: 100%;            
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.qr-invoice > canvas {
+  display: block;         /* Block display */
+  /* No additional centering needed since the parent is flex */
+}
+
+.powered-by {
+  font-size: 14px;
+  color: #878787;
+  text-align: center;
+  padding: 10px 0;
+  margin-top: auto;
+  max-width: 100%;
+  word-wrap: break-word; /* Allows words to break and wrap onto the next line */
+  overflow-wrap: break-word; /* Ensures proper wrapping */
+  white-space: normal; /* Allows normal text wrapping */
+  justify-content: center;
+  align-items: center;
+}
+
+#secret-amount {
+  width: 25%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  background-color: #151515;
+  color: white;
+  border-radius: 4px;
+}
+
+#secret-instructions {
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 0 10px;
+  font-style: italic;
+}
+
+#secret-instructions a {
+  color: #5E35B1; /* Adjust to your theme color */
+  text-decoration: none; /* Removes underline */
+  font-weight: bold;
+}
+
+#secret-instructions a:hover {
+  text-decoration: underline;
+}
+
+
+
+.search-container{
   display: flex;
   gap: 10px;
   margin-bottom: 15px;
   padding: 0 10px;
 }
 
-.search-container input {
-  flex: 1;
+.search-container input{
+  width: 100%;
   padding: 8px;
   border: 1px solid #ccc;
+  background-color: #151515;
+  color: white;
   border-radius: 4px;
 }
 
-.search-container button {
+.search-container button, .secret-container button{
   padding: 8px 16px;
   background-color: #5E35B1;
   color: white;
@@ -711,7 +694,7 @@
   transform: scale(1.1);
 }
 
-#sticker-content, #ai-content {
+/* #sticker-content, #secret-content, #ai-content {
   position: absolute;
   top: 5%;
   left: 0;
@@ -719,4 +702,4 @@
   margin-left: auto;
   margin-right: auto;
   max-width: 600px;
-}
+} */

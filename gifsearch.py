@@ -48,8 +48,8 @@ def fetch_stickers(search_term, limit, pos=None):
     return result
 
 if __name__ == "__main__":
-    # output = fetch_gifs('uh oh',1)
-    # print(output)
+    output = fetch_gifs('bruh',1)
+    print(output)
     # # CAEQ1ezgotOiiAMaHgoKAD-_wHv0zFJjcRIQMBvy4oDXvi_ZiMP0AAAAADAB
     # gif = output['results'][0]['media_formats']['gif']
     # description = output['results'][0]['content_description']
@@ -67,8 +67,8 @@ if __name__ == "__main__":
     # alt = os.path.basename(gifUrl)[0:-4]
     # print(gifUrl, gifSize, gifDims, thumb, preview, alt)
 
-    output = fetch_stickers('pepe', 1)
-    # print(output)
-    print(output['results'][0]['media_formats']['webp_transparent']['url'])
-    print(output['results'][0]['content_description'])
-    print(output['results'][0]['tags'])
+    # output = fetch_stickers('pepe', 1)
+    # # print(output)
+    # print(output['results'][0]['media_formats']['webp_transparent']['url'])
+    # print(output['results'][0]['content_description'])
+    # print(output['results'][0]['tags'])

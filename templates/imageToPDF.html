@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en" class="dark-mode">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Image to PDF Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.3/heic2any.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-secondary: #aaaaaa;
+            --primary-color: #4f6ef2;
+            --primary-hover: #3b5bd4;
+            --success-color: #2ecc71;
+            --success-hover: #27ae60;
+            --success-bg: #1e3d2f;
+            --error-bg: #3d1e1e;
+            --error-color: #e74c3c;
+            --upload-bg: #252525;
+            --upload-border: #4f6ef2;
+            --upload-hover-bg: #2a2a2a;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --toggle-bg: #444;
+            --toggle-knob: #888;
+            --toggle-active-bg: #3b5bd4;
+            --toggle-active-knob: #fff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        
+        h1 {
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .container {
+            background-color: var(--container-bg);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .upload-section {
+            border: 2px dashed var(--upload-border);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: var(--upload-bg);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-section:hover {
+            border-color: var(--primary-hover);
+            background-color: var(--upload-hover-bg);
+        }
+        
+        .upload-section.drag-over {
+            background-color: var(--upload-hover-bg);
+            border-color: var(--primary-hover);
+        }
+        
+        #upload-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        
+        #upload-btn:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        #convert-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+            display: none;
+        }
+        
+        #convert-btn:hover {
+            background-color: var(--success-hover);
+        }
+        
+        #convert-btn:disabled {
+            background-color: #505050;
+            cursor: not-allowed;
+        }
+        
+        #preview-container {
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        #image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 5px;
+            border: 1px solid #444;
+        }
+        
+        #grayscale-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            display: none;
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .privacy-notice {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: rgba(79, 110, 242, 0.1);
+            border-left: 4px solid var(--primary-color);
+            font-size: 14px;
+            color: var(--text-color);
+        }
+        
+        .status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .success {
+            background-color: var(--success-bg);
+            color: var(--success-color);
+        }
+        
+        .error {
+            background-color: var(--error-bg);
+            color: var(--error-color);
+        }
+        
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: transparent;
+            border: 1px solid var(--text-secondary);
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .loader {
+            display: none;
+            border: 3px solid #f3f3f3; 
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+            margin-top: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .format-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            background-color: rgba(79, 110, 242, 0.2);
+            color: var(--primary-color);
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+        
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: var(--upload-bg);
+            border-radius: 5px;
+        }
+        
+        .toggle-label {
+            margin-right: 10px;
+            flex-grow: 1;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--toggle-bg);
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--toggle-knob);
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--toggle-active-bg);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+            background-color: var(--toggle-active-knob);
+        }
+        
+        .help-text {
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .preview-tabs {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .preview-tab {
+            padding: 8px 16px;
+            background-color: var(--upload-bg);
+            border: none;
+            border-radius: 5px 5px 0 0;
+            color: var(--text-secondary);
+            cursor: pointer;
+            margin-right: 2px;
+        }
+        
+        .preview-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Private Image to PDF Converter</h1>
+    <div class="container">
+        <div class="upload-section" id="drop-area">
+            <p>Drag & drop image here or</p>
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+            <button id="upload-btn">Choose Image</button>
+            <p class="file-info">Supported formats:</p>
+            <div>
+                <span class="format-badge">JPEG</span>
+                <span class="format-badge">PNG</span>
+                <span class="format-badge">GIF</span>
+                <span class="format-badge">BMP</span>
+                <span class="format-badge">HEIC/HEIF</span>
+            </div>
+        </div>
+        
+        <div class="toggle-container">
+            <div class="toggle-label">
+                <div>Grayscale Mode</div>
+                <div class="help-text">Convert to high-contrast black & white (ideal for documents)</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="grayscale-toggle" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        
+        <div id="preview-container">
+            <h3>Image Preview</h3>
+            <div class="preview-tabs">
+                <button id="original-tab" class="preview-tab">Original</button>
+                <button id="grayscale-tab" class="preview-tab active">Grayscale</button>
+            </div>
+            <img id="image-preview" src="#" alt="Preview" style="display: none;">
+            <canvas id="grayscale-preview"></canvas>
+            <p class="file-info" id="file-details"></p>
+        </div>
+        
+        <button id="convert-btn" disabled>Convert to PDF</button>
+        <div id="loader" class="loader"></div>
+        
+        <div id="status-message" class="status-message"></div>
+        
+        <div class="privacy-notice">
+            <h3>Privacy Guarantee</h3>
+            <p>This tool processes your images entirely in your browser. No data is sent to any external server.</p>
+            <p>Perfect for sensitive or confidential medical documents.</p>
+        </div>
+    </div>
+    
+    <footer>
+        <p>This is a client-side tool. All operations are performed locally on your device.</p>
+    </footer>
+
+    <script>
+        // Use jsPDF from CDN
+        const { jsPDF } = window.jspdf;
+        
+        // DOM elements
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('file-input');
+        const uploadBtn = document.getElementById('upload-btn');
+        const convertBtn = document.getElementById('convert-btn');
+        const previewContainer = document.getElementById('preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const grayscaleCanvas = document.getElementById('grayscale-preview');
+        const fileDetails = document.getElementById('file-details');
+        const statusMessage = document.getElementById('status-message');
+        const loader = document.getElementById('loader');
+        const grayscaleToggle = document.getElementById('grayscale-toggle');
+        const originalTab = document.getElementById('original-tab');
+        const grayscaleTab = document.getElementById('grayscale-tab');
+        
+        // Current file and image data
+        let currentFile = null;
+        let originalImageData = null;
+        let grayscaleImageData = null;
+        let imageOrientation = 1; // EXIF orientation
+        
+        // Event listeners for drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropArea.classList.add('drag-over');
+        }
+        
+        function unhighlight() {
+            dropArea.classList.remove('drag-over');
+        }
+        
+        // Handle dropped files
+        dropArea.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        }
+        
+        // Handle file selection via button
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                handleFiles(this.files);
+            }
+        });
+        
+        // Handle grayscale toggle
+        grayscaleToggle.addEventListener('change', function() {
+            if (originalImageData) {
+                updatePreview();
+            }
+        });
+        
+        // Preview tabs
+        originalTab.addEventListener('click', function() {
+            originalTab.classList.add('active');
+            grayscaleTab.classList.remove('active');
+            imagePreview.style.display = 'inline';
+            grayscaleCanvas.style.display = 'none';
+        });
+        
+        grayscaleTab.addEventListener('click', function() {
+            grayscaleTab.classList.add('active');
+            originalTab.classList.remove('active');
+            imagePreview.style.display = 'none';
+            grayscaleCanvas.style.display = 'inline';
+        });
+        
+        // Process the selected file
+        async function handleFiles(files) {
+            const file = files[0];
+            loader.style.display = 'block';
+            
+            // Clear previous state
+            convertBtn.disabled = true;
+            imagePreview.src = "#";
+            fileDetails.textContent = "";
+            previewContainer.style.display = 'none';
+            originalImageData = null;
+            grayscaleImageData = null;
+            
+            try {
+                // Check if file is an image
+                if (!file.type.match('image.*') && !file.name.match(/\.(heic|heif)$/i)) {
+                    showStatus('Please select an image file.', 'error');
+                    loader.style.display = 'none';
+                    return;
+                }
+                
+                currentFile = file;
+                
+                // Check if it's a HEIC/HEIF file
+                if (file.name.match(/\.(heic|heif)$/i)) {
+                    // Convert HEIC/HEIF to JPEG
+                    try {
+                        const convertedBlob = await heic2any({
+                            blob: file,
+                            toType: "image/jpeg",
+                            quality: 0.8
+                        });
+                        
+                        // Create a new file object
+                        const jpegFile = new File(
+                            [convertedBlob], 
+                            file.name.replace(/\.(heic|heif)$/i, '.jpg'),
+                            { type: 'image/jpeg' }
+                        );
+                        
+                        await processImageFile(jpegFile);
+                        showStatus('HEIC/HEIF image converted for processing', 'success');
+                    } catch (error) {
+                        console.error('HEIC conversion error:', error);
+                        showStatus('Error converting HEIC/HEIF image. Please try a different format.', 'error');
+                        loader.style.display = 'none';
+                        return;
+                    }
+                } else {
+                    // Regular image processing
+                    await processImageFile(file);
+                }
+                
+                convertBtn.disabled = false;
+                convertBtn.style.display = 'block';
+                loader.style.display = 'none';
+            } catch (error) {
+                console.error('Error processing file:', error);
+                showStatus('Error processing the image. Please try again.', 'error');
+                loader.style.display = 'none';
+            }
+        }
+        
+        // Process image file and extract orientation
+        async function processImageFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    try {
+                        const arrayBuffer = e.target.result;
+                        
+                        // Get orientation from EXIF if available
+                        imageOrientation = await getExifOrientation(arrayBuffer) || 1;
+                        
+                        // Load image for processing
+                        const img = new Image();
+                        img.onload = function() {
+                            // Store original image data
+                            originalImageData = {
+                                image: img,
+                                orientation: imageOrientation,
+                                width: img.width,
+                                height: img.height
+                            };
+                            
+                            // Create grayscale version
+                            createGrayscaleImage(img);
+                            
+                            // Display preview
+                            updatePreview();
+                            
+                            // Display file information
+                            const fileSize = formatFileSize(file.size);
+                            fileDetails.textContent = `${file.name} (${fileSize}) - ${img.width} × ${img.height}`;
+                            previewContainer.style.display = 'block';
+                            
+                            resolve();
+                        };
+                        
+                        img.src = URL.createObjectURL(file);
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+                
+                reader.onerror = function() {
+                    reject(new Error('Error reading file'));
+                };
+                
+                reader.readAsArrayBuffer(file);
+            });
+        }
+        
+        // Extract EXIF orientation
+        async function getExifOrientation(arrayBuffer) {
+            // Check for the EXIF marker
+            const view = new DataView(arrayBuffer);
+            
+            if (view.getUint16(0, false) !== 0xFFD8) {
+                return false; // Not a JPEG
+            }
+            
+            const length = view.byteLength;
+            let offset = 2;
+            
+            while (offset < length) {
+                const marker = view.getUint16(offset, false);
+                offset += 2;
+                
+                // EXIF APP1 marker (0xFFE1)
+                if (marker === 0xFFE1) {
+                    // Check for EXIF header
+                    if (view.getUint32(offset + 2, false) !== 0x45786966) {
+                        return false;
+                    }
+                    
+                    const little = view.getUint16(offset + 8, false) === 0x4949;
+                    offset += 8;
+                    
+                    // First offset after TIFF header (usually 8)
+                    const firstIFDOffset = view.getUint32(offset + 4, little);
+                    
+                    // Go to IFD
+                    offset = offset + firstIFDOffset;
+                    
+                    const endOffset = offset + view.getUint16(offset, little) * 12;
+                    offset += 2;
+                    
+                    // Look through the IFD for orientation tag (0x0112)
+                    while (offset < endOffset) {
+                        if (view.getUint16(offset, little) === 0x0112) {
+                            // Return the orientation value
+                            return view.getUint16(offset + 8, little);
+                        }
+                        offset += 12;
+                    }
+                } else if ((marker & 0xFF00) !== 0xFF00) {
+                    break; // Not a valid marker
+                } else {
+                    offset += view.getUint16(offset, false);
+                }
+            }
+            
+            return 1; // Default orientation
+        }
+        
+        // Create grayscale version of the image
+        function createGrayscaleImage(img) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = img.width;
+            canvas.height = img.height;
+            
+            // Draw original image
+            ctx.drawImage(img, 0, 0);
+            
+            // Get image data
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            // Apply grayscale conversion with increased contrast
+            for (let i = 0; i < data.length; i += 4) {
+                // Convert to grayscale using luminosity method
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                
+                // Luminosity formula
+                let gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                
+                // Increase contrast
+                gray = gray - 128; // Center around zero
+                gray = gray * 1.5; // Increase contrast
+                gray = gray + 128; // Center back around 128
+                
+                // Threshold for more document-like appearance
+                if (gray > 180) {
+                    gray = 255; // White
+                } else if (gray < 50) {
+                    gray = 0; // Black
+                }
+                
+                // Set RGB values to grayscale
+                data[i] = gray;
+                data[i + 1] = gray;
+                data[i + 2] = gray;
+            }
+            
+            // Put the modified data back
+            ctx.putImageData(imageData, 0, 0);
+            
+            // Store grayscale image data
+            grayscaleImageData = {
+                canvas: canvas,
+                imageData: imageData,
+                width: canvas.width,
+                height: canvas.height
+            };
+        }
+        
+        // Update preview based on toggle state
+        function updatePreview() {
+            if (!originalImageData) return;
+            
+            // Original preview
+            imagePreview.src = originalImageData.image.src;
+            
+            // Grayscale preview
+            const canvas = grayscaleCanvas;
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions to match image
+            canvas.width = grayscaleImageData.width;
+            canvas.height = grayscaleImageData.height;
+            
+            // Draw grayscale image on canvas
+            ctx.drawImage(grayscaleImageData.canvas, 0, 0);
+            
+            // Set active tab based on toggle
+            if (grayscaleToggle.checked) {
+                grayscaleTab.click();
+            } else {
+                originalTab.click();
+            }
+        }
+        
+        // Format file size in KB or MB
+        function formatFileSize(bytes) {
+            if (bytes < 1024) {
+                return bytes + ' bytes';
+            } else if (bytes < 1048576) {
+                return (bytes / 1024).toFixed(1) + ' KB';
+            } else {
+                return (bytes / 1048576).toFixed(1) + ' MB';
+            }
+        }
+        
+        // Convert image to PDF
+        convertBtn.addEventListener('click', convertToPdf);
+        
+        function convertToPdf() {
+            if (!originalImageData) {
+                showStatus('No image to convert. Please upload an image first.', 'error');
+                return;
+            }
+            
+            convertBtn.disabled = true;
+            convertBtn.textContent = 'Converting...';
+            loader.style.display = 'block';
+            
+            setTimeout(() => {
+                try {
+                    // Create a new jsPDF instance
+                    const pdf = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm'
+                    });
+                    
+                    // Determine which image to use
+                    let imageSource, imgWidth, imgHeight;
+                    
+                    if (grayscaleToggle.checked && grayscaleImageData) {
+                        // Use grayscale image
+                        imageSource = grayscaleCanvas.toDataURL('image/jpeg', 0.95);
+                        imgWidth = grayscaleImageData.width;
+                        imgHeight = grayscaleImageData.height;
+                    } else {
+                        // Use original image
+                        imageSource = originalImageData.image.src;
+                        imgWidth = originalImageData.width;
+                        imgHeight = originalImageData.height;
+                    }
+                    
+                    // Fix orientation based on EXIF data
+                    const orientation = originalImageData.orientation || 1;
+                    
+                    // Get PDF dimensions
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+                    
+                    // Determine if we need to rotate the page for landscape images
+                    let usePortrait = true;
+                    
+                    // Check if image is naturally landscape
+                    if (imgWidth > imgHeight) {
+                        usePortrait = false;
+                    }
+                    
+                    // Factor in EXIF orientation that would change portrait/landscape
+                    if (orientation >= 5 && orientation <= 8) {
+                        // These orientations swap width and height
+                        usePortrait = !usePortrait;
+                    }
+                    
+                    // If needed, create a new PDF with landscape orientation
+                    let finalPdf = pdf;
+                    if (!usePortrait) {
+                        finalPdf = new jsPDF({
+                            orientation: 'landscape',
+                            unit: 'mm'
+                        });
+                    }
+                    
+                    // Recalculate the PDF dimensions if orientation changed
+                    const finalPdfWidth = finalPdf.internal.pageSize.getWidth();
+                    const finalPdfHeight = finalPdf.internal.pageSize.getHeight();
+                    
+                    // Calculate image dimensions to fit in PDF
+                    let finalWidth, finalHeight;
+                    
+                    if (imgWidth > imgHeight) {
+                        // Landscape image
+                        finalWidth = finalPdfWidth - 20; // 10mm margin on each side
+                        finalHeight = (imgHeight * finalWidth) / imgWidth;
+                        
+                        // If height is still too large
+                        if (finalHeight > finalPdfHeight - 20) {
+                            finalHeight = finalPdfHeight - 20;
+                            finalWidth = (imgWidth * finalHeight) / imgHeight;
+                        }
+                    } else {
+                        // Portrait image
+                        finalHeight = finalPdfHeight - 20; // 10mm margin on each side
+                        finalWidth = (imgWidth * finalHeight) / imgHeight;
+                        
+                        // If width is still too large
+                        if (finalWidth > finalPdfWidth - 20) {
+                            finalWidth = finalPdfWidth - 20;
+                            finalHeight = (imgHeight * finalWidth) / imgWidth;
+                        }
+                    }
+                    
+                    // Center the image
+                    const x = (finalPdfWidth - finalWidth) / 2;
+                    const y = (finalPdfHeight - finalHeight) / 2;
+                    
+                    // Add image to PDF with proper rotation
+                    finalPdf.addImage(imageSource, 'JPEG', x, y, finalWidth, finalHeight);
+                    
+                    // Generate filename by replacing the extension with .pdf
+                    const filename = currentFile.name.replace(/\.[^/.]+$/, "") + '.pdf';
+                    
+                    // Save the PDF
+                    finalPdf.save(filename);
+                    
+                    // Reset button state
+                    convertBtn.disabled = false;
+                    convertBtn.textContent = 'Convert to PDF';
+                    loader.style.display = 'none';
+                    
+                    showStatus('Successfully converted to PDF!', 'success');
+                } catch (error) {
+                    console.error('Error in PDF conversion:', error);
+                    showStatus('Error converting to PDF. Please try again.', 'error');
+                    convertBtn.disabled = false;
+                    convertBtn.textContent = 'Convert to PDF';
+                    loader.style.display = 'none';
+                }
+            }, 500);
+        }
+        
+        // Show status message
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message';
+            statusMessage.classList.add(type);
+            statusMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

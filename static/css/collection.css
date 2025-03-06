@@ -9,11 +9,22 @@
     box-sizing: border-box; /* Include padding and borders in the width */
 }
 
-#collection img {
+#collection img, #collection video {
     height: 75px; /* Fixed height for all images */
     width: 100%; /* Stretch the image to fit the grid cell width */
     object-fit: cover; /* Preserve aspect ratio, fill the grid cell */
     border-radius: 8px; /* Optional: Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Optional: Add shadow for aesthetics */
+}
+
+#collectionUpload {
+    height: 75px; /* Fixed height for all images */
+    width: 100%; /* Stretch the image to fit the grid cell width */
+    border-radius: 8px; /* Optional: Rounded corners */
+    border: 2px solid #5E35B1;
+    color: #5E35B1;
+    font-size: xx-large;
+    background-color: transparent;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Optional: Add shadow for aesthetics */
 }
 
